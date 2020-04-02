@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'main.[contenthash].js'
+    filename: 'js/main.[contenthash].js'
   },
   module: {
     rules: [
@@ -13,11 +13,21 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
-        options: { presets: ['@babel/preset-env'] }
+        options: {
+          presets: ['@babel/preset-env']
+        }
       },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(jpg|png|gif|svg)$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[contenthash].[ext]',
+          outputPath: 'img'
+        }
       }
     ]
   },
