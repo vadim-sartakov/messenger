@@ -1,11 +1,14 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'build')
+    path: path.resolve(__dirname, 'build'),
+    // In development mode and hot reload we can't use contenthash
+    filename: `js/[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.js`
   },
   module: {
     rules: [
@@ -19,13 +22,22 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: process.env.NODE_ENV === 'development'
+            }
+          },
+          'css-loader'
+        ]
       },
       {
         test: /\.(jpg|png|gif|svg)$/,
         loader: 'file-loader',
         options: {
-          name: '[name].[contenthash].[ext]',
+          // In development mode and hot reload we can't use contenthash
+          name: `[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.[ext]`,
           outputPath: 'img'
         }
       }
@@ -51,6 +63,13 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx']
   },
-  // Inline generated bundles into html
-  plugins: [new HtmlWebpackPlugin({ template: './public/index.html' })]
+  plugins: [
+    // Extract CSS
+    new MiniCssExtractPlugin({
+      // In development mode and hot reload we can't use contenthash
+      filename: `css/[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.css`
+    }),
+    // Inline generated bundles into html
+    new HtmlWebpackPlugin({ template: './public/index.html' })
+  ]
 }
