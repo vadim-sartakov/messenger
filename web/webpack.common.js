@@ -1,11 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'build'),
-    filename: 'js/main.[contenthash].js'
+    path: path.resolve(__dirname, 'build')
   },
   module: {
     rules: [
@@ -31,6 +31,26 @@ module.exports = {
       }
     ]
   },
-  resolve: { extensions: ['.js', '.jsx'] },
+  optimization: {
+    // Preserve external bundles hashes
+    moduleIds: 'hashed',
+    // Separate runtime chunk
+    runtimeChunk: 'single',
+    // Separate bundle for external packages
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
+    }
+  },
+  // Allows to omit extensions in import statements
+  resolve: {
+    extensions: ['.js', '.jsx']
+  },
+  // Inline generated bundles into html
   plugins: [new HtmlWebpackPlugin({ template: './public/index.html' })]
 }
