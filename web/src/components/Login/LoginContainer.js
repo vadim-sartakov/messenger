@@ -8,7 +8,7 @@ function LoginContainer({ login, ...props }) {
   const history = useHistory();
   const location = useLocation();
   const onSubmit = useCallback(async value => {
-    const response = await fetch('/login', { method: 'POST', body: value });
+    const response = await fetch('/login', { method: 'POST', body: JSON.stringify(value) });
     if (response.ok) {
       const user = await response.json();
       login(user);
