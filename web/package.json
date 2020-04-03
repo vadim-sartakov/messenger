@@ -20,6 +20,7 @@
     "css-loader": "^3.4.2",
     "eslint": "^6.8.0",
     "eslint-plugin-react": "^7.19.0",
+    "eslint-plugin-react-hooks": "^3.0.0",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.0.4",
     "mini-css-extract-plugin": "^0.9.0",
@@ -35,6 +36,7 @@
   "dependencies": {
     "@material-ui/core": "^4.9.8",
     "@material-ui/icons": "^4.9.1",
+    "formik": "^2.1.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hot-loader": "^4.12.20",
