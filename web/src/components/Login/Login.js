@@ -96,7 +96,7 @@ function Login({ onSubmit }) {
               variant="contained"
               fullWidth
             >
-              Create chat room
+              Login
             </Button>
           </Grid>
         </Container>

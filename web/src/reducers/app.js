@@ -7,9 +7,9 @@ function app(state = initialState, action) {
     case LOGIN:
       return { ...state, user: action.user };
     case LOGOUT:
-      return initialState;
+      return { ...state, user: undefined };
     default:
-      return initialState;
+      return state;
   }
 }
 

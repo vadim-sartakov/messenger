@@ -12,7 +12,7 @@ function LoginContainer({ login, ...props }) {
     if (response.ok) {
       const user = await response.json();
       login(user);
-      const { from } = location.state || { from: { pathname: "/" } };
+      const { from } = location.state || { from: { pathname: '/' } };
       history.replace(from);
     }
   }, [history, location.state, login]);
