@@ -7,6 +7,7 @@ import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
 import Drawer from '@material-ui/core/Drawer';
+import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -22,7 +23,10 @@ const useStyles = makeStyles(theme => {
       display: 'flex'
     },
     appBar: {
-      zIndex: theme.zIndex.drawer + 1
+      [theme.breakpoints.up('sm')]: {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: drawerWidth
+      }
     },
     menuButton: {
       [theme.breakpoints.up('sm')]: {
@@ -63,6 +67,8 @@ function ResponsiveDrawer({ open, onClose, children }) {
             paper: classes.drawerPaper,
           }}
         >
+          <div className={classes.toolbar} />
+          <Divider />
           {children}
         </Drawer>
       </Hidden>
@@ -74,6 +80,7 @@ function ResponsiveDrawer({ open, onClose, children }) {
           }}
         >
           <div className={classes.toolbar} />
+          <Divider />
           {children}
         </Drawer>
       </Hidden>
