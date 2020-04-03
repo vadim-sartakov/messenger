@@ -1,12 +1,12 @@
-import { LOG_IN, LOG_OUT } from '../actions';
+import { LOGIN, LOGOUT } from '../actions';
 
 const initialState = { user: undefined };
 
 function app(state = initialState, action) {
   switch (action.type) {
-    case LOG_IN:
+    case LOGIN:
       return { ...state, user: action.user };
-    case LOG_OUT:
+    case LOGOUT:
       return initialState;
     default:
       return initialState;

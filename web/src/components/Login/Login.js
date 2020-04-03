@@ -1,6 +1,4 @@
-import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import React from 'react';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -9,7 +7,6 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { Formik, Form, useField } from 'formik';
-import { logIn } from '../actions';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -53,18 +50,8 @@ function InputField(props) {
   );
 }
 
-function Login({ logIn }) {
+function Login({ onSubmit }) {
   const classes = useStyles();
-
-  const history = useHistory();
-  const location = useLocation();
-
-  const onSubmit = useCallback(() => {
-    const { from } = location.state || { from: { pathname: "/" } };
-    logIn({ name: 'Test' });
-    history.replace(from);
-  }, [history, location.state, logIn]);
-
   return (
     <Formik
       initialValues={initialValues}
@@ -109,10 +96,4 @@ function Login({ logIn }) {
   );
 }
 
-function mapDispatchToProps(dispatch) {
-  return { logIn: user => dispatch(logIn(user)) };
-}
-
-const LoginContainer = connect(undefined, mapDispatchToProps)(Login);
-
-export default LoginContainer;
+export default Login;
