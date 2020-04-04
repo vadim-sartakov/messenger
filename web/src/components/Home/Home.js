@@ -3,6 +3,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
@@ -86,6 +87,14 @@ function ResponsiveDrawer({ open, onClose, children }) {
       </Hidden>
     </nav>
   )
+}
+
+function getShortUsername(username) {
+  const parts = username.split(' ');
+  const string = parts.length === 2 ?
+    parts[0].charAt(0) + parts[1].charAt(0) :
+    username.substring(0, 2);
+  return string.toUpperCase();
 }
 
 function Home({ logout, chats }) {

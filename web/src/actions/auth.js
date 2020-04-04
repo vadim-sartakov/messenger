@@ -8,6 +8,6 @@ export function login({ credentials, history, from }) {
   return { type: AUTH_REQUESTED, credentials, history, from };
 }
 
-export function logout({ history }) {
+export function logout(history) {
   return { type: LOGOUT_REQUESTED, history };
 }

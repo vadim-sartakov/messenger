@@ -15,7 +15,7 @@ function LoginContainer({ login, ...props }) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return { login: user => dispatch(login(user)) };
+  return { login: options => dispatch(login(options)) };
 }
 
 export default connect(undefined, mapDispatchToProps)(LoginContainer);

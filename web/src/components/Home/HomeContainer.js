@@ -7,12 +7,12 @@ import Home from './Home';
 function HomeContainer({ logout, ...props }) {
   const history = useHistory();
   const handleLogout = useCallback(() => {
-    logout({ history });
+    logout(history);
   }, [history, logout]);
   return <Home {...props} logout={handleLogout} />;
 }
 
 const mapStateToProps = state => ({ user: state.auth.user });
-const mapDispatchToProps = dispatch => ({ logout: history => dispatch(logout({ history })) });
+const mapDispatchToProps = dispatch => ({ logout: history => dispatch(logout(history)) });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);
