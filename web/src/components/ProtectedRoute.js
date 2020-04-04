@@ -2,14 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Route, Redirect } from 'react-router-dom';
 
-function ProtectedRoute({ user, children, ...props }) {
+function ProtectedRoute({ user, redirectTo, children, ...props }) {
   return (
     <Route
       render={({ location }) => {
         return user ? children : (
           <Redirect
             to={{
-              pathname: '/login',
+              pathname: redirectTo,
               state: { from: location }
             }}
           />
@@ -21,9 +21,8 @@ function ProtectedRoute({ user, children, ...props }) {
 }
 
 function mapStateToProps(state) {
-  return { user: state.app.user };
+  return { user: state.auth.user };
 }
-
 
 const ProtectedRouteContainer = connect(mapStateToProps)(ProtectedRoute);
 

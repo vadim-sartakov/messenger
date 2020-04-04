@@ -7,14 +7,9 @@ import Login from './Login';
 function LoginContainer({ login, ...props }) {
   const history = useHistory();
   const location = useLocation();
-  const onSubmit = useCallback(async value => {
-    const response = await fetch('/login', { method: 'POST', body: JSON.stringify(value) });
-    if (response.ok) {
-      const user = await response.json();
-      login(user);
-      const { from } = location.state || { from: { pathname: '/' } };
-      history.replace(from);
-    }
+  const onSubmit = useCallback(async credentials => {
+    const { from } = location.state || { from: { pathname: '/' } };
+    login({ credentials, history, from });
   }, [history, location.state, login]);
   return <Login {...props} onSubmit={onSubmit} />;
 }

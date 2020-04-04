@@ -88,7 +88,7 @@ function ResponsiveDrawer({ open, onClose, children }) {
   )
 }
 
-function Home({ logout }) {
+function Home({ logout, chats }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);

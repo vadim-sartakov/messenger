@@ -12,7 +12,7 @@ function App() {
         <Route path="/login">
           <Login />
         </Route>
-        <ProtectedRoute exact path="/">
+        <ProtectedRoute exact path="/" redirectTo="/login">
           <Home />
         </ProtectedRoute>
       </Switch>

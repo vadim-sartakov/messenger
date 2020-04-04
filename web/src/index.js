@@ -10,7 +10,7 @@ import App from './components/App';
 import createStore from './createStore';
 import './index.css';
 
-const store = createStore({ app: { user: { username: 'Jane Doe' } } });
+const store = createStore();
 const theme = createMuiTheme();
 
 ReactDOM.render(
