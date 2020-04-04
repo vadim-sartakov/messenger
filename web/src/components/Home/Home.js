@@ -3,6 +3,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
@@ -46,15 +47,21 @@ const useStyles = makeStyles(theme => {
     drawerPaper: {
       width: drawerWidth,
     },
+    avatar: {
+      marginRight: theme.spacing(2)
+    },
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
     },
-    toolbar: theme.mixins.toolbar
+    toolbar: {
+      padding: `0 ${theme.spacing(2)}px`,
+      ...theme.mixins.toolbar
+    }
   };
 });
 
-function ResponsiveDrawer({ open, onClose, children }) {
+function ResponsiveDrawer({ open, onClose, user, children }) {
   const classes = useStyles();
   return (
     <nav className={classes.drawer}>
@@ -64,24 +71,16 @@ function ResponsiveDrawer({ open, onClose, children }) {
           anchor="left"
           open={open}
           onClose={onClose}
-          classes={{
-            paper: classes.drawerPaper,
-          }}
+          classes={{ paper: classes.drawerPaper }}
         >
-          <div className={classes.toolbar} />
-          <Divider />
           {children}
         </Drawer>
       </Hidden>
       <Hidden xsDown implementation="css">
         <Drawer
           variant="permanent"
-          classes={{
-            paper: classes.drawerPaper,
-          }}
+          classes={{ paper: classes.drawerPaper }}
         >
-          <div className={classes.toolbar} />
-          <Divider />
           {children}
         </Drawer>
       </Hidden>
@@ -97,7 +96,7 @@ function getShortUsername(username) {
   return string.toUpperCase();
 }
 
-function Home({ logout, chats }) {
+function Home({ user, logout, chats }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
@@ -122,7 +121,31 @@ function Home({ logout, chats }) {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <ResponsiveDrawer open={openDrawer} onClose={handleDrawerClose}>
+      <ResponsiveDrawer
+        open={openDrawer}
+        onClose={handleDrawerClose}
+        user={user}
+      >
+        <Grid
+          container
+          alignItems="center"
+          wrap="nowrap"
+          className={classes.toolbar}
+        >
+          <Avatar
+            className={classes.avatar}
+            style={{
+              color: user.textColor,
+              backgroundColor: user.color
+            }}
+          >
+            {getShortUsername(user.username)}
+          </Avatar>
+          <Typography variant="h6" noWrap>
+            {user.username}
+          </Typography>
+        </Grid>
+        <Divider />
         <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map(text => (
             <ListItem button key={text}>
