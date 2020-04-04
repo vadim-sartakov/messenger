@@ -13,7 +13,11 @@ function HomeContainer({ logout, ...props }) {
   return <Home {...props} logout={handleLogout} />;
 }
 
-const mapStateToProps = state => ({ user: state.auth.user });
-const mapDispatchToProps = dispatch => ({ logout: history => dispatch(logout(history)) });
+const mapStateToProps = state => ({
+  user: state.auth.user
+});
+const mapDispatchToProps = dispatch => ({
+  logout: history => dispatch(logout(history))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);

@@ -16,6 +16,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/Inbox';
 import MenuIcon from '@material-ui/icons/Menu';
+import SessionExpiredDialog from './SessionExpiredDialog';
 
 const drawerWidth = 240;
 
@@ -61,7 +62,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function ResponsiveDrawer({ open, onClose, user, children }) {
+function ResponsiveDrawer({ open, onClose, children }) {
   const classes = useStyles();
   return (
     <nav className={classes.drawer}>
@@ -124,7 +125,6 @@ function Home({ user, logout, chats }) {
       <ResponsiveDrawer
         open={openDrawer}
         onClose={handleDrawerClose}
-        user={user}
       >
         <Grid
           container
@@ -172,6 +172,7 @@ function Home({ user, logout, chats }) {
           donec massa sapien faucibus et molestie ac.
         </Typography>
       </main>
+      <SessionExpiredDialog />
     </div>
   );
 }
