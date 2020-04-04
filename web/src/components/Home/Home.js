@@ -88,11 +88,11 @@ function ResponsiveDrawer({ open, onClose, user, children }) {
   )
 }
 
-function getShortUsername(username) {
-  const parts = username.split(' ');
+function getShortName(name) {
+  const parts = name.split(' ');
   const string = parts.length === 2 ?
     parts[0].charAt(0) + parts[1].charAt(0) :
-    username.substring(0, 2);
+    name.substring(0, 2);
   return string.toUpperCase();
 }
 
@@ -139,7 +139,7 @@ function Home({ user, logout, chats }) {
               backgroundColor: user.color
             }}
           >
-            {getShortUsername(user.username)}
+            {getShortName(user.username)}
           </Avatar>
           <Typography variant="h6" noWrap>
             {user.username}

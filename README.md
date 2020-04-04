@@ -4,7 +4,8 @@ Messenger application
 
 ### Features
 - Authentication (No sign up required, username is enough)
-- Authorization
+- Chat rooms
+- Text messages
 
 ### Libraries used:
 
@@ -22,6 +23,7 @@ Messenger application
 - node.js
 - express
 - mongoose
+- JWT
 
 ### TODO
 - Route transition

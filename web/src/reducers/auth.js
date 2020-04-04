@@ -2,12 +2,12 @@ import { AUTH_REQUESTED, AUTH_SUCCEEDED, AUTH_FAILED, LOGOUT_SUCCEEDED } from '.
 
 const initialState = {};
 
-function auth(state = initialState, { type, user, accessToken, refreshToken }) {
+function auth(state = initialState, { type, user, token }) {
   switch (type) {
     case AUTH_REQUESTED:
       return { ...state, user: { isLoading: true } };
     case AUTH_SUCCEEDED:
-      return { ...state, user, accessToken, refreshToken };
+      return { ...state, user, token };
     case AUTH_FAILED:
       return { ...state, error: true, isLoading: false };
     case LOGOUT_SUCCEEDED:

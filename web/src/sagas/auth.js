@@ -10,8 +10,8 @@ function* authenticate({ credentials, history, from }) {
     body: JSON.stringify(credentials)
   });
   if (response.ok) {
-    const { accessToken, refreshToken, user } = yield call([response, 'json']);
-    yield put({ type: AUTH_SUCCEEDED, accessToken, refreshToken, user });
+    const { token, user } = yield call([response, 'json']);
+    yield put({ type: AUTH_SUCCEEDED, token, user });
     history.replace({ pathname: (from && from.pathname) || '/' });
   } else {
     yield put({ type: AUTH_FAILED });
