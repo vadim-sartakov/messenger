@@ -23,7 +23,7 @@ Messenger application
 - node.js
 - express
 - mongoose
-- JWT
+- jsonwebtoken
 
 ### TODO
 - Route transition

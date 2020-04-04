@@ -15,10 +15,7 @@ const login = asyncMiddleware(async (req, res) => {
 
   const token = await jwtSignAsync(
     {
-      subject: {
-        id: user.id,
-        username: user.username
-      }
+      subject: user.id
     },
     privateKey,
     {

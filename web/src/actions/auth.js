@@ -1,13 +1,13 @@
 export const AUTH_REQUESTED = 'AUTH_REQUESTED';
 export const AUTH_SUCCEEDED = 'AUTH_SUCCEEDED';
 export const AUTH_FAILED = 'AUTH_FAILED';
-export const LOGOUT_REQUESTED = 'LOGOUT_REQUESTED';
-export const LOGOUT_SUCCEEDED = 'LOGOUT_SUCCEEDED';
+export const LOGOUT = 'LOGOUT';
+export const TOKEN_EXPIRED = 'TOKEN_EXPIRED';
 
-export function login({ credentials, history, from }) {
-  return { type: AUTH_REQUESTED, credentials, history, from };
+export function login({ credentials, onSuccess, onError }) {
+  return { type: AUTH_REQUESTED, credentials, onSuccess, onError };
 }
 
 export function logout(history) {
-  return { type: LOGOUT_REQUESTED, history };
+  return { type: LOGOUT, history };
 }

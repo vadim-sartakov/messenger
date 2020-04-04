@@ -8,6 +8,7 @@ function HomeContainer({ logout, ...props }) {
   const history = useHistory();
   const handleLogout = useCallback(() => {
     logout(history);
+    history.replace({ pathname: '/' });
   }, [history, logout]);
   return <Home {...props} logout={handleLogout} />;
 }

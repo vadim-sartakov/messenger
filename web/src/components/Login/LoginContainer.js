@@ -9,7 +9,8 @@ function LoginContainer({ login, ...props }) {
   const location = useLocation();
   const onSubmit = useCallback(async credentials => {
     const { from } = location.state || { from: { pathname: '/' } };
-    login({ credentials, history, from });
+    const onSuccess = () => history.replace(from);
+    login({ credentials, onSuccess });
   }, [history, location.state, login]);
   return <Login {...props} onSubmit={onSubmit} />;
 }
