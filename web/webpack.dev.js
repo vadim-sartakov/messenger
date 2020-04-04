@@ -8,6 +8,9 @@ module.exports = merge(common, {
     contentBase: './build',
     port: 3000,
     historyApiFallback: true,
-    hot: true
+    hot: true,
+    proxy: {
+      '/api': 'http://localhost:8080/'
+    }
   }
 });

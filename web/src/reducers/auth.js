@@ -1,4 +1,4 @@
-import { AUTH_REQUESTED, AUTH_SUCCEEDED, AUTH_FAILED, LOGOUT } from '../actions';
+import { AUTH_REQUESTED, AUTH_SUCCEEDED, AUTH_FAILED, LOGOUT_SUCCEEDED } from '../actions';
 
 const initialState = {};
 
@@ -10,7 +10,7 @@ function auth(state = initialState, { type, user, accessToken, refreshToken }) {
       return { ...state, user, accessToken, refreshToken };
     case AUTH_FAILED:
       return { ...state, error: true, isLoading: false };
-    case LOGOUT:
+    case LOGOUT_SUCCEEDED:
       return initialState;
     default:
       return state;
