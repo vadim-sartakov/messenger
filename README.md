@@ -3,28 +3,23 @@
 Messenger application
 
 ### Features
-- Responsive
-- Authentication (No sign up required, username is enough)
+- Authentication (No password required, username is enough)
 - Chat rooms
+- Friends list
 - Text messages
+- Responsive layout
 
-### Libraries used:
-
-#### Web application
-- webpack
-- react
-- react-router-dom
-- redux
-- redux-saga
-- redux-persist
-- formik
-- @material-ui
-
-#### Server
-- node.js
-- express
-- mongoose
-- jsonwebtoken
+### Stack
+- Webpack
+- React
+- Redux
+- Redux Saga
+- Material UI
+- Node.js
+- Express
+- MongoDB
+- JWT
+- GraphQL
 
 ### TODO
 - Route transition
