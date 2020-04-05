@@ -1,15 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const { buildSchema } = require('graphql');
-const graphqlServer = require('express-graphql');
-const rootValue = require('./resolver');
+const { ApolloServer } = require('apollo-server-express');
+const resolvers = require('./resolvers');
 
-const schema = buildSchema(fs.readFileSync(path.resolve(__dirname, './schema.gql'), { encoding: 'utf8' }));
-
-const server = graphqlServer({
-  schema,
-  rootValue,
-  graphiql: process.env === 'development'
+const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.gql'), { encoding: 'utf8' });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => req.user
 });
 
 module.exports = server;

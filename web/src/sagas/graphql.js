@@ -17,8 +17,12 @@ function* graphqlFetch({ id, query, variables }) {
     }
   );
   if (response.ok) {
-    const data = yield call([response, 'json']);
-    yield put({ type: GRAPHQL_FETCH_SUCCEEDED, id, data });
+    const content = yield call([response, 'json']);
+    if (content.errors) {
+      yield put({ type: GRAPHQL_FETCH_FAILED, id });
+    } else {
+      yield put({ type: GRAPHQL_FETCH_SUCCEEDED, id, data: content });
+    }
   } else {
     yield put({ type: GRAPHQL_FETCH_FAILED, id });
   }

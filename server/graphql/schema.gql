@@ -4,26 +4,27 @@ type UserColors {
 }
 
 type User {
-  _id: String!
+  _id: ID!
   name: String!
   login: String!
   colors: UserColors!
 }
 
 type Message {
-  _id: String!
+  _id: ID!
   author: User!
   content: String!
   chat: Chat!
 }
 
 type Chat {
-  _id: String!
+  _id: ID!
   owner: User!
-  participants: [User!]
-  messages: [Message!]
+  participants: [User]!
+  messages: [Message]!
 }
 
 type Query {
-  getOverview: String
+  friends: [User!]!
+  chats: [Chat!]!
 }

@@ -23,7 +23,7 @@ app.head(`${apiPrefix}/users`, usersHead);
 app.use(`${apiPrefix}/login`, login);
 
 app.use(auth);
-app.use('/graphql', graphqlServer);
+graphqlServer.applyMiddleware({ app, path: '/graphql' });
 
 app.listen(port, () => {
   console.log(`Application started at port ${port}`);
