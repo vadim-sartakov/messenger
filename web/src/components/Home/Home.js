@@ -135,14 +135,14 @@ function Home({ user, logout, chats }) {
           <Avatar
             className={classes.avatar}
             style={{
-              color: user.textColor,
-              backgroundColor: user.color
+              color: user.colors.text,
+              backgroundColor: user.colors.background
             }}
           >
-            {getShortName(user.username)}
+            {getShortName(user.name)}
           </Avatar>
           <Typography variant="h6" noWrap>
-            {user.username}
+            {user.name}
           </Typography>
         </Grid>
         <Divider />

@@ -7,6 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
 import AccountCircle from '@material-ui/icons/AccountCircle';
+import VpnKey from '@material-ui/icons/VpnKey';
 import { makeStyles } from '@material-ui/core/styles';
 import { Formik, Form, useField } from 'formik';
 
@@ -22,22 +23,35 @@ const useStyles = makeStyles(theme => {
       marginBottom: theme.spacing(5)
     },
     input: {
-      marginBottom: theme.spacing(5)
+      marginBottom: theme.spacing(3)
     },
     submit: {
+      marginTop: theme.spacing(2),
       marginBottom: theme.spacing(2)
     }
   };
 });
 
-function validate(values) {
+function isRequired(value) {
+  return !value || !value.length;
+}
+
+async function loginIsUsed(login) {
+  const response = await fetch(`/api/users?login=${login}`, { method: 'HEAD' });
+  return response.status === 200;
+}
+
+async function validate(values) {
   const errors = {};
-  if (!values.username || !values.username.length) errors.username = 'Username is required';
+  if (isRequired(values.name)) errors.name = 'Username is required';
+  if (isRequired(values.login)) errors.login = 'Login is required';
+  else if (await loginIsUsed(values.login)) errors.login = 'Login is used';
   return errors;
 }
 
 const initialValues = {
-  username: ''
+  name: '',
+  login: ''
 };
 
 function InputField(props) {
@@ -47,7 +61,7 @@ function InputField(props) {
       {...props}
       {...field}
       error={Boolean(meta.touched && meta.error)}
-      helperText={meta.error}
+      helperText={meta.touched && meta.error}
     />
   );
 }
@@ -74,17 +88,34 @@ function Login({ onSubmit }) {
             </Typography>
             <InputField
               className={classes.input}
-              id="username"
-              name="username"
+              id="name"
+              name="name"
               required
               fullWidth
-              label="Username"
+              label="Name"
               variant="outlined"
-              placeholder="Enter your username"
+              placeholder="Enter your name"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <AccountCircle />
+                  </InputAdornment>
+                )
+              }}
+            />
+            <InputField
+              className={classes.input}
+              id="login"
+              name="login"
+              required
+              fullWidth
+              label="Login"
+              variant="outlined"
+              placeholder="Enter unique login string"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <VpnKey />
                   </InputAdornment>
                 )
               }}

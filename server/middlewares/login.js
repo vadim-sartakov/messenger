@@ -8,14 +8,14 @@ const privateKey = fs.readFileSync('./private.key');
 const jwtSignAsync = promisify(jwt.sign);
 
 const login = asyncMiddleware(async (req, res) => {
-  const { username } = req.body;
+  const { name, login } = req.body;
 
-  const user = new User({ username });
+  const user = new User({ name, login });
   await user.save();
 
   const token = await jwtSignAsync(
     {
-      subject: user.id
+      subject: user._id
     },
     privateKey,
     {

@@ -9,7 +9,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { useHistory } from 'react-router-dom';
 import { logout } from '../../actions';
 
-function SessionExpiredDialog({ open, logout }) {
+function SessionExpiredDialog({ open = false, logout }) {
   const history = useHistory();
   const handleLogin = () => {
     logout();

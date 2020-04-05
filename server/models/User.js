@@ -1,15 +1,29 @@
-const Model = require('./Model');
+const { Schema, model } = require('mongoose');
 const getRandomInt = require('../utils/getRandomInt');
 const colors = require('../constants/colors');
 
-class User extends Model {
-  constructor({ username }) {
-    super();
-    const { color, textColor } = colors[getRandomInt(0, colors.length - 1)];
-    this.username = username;
-    this.color = color;
-    this.textColor = textColor;
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    index: true
+  },
+  login: {
+    type: String,
+    required: true,
+    index: true,
+    unique: true
+  },
+  colors: {
+    type: {
+      background: String,
+      text: String
+    },
+    required: true,
+    default: () => colors[getRandomInt(0, colors.length - 1)]
   }
-}
+});
+
+const User = model('User', userSchema);
 
 module.exports = User;
