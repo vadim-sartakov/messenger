@@ -1,19 +1,20 @@
-export const GET_OVERVIEW = `
+export const ME = `
   query {
-    chats {
-      _id
-      owner {
-        _id
-        name
-      }
-      participants {
-        _id
-        name
-      }
-    }
-    friends {
+    me {
       _id
       name
+      login
+      chats {
+        _id
+        participants {
+          _id
+          name
+        }
+      }
+      friends {
+        _id
+        name
+      }
     }
   }
 `;

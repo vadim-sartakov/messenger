@@ -23,3 +23,4 @@ Messenger application
 
 ### TODO
 - Route transition
+- Fetch error handling

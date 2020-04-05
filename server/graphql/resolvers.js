@@ -2,27 +2,30 @@ const { ObjectId } = require('mongoose').Types;
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 
+async function populateArray(array, populate) {
+  return array.reduce(async (prev, cur) => {
+    const acc = await prev;
+    const entry = await populate(cur);
+    return [...acc, entry];
+  }, Promise.resolve([]));
+}
+
 const root = {
+  User: {
+    chats: parent => Chat.find({ owner: parent._id }),
+    friends: parent => populateArray(parent.friends, id => User.findById(id))
+  },
   Chat: {
     owner: parent => User.findById(parent.owner),
     participants: async parent => {
-      return parent.participants.reduce(async (prev, cur) => {
-        const acc = await prev;
-        const user = await User.findById(cur);
-        return [...acc, user];
-      }, Promise.resolve([]));
+      return populateArray(parent.participants, id => User.findById(id));
     }
   },
   Query: {
-    chats: async (parent, args, context) => {
-      const currentUserId = context.subject;      
-      const chats = await Chat.find({ 'owner': new ObjectId(currentUserId) });
-      return chats;
-    },
-    friends: async (parent, args, context) => {
+    me: async (parent, args, context) => {
       const currentUserId = context.subject;
       const curUser = await User.findById(currentUserId);
-      return curUser.friends;
+      return curUser;
     }
   }
 };

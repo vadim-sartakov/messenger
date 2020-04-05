@@ -8,6 +8,8 @@ type User {
   name: String!
   login: String!
   colors: UserColors!
+  chats: [Chat!]
+  friends: [User!]
 }
 
 type Message {
@@ -20,11 +22,10 @@ type Message {
 type Chat {
   _id: ID!
   owner: User!
-  participants: [User]!
-  messages: [Message]!
+  participants: [User!]!
+  messages: [Message!]!
 }
 
 type Query {
-  friends: [User!]!
-  chats: [Chat!]!
+  me: User!
 }

@@ -4,12 +4,12 @@ import { useHistory } from 'react-router-dom';
 import { logout } from '../../actions';
 import Home from './Home';
 import withGraphql from '../withGraphql';
-import { GET_OVERVIEW } from '../../queries';
+import { ME } from '../../queries';
 
 function HomeContainer({ logout, graphqlFetch, ...props }) {
   const history = useHistory();
   useEffect(() => {
-    graphqlFetch(GET_OVERVIEW);
+    graphqlFetch(ME);
   }, [graphqlFetch]);
   const handleLogout = useCallback(() => {
     logout(history);
