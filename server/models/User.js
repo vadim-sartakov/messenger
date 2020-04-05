@@ -21,7 +21,8 @@ const userSchema = new Schema({
     },
     required: true,
     default: () => colors[getRandomInt(0, colors.length - 1)]
-  }
+  },
+  friends: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
 
 const User = model('User', userSchema);

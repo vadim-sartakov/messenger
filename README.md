@@ -3,6 +3,7 @@
 Messenger application
 
 ### Features
+- Responsive
 - Authentication (No sign up required, username is enough)
 - Chat rooms
 - Text messages
