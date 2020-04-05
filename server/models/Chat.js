@@ -6,7 +6,8 @@ const chatSchema = new Schema({
     ref: 'User',
     required: true
   },
-  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }]
 });
 
 const Chat = model('Chat', chatSchema);

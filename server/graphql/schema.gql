@@ -1,0 +1,29 @@
+type UserColors {
+  text: String!
+  background: String!
+}
+
+type User {
+  _id: String!
+  name: String!
+  login: String!
+  colors: UserColors!
+}
+
+type Message {
+  _id: String!
+  author: User!
+  content: String!
+  chat: Chat!
+}
+
+type Chat {
+  _id: String!
+  owner: User!
+  participants: [User!]
+  messages: [Message!]
+}
+
+type Query {
+  getOverview: String
+}

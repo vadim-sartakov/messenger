@@ -1,10 +1,11 @@
 const fs = require('fs');
+const path = require('path');
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const asyncMiddleware = require('../utils/asyncMiddleware');
 
-const privateKey = fs.readFileSync('./private.key');
+const privateKey = fs.readFileSync(path.resolve(__dirname, '..', 'private.key'));
 const jwtSignAsync = promisify(jwt.sign);
 
 const login = asyncMiddleware(async (req, res) => {
@@ -20,7 +21,7 @@ const login = asyncMiddleware(async (req, res) => {
     privateKey,
     {
       algorithm: 'RS256',
-      expiresIn: '2h'
+      expiresIn: '4h'
     }
   );
 
