@@ -49,7 +49,7 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
-  graphqlFetch: (id, query) => dispatch(graphqlFetch(id, query)),
+  graphqlFetch: (id, query, variables) => dispatch(graphqlFetch(id, query)),
   graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
 });
 

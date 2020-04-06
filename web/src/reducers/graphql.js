@@ -13,10 +13,10 @@ function clear(state, id) {
   return nextState;
 }
 
-function graphql(state = initialState, { type, id, query, data }) {
+function graphql(state = initialState, { type, id, query, variables, data }) {
   switch (type) {
     case GRAPHQL_FETCH_REQUESTED:
-      return { ...state, [id]: { isLoading: true, query } };
+      return { ...state, [id]: { isLoading: true, query, variables } };
     case GRAPHQL_FETCH_SUCCEEDED:
       return { ...state, [id]: data };
     case GRAPHQL_FETCH_FAILED:
