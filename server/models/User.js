@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose');
-const getRandomInt = require('../utils/getRandomInt');
-const colors = require('../constants/colors');
+const colors = require('./colors');
 
 const userSchema = new Schema({
   name: {
@@ -8,15 +7,7 @@ const userSchema = new Schema({
     required: true,
     index: true
   },
-  colors: {
-    type: {
-      background: String,
-      text: String
-    },
-    required: true,
-    default: () => colors[getRandomInt(0, colors.length - 1)]
-  },
-  friends: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  colors
 });
 
 const User = model('User', userSchema);

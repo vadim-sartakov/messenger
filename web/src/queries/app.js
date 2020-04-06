@@ -9,10 +9,6 @@ export const ME = `query {
         name
       }
     }
-    friends {
-      _id
-      name
-    }
   }
 }
 `;
@@ -22,9 +18,12 @@ export const CREATE_CHAT = `
     createChat(value: $value) {
       _id
       name
-      participants {
+      chats {
         _id
-        name
+        participants {
+          _id
+          name
+        }
       }
     }
   }

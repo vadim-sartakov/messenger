@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import Drawer from './Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
@@ -40,7 +41,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ user, logout }) {
+function Home({ user, logout, me }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
@@ -60,14 +61,17 @@ function Home({ user, logout }) {
           <Typography variant="h6" noWrap className={classes.title}>
             Messenger App
           </Typography>
-          <IconButton color="inherit" title="Logout" onClick={logout}>
-            <ExitToApp />
-          </IconButton>
+          <Tooltip arrow title="Logout">
+            <IconButton color="inherit" onClick={logout}>
+              <ExitToApp />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Drawer
         classes={classes}
         user={user}
+        me={me}
         open={openDrawer}
         onClose={handleDrawerClose}
       />

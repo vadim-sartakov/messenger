@@ -1,4 +1,4 @@
-type UserColors {
+type Colors {
   text: String!
   background: String!
 }
@@ -6,9 +6,8 @@ type UserColors {
 type User {
   _id: ID!
   name: String!
-  colors: UserColors!
+  colors: Colors!
   chats: [Chat!]
-  friends: [User!]
 }
 
 type Message {
@@ -22,12 +21,13 @@ type Chat {
   _id: ID!
   name: String
   participants: [User!]!
+  colors: Colors!
   messages: [Message!]!
 }
 
 type Query {
-  findUser(string: String!): User
   me: User!
+  findUser(string: String!): User
 }
 
 input ReferenceInput {
@@ -40,5 +40,5 @@ input ChatInput {
 }
 
 type Mutation {
-  createChat(value: ChatInput!): Chat!
+  createChat(value: ChatInput!): User!
 }

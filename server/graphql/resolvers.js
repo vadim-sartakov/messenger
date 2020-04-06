@@ -11,8 +11,7 @@ async function populateArray(array, populate) {
 
 const root = {
   User: {
-    chats: parent => Chat.find({ owner: parent._id }),
-    friends: parent => populateArray(parent.friends, id => User.findById(id))
+    chats: parent => Chat.find({ owner: parent._id })
   },
   Chat: {
     participants: async parent => {
@@ -29,8 +28,11 @@ const root = {
   Mutation: {
     createChat: async (parent, { value }, context) => {
       const currentUserId = context.subject;
-      const newChat = new Chat({ ...value, owner: currentUserId });
-      return await newChat.save();
+      let participants = value.participants.filter(cur => cur._id !== currentUserId);
+      participants = [currentUserId, ...participants];
+      const newChat = new Chat({ ...value, participants, owner: currentUserId });
+      await newChat.save();
+      return await User.findById(currentUserId);
     }
   }
 };

@@ -8,11 +8,12 @@ import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import InboxIcon from '@material-ui/icons/Inbox';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { makeStyles } from '@material-ui/core/styles';
 import { DRAWER_WIDTH } from './constants';
@@ -30,6 +31,9 @@ const useStyles = makeStyles(theme => {
     },
     avatar: {
       marginRight: theme.spacing(2)
+    },
+    subheaderText: {
+      flex: '1 0'
     }
   }
 });
@@ -69,7 +73,24 @@ function ResponsiveDrawer({ open, onClose, children }) {
   )
 }
 
-function Drawer({ classes: rootClasses, user, open, onClose }) {
+function Chat({ name, messages, participants }) {
+  const title = name || participants[participants.length - 1].name;
+  return (
+    <ListItem button>
+      <ListItemAvatar>
+        <Avatar>
+          {getShortName(title)}
+        </Avatar>
+      </ListItemAvatar>
+      <ListItemIcon>
+        <InboxIcon />
+      </ListItemIcon>
+      <ListItemText primary={title} secondary={messages[messages.length - 1].content} />
+    </ListItem>
+  )
+}
+
+function Drawer({ classes: rootClasses, user, open, onClose, me }) {
   const classes = useStyles();
   return (
     <ResponsiveDrawer
@@ -97,38 +118,21 @@ function Drawer({ classes: rootClasses, user, open, onClose }) {
       </Grid>
       <Divider />
       <List>
-        <Grid component={ListSubheader} container>
-          <div style={classes}>
+        <Grid
+          component={ListSubheader}
+          container
+          alignItems="center"
+        >
+          <div className={classes.subheaderText}>
             Chat rooms
           </div>
-          <IconButton size="small" title="Create chat">
-            <AddCommentIcon />
-          </IconButton>
+          <Tooltip title="Create chat" arrow>
+            <IconButton size="small" className={classes.subheaderButton}>
+              <AddCommentIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Grid>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map(text => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
-        <ListSubheader>
-          <div>
-            Friends
-          </div>
-          <IconButton size="small" title="Add friend">
-            <PersonAddIcon />
-          </IconButton>
-        </ListSubheader>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map(text => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
+        {me.chats.map(chat => <Chat key={chat._id} {...chat} />)}
       </List>
     </ResponsiveDrawer>
   )
