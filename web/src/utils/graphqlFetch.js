@@ -5,6 +5,17 @@ function graphqlFetch(query, options = {}) {
     token
   } = options;
   return new Promise((resolve, reject) => {
+    const onContentParse = content => {
+      if (content.errors) {
+        reject(content);
+      } else {
+        resolve(content)
+      }
+    };
+    const onFetchSuccess = response => {
+      if (!response.ok) reject();
+      return response.json().then(onContentParse);
+    };
     return fetch(
       url,
       {
@@ -15,16 +26,7 @@ function graphqlFetch(query, options = {}) {
         },
         body: JSON.stringify({ query, variables })
       }
-    ).then(response => {
-      if (!response.ok) reject();
-      return response.json().then(content => {
-        if (content.errors) {
-          reject(content);
-        } else {
-          resolve(content)
-        }
-      });
-    })
+    ).then(onFetchSuccess)
   });
 }
 
