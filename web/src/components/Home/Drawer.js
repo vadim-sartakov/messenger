@@ -10,7 +10,10 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
 import InboxIcon from '@material-ui/icons/Inbox';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import AddCommentIcon from '@material-ui/icons/AddComment';
 import { makeStyles } from '@material-ui/core/styles';
 import { DRAWER_WIDTH } from './constants';
 
@@ -94,7 +97,14 @@ function Drawer({ classes: rootClasses, user, open, onClose }) {
       </Grid>
       <Divider />
       <List>
-        <ListSubheader>Chat rooms</ListSubheader>
+        <Grid component={ListSubheader} container>
+          <div style={classes}>
+            Chat rooms
+          </div>
+          <IconButton size="small" title="Create chat">
+            <AddCommentIcon />
+          </IconButton>
+        </Grid>
         {['Inbox', 'Starred', 'Send email', 'Drafts'].map(text => (
           <ListItem button key={text}>
             <ListItemIcon>
@@ -103,7 +113,14 @@ function Drawer({ classes: rootClasses, user, open, onClose }) {
             <ListItemText primary={text} />
           </ListItem>
         ))}
-        <ListSubheader>Friends</ListSubheader>
+        <ListSubheader>
+          <div>
+            Friends
+          </div>
+          <IconButton size="small" title="Add friend">
+            <PersonAddIcon />
+          </IconButton>
+        </ListSubheader>
         {['Inbox', 'Starred', 'Send email', 'Drafts'].map(text => (
           <ListItem button key={text}>
             <ListItemIcon>

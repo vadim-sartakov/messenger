@@ -8,12 +8,6 @@ const userSchema = new Schema({
     required: true,
     index: true
   },
-  login: {
-    type: String,
-    required: true,
-    index: true,
-    unique: true
-  },
   colors: {
     type: {
       background: String,

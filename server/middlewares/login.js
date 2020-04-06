@@ -9,9 +9,9 @@ const privateKey = fs.readFileSync(path.resolve(__dirname, '..', 'private.key'))
 const jwtSignAsync = promisify(jwt.sign);
 
 const login = asyncMiddleware(async (req, res) => {
-  const { name, login } = req.body;
+  const { name } = req.body;
 
-  const user = new User({ name, login });
+  const user = new User({ name });
   await user.save();
 
   const token = await jwtSignAsync(
@@ -21,7 +21,7 @@ const login = asyncMiddleware(async (req, res) => {
     privateKey,
     {
       algorithm: 'RS256',
-      expiresIn: '4h'
+      expiresIn: '8h'
     }
   );
 

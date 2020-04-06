@@ -6,7 +6,6 @@ type UserColors {
 type User {
   _id: ID!
   name: String!
-  login: String!
   colors: UserColors!
   chats: [Chat!]
   friends: [User!]
@@ -14,34 +13,21 @@ type User {
 
 type Message {
   _id: ID!
+  chat: Chat!
   author: User!
   content: String!
-  chat: Chat!
 }
 
 type Chat {
   _id: ID!
   name: String
-  owner: User!
   participants: [User!]!
   messages: [Message!]!
 }
 
 type Query {
-  loginIsUsed(login: String!): Boolean!
   findUser(string: String!): User
-  chats: [Chat!]!
-  friends: [User!]!
-}
-
-input LoginInput {
-  login: String!
-  name: String!
-}
-
-type LoginResponse {
-  user: User!
-  token: String!
+  me: User!
 }
 
 input ReferenceInput {
@@ -54,6 +40,5 @@ input ChatInput {
 }
 
 type Mutation {
-  login(credentials: LoginInput!): LoginResponse!
   createChat(value: ChatInput!): Chat!
 }

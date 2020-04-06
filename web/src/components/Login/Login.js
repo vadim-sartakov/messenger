@@ -7,7 +7,6 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import VpnKey from '@material-ui/icons/VpnKey';
 import { makeStyles } from '@material-ui/core/styles';
 import { Formik, Form, useField } from 'formik';
 
@@ -36,22 +35,14 @@ function isRequired(value) {
   return !value || !value.length;
 }
 
-async function loginIsUsed(login) {
-  const response = await fetch(`/api/users?login=${login}`, { method: 'HEAD' });
-  return response.status === 200;
-}
-
-async function validate(values) {
+function validate(values) {
   const errors = {};
-  if (isRequired(values.name)) errors.name = 'Username is required';
-  if (isRequired(values.login)) errors.login = 'Login is required';
-  else if (await loginIsUsed(values.login)) errors.login = 'Login is used';
+  if (isRequired(values.name)) errors.name = 'Name is required';
   return errors;
 }
 
 const initialValues = {
   name: '',
-  login: ''
 };
 
 function InputField(props) {
@@ -99,23 +90,6 @@ function Login({ onSubmit }) {
                 startAdornment: (
                   <InputAdornment position="start">
                     <AccountCircle />
-                  </InputAdornment>
-                )
-              }}
-            />
-            <InputField
-              className={classes.input}
-              id="login"
-              name="login"
-              required
-              fullWidth
-              label="Login"
-              variant="outlined"
-              placeholder="Enter unique login string"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <VpnKey />
                   </InputAdornment>
                 )
               }}

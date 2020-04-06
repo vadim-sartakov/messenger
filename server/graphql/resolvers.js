@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongoose').Types;
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 
@@ -16,27 +15,21 @@ const root = {
     friends: parent => populateArray(parent.friends, id => User.findById(id))
   },
   Chat: {
-    owner: parent => User.findById(parent.owner),
     participants: async parent => {
       return populateArray(parent.participants, id => User.findById(id));
     }
   },
   Query: {
-    chats: async (parent, args, context) => {
-      const currentUserId = context.subject;
-      const chats = await Chat.find({ owner: currentUserId });
-      return chats;
-    },
-    friends: async (parent, args, context) => {
+    me: async (parent, args, context) => {
       const currentUserId = context.subject;
       const currentUser = await User.findById(currentUserId);
-      return populateArray(currentUser.friends, id => User.findById(id));;
+      return currentUser;
     }
   },
   Mutation: {
     createChat: async (parent, { value }, context) => {
       const currentUserId = context.subject;
-      const newChat = new Chat({ owner: currentUserId, ...value });
+      const newChat = new Chat({ ...value, owner: currentUserId });
       return await newChat.save();
     }
   }

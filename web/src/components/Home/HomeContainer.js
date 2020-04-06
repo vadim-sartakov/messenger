@@ -1,30 +1,30 @@
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { logout, graphqlFetch, graphqlFetchClear } from '../../actions';
+import { logout, requestGraphqlFetch, graphqlFetchClear } from '../../actions';
 import Home from './Home';
-import { GET_CHATS_AND_FRIENDS, CREATE_CHAT } from '../../queries';
+import { ME, CREATE_CHAT } from '../../queries';
 
 function HomeContainer({
   logout,
   homeData,
   createChatData,
-  graphqlFetch,
+  requestGraphqlFetch,
   graphqlFetchClear,
   ...props
 }) {
   const history = useHistory();
   useEffect(() => {
-    graphqlFetch('home', GET_CHATS_AND_FRIENDS);
+    requestGraphqlFetch('me', ME);
     return () => {
-      graphqlFetchClear('home');
+      graphqlFetchClear('me');
       graphqlFetchClear('createChat');
     }
-  }, [graphqlFetch, graphqlFetchClear]);
+  }, [requestGraphqlFetch, graphqlFetchClear]);
 
   const handleCreateChat = useCallback(value => {
-    graphqlFetch('createChat', CREATE_CHAT, value)
-  }, [graphqlFetch]);
+    requestGraphqlFetch('createChat', CREATE_CHAT, value)
+  }, [requestGraphqlFetch]);
 
   const handleLogout = useCallback(() => {
     logout(history);
@@ -49,7 +49,7 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
-  graphqlFetch: (id, query, variables) => dispatch(graphqlFetch(id, query)),
+  requestGraphqlFetch: (id, query, variables) => dispatch(requestGraphqlFetch(id, query, variables)),
   graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
 });
 

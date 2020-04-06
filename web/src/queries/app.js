@@ -1,11 +1,9 @@
-export const GET_CHATS_AND_FRIENDS = `
-  query {
+export const ME = `query {
+  me {
+    _id
+    name
     chats {
       _id
-      owner {
-        _id
-        name
-      }
       participants {
         _id
         name
@@ -16,6 +14,7 @@ export const GET_CHATS_AND_FRIENDS = `
       name
     }
   }
+}
 `;
 
 export const CREATE_CHAT = `
@@ -23,10 +22,8 @@ export const CREATE_CHAT = `
     createChat(value: $value) {
       _id
       name
-      owner {
-        name
-      }
       participants {
+        _id
         name
       }
     }
