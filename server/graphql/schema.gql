@@ -26,7 +26,7 @@ type Chat {
 }
 
 type Query {
-  me: User!
+  chats: [Chat!]!
   findUser(string: String!): User
 }
 
@@ -40,5 +40,5 @@ input ChatInput {
 }
 
 type Mutation {
-  createChat(value: ChatInput!): User!
+  createChat(value: ChatInput!): Chat!
 }

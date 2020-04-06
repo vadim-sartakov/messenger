@@ -1,13 +1,9 @@
-export const ME = `query {
-  me {
+export const GET_CHATS = `query {
+  chats {
     _id
-    name
-    chats {
+    participants {
       _id
-      participants {
-        _id
-        name
-      }
+      name
     }
   }
 }
@@ -17,13 +13,9 @@ export const CREATE_CHAT = `
   mutation CreateChat($value: ChatInput!) {
     createChat(value: $value) {
       _id
-      name
-      chats {
+      participants {
         _id
-        participants {
-          _id
-          name
-        }
+        name
       }
     }
   }

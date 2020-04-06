@@ -1,3 +1,4 @@
+const { Types } = require('mongoose');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 
@@ -19,10 +20,10 @@ const root = {
     }
   },
   Query: {
-    me: async (parent, args, context) => {
+    chats: async (parent, args, context) => {
       const currentUserId = context.subject;
-      const currentUser = await User.findById(currentUserId);
-      return currentUser;
+      const chats = await Chat.find({ owner: currentUserId });
+      return chats || [];
     }
   },
   Mutation: {
@@ -31,8 +32,7 @@ const root = {
       let participants = value.participants.filter(cur => cur._id !== currentUserId);
       participants = [currentUserId, ...participants];
       const newChat = new Chat({ ...value, participants, owner: currentUserId });
-      await newChat.save();
-      return await User.findById(currentUserId);
+      return await newChat.save();
     }
   }
 };

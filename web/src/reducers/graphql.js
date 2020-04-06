@@ -21,7 +21,7 @@ function graphql(state = initialState, { type, id, query, variables, data }) {
     case GRAPHQL_FETCH_SUCCEEDED:
       return { ...state, [id]: data };
     case GRAPHQL_FETCH_FAILED:
-      return { ...state, [id]: { ...state[id], error: true } }
+      return { ...state, [id]: { ...state[id], error: true, isLoading: false } }
     case GRAPHQL_SET_DATA:
       return { ...state, [id]: { ...state[id], data } }
     case GRAPHQL_FETCH_CLEAR:
