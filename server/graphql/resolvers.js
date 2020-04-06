@@ -22,10 +22,22 @@ const root = {
     }
   },
   Query: {
-    me: async (parent, args, context) => {
+    chats: async (parent, args, context) => {
       const currentUserId = context.subject;
-      const curUser = await User.findById(currentUserId);
-      return curUser;
+      const chats = await Chat.find({ owner: currentUserId });
+      return chats;
+    },
+    friends: async (parent, args, context) => {
+      const currentUserId = context.subject;
+      const currentUser = await User.findById(currentUserId);
+      return populateArray(currentUser.friends, id => User.findById(id));;
+    }
+  },
+  Mutation: {
+    createChat: async (parent, { value }, context) => {
+      const currentUserId = context.subject;
+      const newChat = new Chat({ owner: currentUserId, ...value });
+      return await newChat.save();
     }
   }
 };

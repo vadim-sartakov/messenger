@@ -21,11 +21,39 @@ type Message {
 
 type Chat {
   _id: ID!
+  name: String
   owner: User!
   participants: [User!]!
   messages: [Message!]!
 }
 
 type Query {
-  me: User!
+  loginIsUsed(login: String!): Boolean!
+  findUser(string: String!): User
+  chats: [Chat!]!
+  friends: [User!]!
+}
+
+input LoginInput {
+  login: String!
+  name: String!
+}
+
+type LoginResponse {
+  user: User!
+  token: String!
+}
+
+input ReferenceInput {
+  _id: ID!
+}
+
+input ChatInput {
+  name: String
+  participants: [ReferenceInput!]
+}
+
+type Mutation {
+  login(credentials: LoginInput!): LoginResponse!
+  createChat(value: ChatInput!): Chat!
 }

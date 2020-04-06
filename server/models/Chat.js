@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const chatSchema = new Schema({
+  name: String,
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',
