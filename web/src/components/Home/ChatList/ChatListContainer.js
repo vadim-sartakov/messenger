@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { graphqlSetData } from '../../../actions';
+import { graphqlSetData, selectChat } from '../../../actions';
 import { CREATE_CHAT } from '../../../queries';
 import graphqlFetch from '../../../utils/graphqlFetch';
 import ChatList from './ChatList';
@@ -31,10 +31,12 @@ function ChatListContainer({
 
 const mapStateToProps = state => ({
   token: state.auth.token,
-  rootData: state.graphql.root
+  rootData: state.graphql.root,
+  selectedChat: state.app.selectedChat
 });
 const mapDispatchToProps = dispatch => ({
-  graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data))
+  graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
+  selectChat: id => dispatch(selectChat(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChatListContainer);

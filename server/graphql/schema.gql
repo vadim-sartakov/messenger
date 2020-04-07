@@ -21,7 +21,8 @@ type Message {
 type Chat {
   _id: ID!
   name: String
-  participants: [User!]
+  inviteLink: String!
+  participants: [User!]!
   colors: Colors!
   messages: [Message!]!
 }

@@ -9,6 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import Drawer from './Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
+import Chat from '../Chat';
 import { DRAWER_WIDTH } from './constants';
 
 const useStyles = makeStyles(theme => {
@@ -41,9 +42,10 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ logout, data }) {
+function Home({ logout, data, selectedChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
+
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
   return (
@@ -76,18 +78,7 @@ function Home({ logout, data }) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <Typography paragraph>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent elementum
-          facilisis leo vel. Risus at ultrices mi tempus imperdiet. Semper risus in hendrerit
-          gravida rutrum quisque non tellus. Convallis convallis tellus id interdum velit laoreet id
-          donec ultrices. Odio morbi quis commodo odio aenean sed adipiscing. Amet nisl suscipit
-          adipiscing bibendum est ultricies integer quis. Cursus euismod quis viverra nibh cras.
-          Metus vulputate eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo quis
-          imperdiet massa tincidunt. Cras tincidunt lobortis feugiat vivamus at augue. At augue eget
-          arcu dictum varius duis at consectetur lorem. Velit sed ullamcorper morbi tincidunt. Lorem
-          donec massa sapien faucibus et molestie ac.
-        </Typography>
+        {selectedChat !== undefined && <Chat chat={data.me.chats.find(chat => chat._id === selectedChat)} />}
       </main>
       <SessionExpiredDialog />
     </div>

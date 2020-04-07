@@ -8,6 +8,7 @@ export const ME = `query {
     chats {
       _id
       name
+      inviteLink
       participants {
         _id
         name
@@ -30,6 +31,7 @@ export const CREATE_CHAT = `
     createChat(value: $value) {
       _id
       name
+      inviteLink
       participants {
         _id
         name

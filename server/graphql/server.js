@@ -7,7 +7,7 @@ const typeDefs = fs.readFileSync(path.resolve(__dirname, './schema.gql'), { enco
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => req.user
+  context: ({ req }) => req
 });
 
 module.exports = server;

@@ -1,4 +1,4 @@
-const { Types } = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 
@@ -20,16 +20,17 @@ const root = {
     }
   },
   Query: {
-    me: async (parent, args, context) => {
-      const currentUserId = context.subject;
+    me: async (parent, args, req) => {
+      const currentUserId = req.user.subject;
       const currentUser = await User.findById(currentUserId);
       return currentUser;
     }
   },
   Mutation: {
-    createChat: async (parent, { value }, context) => {
-      const currentUserId = context.subject;
-      const newChat = new Chat({ ...value, owner: currentUserId });
+    createChat: async (parent, { value }, req) => {
+      const currentUserId = req.user.subject;
+      const inviteLink = req.protocol + '://' + req.get('host') + '/' + uuidv4()
+      const newChat = new Chat({ ...value, inviteLink, owner: currentUserId });
       return await newChat.save();
     }
   }

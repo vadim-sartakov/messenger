@@ -58,7 +58,9 @@ function Drawer({
   classes: rootClasses,
   user,
   open,
-  onClose
+  onClose,
+  selectedChat,
+  onSelectedChatChange
 }) {
   const classes = useStyles();
   return (
@@ -86,7 +88,11 @@ function Drawer({
         </Typography>
       </Grid>
       <Divider />
-      <ChatList chats={user.chats} />
+      <ChatList
+        chats={user.chats}
+        selectedChat={selectedChat}
+        onSelectedChatChange={onSelectedChatChange}
+      />
     </ResponsiveDrawer>
   )
 }
