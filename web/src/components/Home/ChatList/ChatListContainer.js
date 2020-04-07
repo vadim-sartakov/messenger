@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { requestGraphqlFetch, graphqlSetData, graphqlFetchClear } from '../../../actions';
+import { graphqlSetData } from '../../../actions';
 import { CREATE_CHAT } from '../../../queries';
+import graphqlFetch from '../../../utils/graphqlFetch';
 import ChatList from './ChatList';
 
 function ChatListContainer({
+  token,
   rootData,
-  requestGraphqlFetch,
   graphqlSetData,
-  graphqlFetchClear,
   ...props
 }) {
-  const handleCreateChat = useCallback(chat => {
-    const onSuccess = response => {
+  const handleCreateChat = useCallback(async chat => {
+    try {
+      const response = await graphqlFetch(CREATE_CHAT, { variables: { value: chat }, token });
       graphqlSetData('root', {
         ...rootData,
         me: {
@@ -20,24 +21,20 @@ function ChatListContainer({
           chats: [...rootData.me.chats, response.createChat]
         }
       });
-    };
-    requestGraphqlFetch('createChat', CREATE_CHAT, { variables: { value: chat }, onSuccess, noCache: true });
-  }, [requestGraphqlFetch, graphqlSetData, rootData]);
-
-  useEffect(function cleanUp() {
-    return () => graphqlFetchClear('createChat');
-  }, [graphqlFetchClear]);
+    } catch (e) {
+      // TODO: Show error message
+    }
+  }, [graphqlSetData, rootData, token]);
 
   return <ChatList {...props} onCreateChat={handleCreateChat} />;
 }
 
 const mapStateToProps = state => ({
+  token: state.auth.token,
   rootData: state.graphql.root
 });
 const mapDispatchToProps = dispatch => ({
-  requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
-  graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
-  graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
+  graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChatListContainer);

@@ -2,7 +2,11 @@ const { Schema, model } = require('mongoose');
 const colors = require('./colors');
 
 const chatSchema = new Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true,
+    index: true
+  },
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',

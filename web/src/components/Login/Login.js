@@ -3,12 +3,13 @@ import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { makeStyles } from '@material-ui/core/styles';
-import { Formik, Form, useField } from 'formik';
+import { Formik, Form } from 'formik';
+import { isRequired } from '../../utils/validators';
+import InputTextField from '../InputTextField';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -31,31 +32,15 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function isRequired(value) {
-  return !value || !value.length;
-}
-
 function validate(values) {
   const errors = {};
-  if (isRequired(values.name)) errors.name = 'Name is required';
+  if (!isRequired(values.name)) errors.name = 'Name is required';
   return errors;
 }
 
 const initialValues = {
   name: '',
 };
-
-function InputField(props) {
-  const [field, meta] = useField(props);
-  return (
-    <TextField
-      {...props}
-      {...field}
-      error={Boolean(meta.touched && meta.error)}
-      helperText={meta.touched && meta.error}
-    />
-  );
-}
 
 function Login({ onSubmit }) {
   const classes = useStyles();
@@ -77,7 +62,7 @@ function Login({ onSubmit }) {
             <Typography variant="h5" className={classes.title}>
               Messenger App
             </Typography>
-            <InputField
+            <InputTextField
               className={classes.input}
               id="name"
               name="name"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import ListItem from '@material-ui/core/ListItem';
@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { makeStyles } from '@material-ui/core/styles';
+import CreateNewChat from './CreateNewChat';
 import getShortName from '../../../utils/getShortName';
 
 const useStyles = makeStyles({
@@ -28,13 +29,26 @@ function Chat({ name, messages, participants, colors = {} }) {
           {getShortName(title)}
         </Avatar>
       </ListItemAvatar>
-      <ListItemText primary={title} secondary={lastMessage && lastMessage.content} />
+      <ListItemText
+        primary={title}
+        primaryTypographyProps={{ noWrap: true }}
+        secondary={lastMessage && lastMessage.content}
+      />
     </ListItem>
   )
 }
 
 function ChatList({ chats = [], onCreateChat }) {
   const classes = useStyles();
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleOpenDialog = () => setOpenDialog(true);
+  const handleCloseDialog = () => setOpenDialog(false);
+  const handleCreate = async newChat => {
+    await onCreateChat(newChat);
+    handleCloseDialog();
+  };
+
   return (
     <List>
       <Grid
@@ -49,13 +63,18 @@ function ChatList({ chats = [], onCreateChat }) {
           <IconButton
             size="small"
             className={classes.subheaderButton}
-            onClick={() => onCreateChat({ name: 'Test' })}
+            onClick={handleOpenDialog}
           >
             <AddCommentIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Grid>
       {chats.map((chat, index) => <Chat key={index} {...chat} />)}
+      <CreateNewChat
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onCreate={handleCreate}
+      />
     </List>
   )
 }
