@@ -20,18 +20,16 @@ const root = {
     }
   },
   Query: {
-    chats: async (parent, args, context) => {
+    me: async (parent, args, context) => {
       const currentUserId = context.subject;
-      const chats = await Chat.find({ owner: currentUserId });
-      return chats || [];
+      const currentUser = await User.findById(currentUserId);
+      return currentUser;
     }
   },
   Mutation: {
     createChat: async (parent, { value }, context) => {
       const currentUserId = context.subject;
-      let participants = value.participants.filter(cur => cur._id !== currentUserId);
-      participants = [currentUserId, ...participants];
-      const newChat = new Chat({ ...value, participants, owner: currentUserId });
+      const newChat = new Chat({ ...value, owner: currentUserId });
       return await newChat.save();
     }
   }

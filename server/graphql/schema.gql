@@ -15,28 +15,23 @@ type Message {
   chat: Chat!
   author: User!
   content: String!
+  createdAt: String!
 }
 
 type Chat {
   _id: ID!
   name: String
-  participants: [User!]!
+  participants: [User!]
   colors: Colors!
   messages: [Message!]!
 }
 
 type Query {
-  chats: [Chat!]!
-  findUser(string: String!): User
-}
-
-input ReferenceInput {
-  _id: ID!
+  me: User!
 }
 
 input ChatInput {
-  name: String
-  participants: [ReferenceInput!]
+  name: String!
 }
 
 type Mutation {

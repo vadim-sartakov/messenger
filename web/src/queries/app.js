@@ -1,11 +1,27 @@
-export const GET_CHATS = `query {
-  chats {
+export const ME = `query {
+  me {
     _id
-    participants {
+    name
+    colors {
+      ...colorsFields
+    }
+    chats {
       _id
       name
+      participants {
+        _id
+        name
+      }
+      colors {
+        ...colorsFields
+      }
     }
   }
+}
+
+fragment colorsFields on Colors {
+  text
+  background
 }
 `;
 
@@ -16,6 +32,10 @@ export const CREATE_CHAT = `
       participants {
         _id
         name
+      }
+      colors {
+        text
+        background
       }
     }
   }

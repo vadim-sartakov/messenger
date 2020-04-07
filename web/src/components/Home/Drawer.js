@@ -54,7 +54,14 @@ function ResponsiveDrawer({ open, onClose, children }) {
   )
 }
 
-function Drawer({ classes: rootClasses, user, open, onClose }) {
+function Drawer({
+  classes: rootClasses,
+  user,
+  data,
+  onCreateChat,
+  open,
+  onClose
+}) {
   const classes = useStyles();
   return (
     <ResponsiveDrawer
@@ -81,7 +88,7 @@ function Drawer({ classes: rootClasses, user, open, onClose }) {
         </Typography>
       </Grid>
       <Divider />
-      <ChatList />
+      <ChatList chats={data.chats} onCreateChat={onCreateChat} />
     </ResponsiveDrawer>
   )
 }

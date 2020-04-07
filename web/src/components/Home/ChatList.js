@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { makeStyles } from '@material-ui/core/styles';
-import getShortName from '../../../utils/getShortName';
+import getShortName from '../../utils/getShortName';
 
 const useStyles = makeStyles({
   subheaderText: {
@@ -18,13 +18,13 @@ const useStyles = makeStyles({
   }
 });
 
-function Chat({ name, messages, participants }) {
+function Chat({ name, messages, participants, colors = {} }) {
   const title = name || participants[participants.length - 1].name;
   const lastMessage = messages && messages[messages.length - 1];
   return (
     <ListItem button>
       <ListItemAvatar>
-        <Avatar>
+        <Avatar style={{ color: colors.text, backgroundColor: colors.background }}>
           {getShortName(title)}
         </Avatar>
       </ListItemAvatar>
@@ -49,7 +49,7 @@ function ChatList({ chats = [], onCreateChat }) {
           <IconButton
             size="small"
             className={classes.subheaderButton}
-            onClick={() => onCreateChat({ name: 'Test', participants: [] })}
+            onClick={() => onCreateChat({ name: 'Test' })}
           >
             <AddCommentIcon fontSize="small" />
           </IconButton>

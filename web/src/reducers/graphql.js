@@ -14,14 +14,14 @@ function clear(state, id) {
   return nextState;
 }
 
-function graphql(state = initialState, { type, id, query, variables, data }) {
+function graphql(state = initialState, { type, id, query, variables, data, noCache }) {
   switch (type) {
     case GRAPHQL_FETCH_REQUESTED:
-      return { ...state, [id]: { ...state[id], isLoading: true, query, variables, data: {} } };
+      return { ...state, [id]: { ...state[id], isLoading: true, query, variables, noCache, data: {} } };
     case GRAPHQL_FETCH_SUCCEEDED:
-      return { ...state, [id]: data };
+      return noCache ? clear(state, id) : { ...state, [id]: data };
     case GRAPHQL_FETCH_FAILED:
-      return { ...state, [id]: { ...state[id], error: true, isLoading: false } }
+      return noCache ? clear(state, id) : { ...state, [id]: { ...state[id], error: true, isLoading: false } }
     case GRAPHQL_SET_DATA:
       return { ...state, [id]: { ...state[id], data } }
     case GRAPHQL_FETCH_CLEAR:
