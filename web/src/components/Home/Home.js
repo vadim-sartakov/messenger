@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ user, logout, data, onCreateChat }) {
+function Home({ logout, data }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
@@ -70,9 +70,7 @@ function Home({ user, logout, data, onCreateChat }) {
       </AppBar>
       <Drawer
         classes={classes}
-        user={user}
-        data={data}
-        onCreateChat={onCreateChat}
+        user={data.me}
         open={openDrawer}
         onClose={handleDrawerClose}
       />

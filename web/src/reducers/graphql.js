@@ -3,6 +3,7 @@ import {
   GRAPHQL_FETCH_SUCCEEDED,
   GRAPHQL_FETCH_FAILED,
   GRAPHQL_FETCH_CLEAR,
+  GRAPHQL_FETCH_CLEAR_ALL,
   GRAPHQL_SET_DATA
 } from '../actions';
 
@@ -23,9 +24,11 @@ function graphql(state = initialState, { type, id, query, variables, data, noCac
     case GRAPHQL_FETCH_FAILED:
       return noCache ? clear(state, id) : { ...state, [id]: { ...state[id], error: true, isLoading: false } }
     case GRAPHQL_SET_DATA:
-      return { ...state, [id]: { ...state[id], data } }
+      return { ...state, [id]: { ...state[id], ...data } }
     case GRAPHQL_FETCH_CLEAR:
       return clear(state, id);
+    case GRAPHQL_FETCH_CLEAR_ALL:
+      return initialState;
     default:
       return state;
   }

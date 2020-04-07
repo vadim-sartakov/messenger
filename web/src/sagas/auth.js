@@ -28,8 +28,8 @@ function* authorize({ credentials, onSuccess, onError }) {
     body: JSON.stringify(credentials)
   });
   if (response.ok) {
-    const { token, user } = yield call([response, 'json']);
-    yield put({ type: AUTH_SUCCEEDED, token, user });
+    const { token } = yield call([response, 'json']);
+    yield put({ type: AUTH_SUCCEEDED, token });
     onSuccess && onSuccess();
   } else {
     yield put({ type: AUTH_FAILED });

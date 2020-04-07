@@ -2,14 +2,20 @@ export const GRAPHQL_FETCH_REQUESTED = 'GRAPHQL_FETCH_REQUESTED';
 export const GRAPHQL_FETCH_SUCCEEDED = 'GRAPHQL_FETCH_SUCCEEDED';
 export const GRAPHQL_FETCH_FAILED = 'GRAPHQL_FETCH_FAILED';
 export const GRAPHQL_FETCH_CLEAR = 'GRAPHQL_FETCH_CLEAR';
+export const GRAPHQL_FETCH_CLEAR_ALL = 'GRAPHQL_FETCH_CLEAR_ALL';
 export const GRAPHQL_SET_DATA = 'GRAPHQL_SET_DATA';
 
-export function requestGraphqlFetch(id, query, variables, noCache) {
-  return { type: GRAPHQL_FETCH_REQUESTED, id, query, variables, noCache };
+export function requestGraphqlFetch(id, query, options = {}) {
+  const { variables, noCache, onSuccess, onError } = options;
+  return { type: GRAPHQL_FETCH_REQUESTED, id, query, variables, noCache, onSuccess, onError };
 }
 
 export function graphqlFetchClear(id) {
   return { type: GRAPHQL_FETCH_CLEAR, id };
+}
+
+export function graphqlFetchClearAll() {
+  return { type: GRAPHQL_FETCH_CLEAR };
 }
 
 export function graphqlSetData(id, data) {

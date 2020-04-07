@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { makeStyles } from '@material-ui/core/styles';
-import getShortName from '../../utils/getShortName';
+import getShortName from '../../../utils/getShortName';
 
 const useStyles = makeStyles({
   subheaderText: {

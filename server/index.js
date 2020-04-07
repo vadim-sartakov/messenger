@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
-const login = require('./routes/login');
+const login = require('./middlewares/login');
 const graphqlServer = require('./graphql/server');
 
 const apiPrefix = '/api';
@@ -17,7 +17,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
-app.use(`${apiPrefix}/login`, login);
+app.post(`${apiPrefix}/login`, login);
 
 app.use(auth);
 graphqlServer.applyMiddleware({ app, path: '/graphql' });

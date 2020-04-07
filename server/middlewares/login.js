@@ -25,10 +25,7 @@ const login = asyncMiddleware(async (req, res) => {
     }
   );
 
-  res.json({
-    token,
-    user
-  });
+  res.json({ token });
 })
 
 module.exports = login;

@@ -1,57 +1,46 @@
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { logout, requestGraphqlFetch, graphqlSetData, graphqlFetchClear } from '../../actions';
+import { logout, requestGraphqlFetch, graphqlSetData, graphqlFetchClearAll } from '../../actions';
 import Home from './Home';
-import { ME, CREATE_CHAT } from '../../queries';
+import { ME } from '../../queries';
 
 function HomeContainer({
   logout,
-  fetchResult,
+  data,
   requestGraphqlFetch,
-  graphqlSetData,
   graphqlFetchClear,
   ...props
 }) {
   const history = useHistory();
 
   useEffect(() => {
-    requestGraphqlFetch('me', ME);
-    return () => graphqlFetchClear('me')
+    requestGraphqlFetch('root', ME);
+    return () => {
+      graphqlFetchClearAll();
+    }
   }, [requestGraphqlFetch, graphqlFetchClear]);
-
-  const handleCreateChat = useCallback(chat => {
-    graphqlSetData('me', {
-      me: {
-        ...fetchResult.data.me,
-        chats: [...fetchResult.data.me.chats, chat]
-      }
-    });
-    requestGraphqlFetch('createChat', CREATE_CHAT, { value: chat }, true)
-  }, [fetchResult.data, graphqlSetData, requestGraphqlFetch]);
 
   const handleLogout = useCallback(() => {
     logout(history);
     history.replace({ pathname: '/' });
   }, [history, logout]);
 
-  return fetchResult.isLoading ? null : (
+  return data.isLoading ? null : (
     <Home
       {...props}
       logout={handleLogout}
-      onCreateChat={handleCreateChat}
-      data={fetchResult.data.me}
+      data={data}
     />
   );
 }
 
 const mapStateToProps = state => ({
-  user: state.auth.user,
-  fetchResult: state.graphql.me || { isLoading: true, data: {} }
+  data: state.graphql.root || { isLoading: true }
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
-  requestGraphqlFetch: (id, query, variables, noCahce) => dispatch(requestGraphqlFetch(id, query, variables, noCahce)),
+  requestGraphqlFetch: (id, query) => dispatch(requestGraphqlFetch(id, query)),
   graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
   graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
 });

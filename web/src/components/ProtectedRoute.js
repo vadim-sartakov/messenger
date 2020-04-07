@@ -2,11 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Route, Redirect } from 'react-router-dom';
 
-function ProtectedRoute({ user, redirectTo, children, ...props }) {
+function ProtectedRoute({ token, redirectTo, children, ...props }) {
   return (
     <Route
       render={({ location }) => {
-        return user ? children : (
+        return token ? children : (
           <Redirect
             to={{
               pathname: redirectTo,
@@ -21,7 +21,7 @@ function ProtectedRoute({ user, redirectTo, children, ...props }) {
 }
 
 function mapStateToProps(state) {
-  return { user: state.auth.user };
+  return { token: state.auth.token };
 }
 
 const ProtectedRouteContainer = connect(mapStateToProps)(ProtectedRoute);
