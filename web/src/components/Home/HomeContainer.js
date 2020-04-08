@@ -21,6 +21,8 @@ function HomeContainer({
   graphqlSetData,
   destroyApp,
   token,
+  selectedChat,
+  selectChat,
   ...props
 }) {
   const history = useHistory();
@@ -40,10 +42,11 @@ function HomeContainer({
         ...data,
         chats: [...data.chats, response.createChat]
       });
+      selectChat(response.createChat._id);
     } catch (e) {
       // TODO: Show error message
     }
-  }, [graphqlSetData, data, token]);
+  }, [graphqlSetData, data, token, selectChat]);
 
   const handleLogout = useCallback(() => {
     logout(history);
@@ -57,6 +60,7 @@ function HomeContainer({
       me={data.me}
       chats={data.chats}
       onCreateChat={handleCreateChat}
+      selectedChat={selectedChat}
       onSelectChat={selectChat}
     />
   );

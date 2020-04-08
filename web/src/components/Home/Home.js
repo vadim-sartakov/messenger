@@ -83,7 +83,7 @@ function Home({ logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {!currentChat || chats.length === 0 ? <NoChats /> : <Chat chat={currentChat} />}
+        {chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} />}
       </main>
       <SessionExpiredDialog />
     </div>

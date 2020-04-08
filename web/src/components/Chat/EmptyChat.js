@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Container from '@material-ui/core/Container';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
@@ -24,7 +24,13 @@ const useStyles = makeStyles(theme => ({
 
 function EmptyChat({ chat }) {
   const classes = useStyles();
+  const inputRef = useRef();
   const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    setCopied(true);
+    inputRef.current.select();
+    document.execCommand('copy');
+  };
   return (
     <Container maxWidth="sm">
       <Paper className={classes.paper}>
@@ -40,15 +46,18 @@ function EmptyChat({ chat }) {
             value={chat.inviteLink}
             fullWidth
             InputProps={{
+              inputRef,
               readOnly: true,
               endAdornment: (
                 <InputAdornment position="end">
                   <Tooltip
                     title={copied ? 'Copied!' : 'Copy'}
-                    onClick={() => setCopied(true)}
                     onTransitionEnd={() => setCopied(false)}
                   >
-                    <IconButton color="primary">
+                    <IconButton
+                      color="primary"
+                      onClick={handleCopy}
+                    >
                       <CopyIcon />
                     </IconButton>
                   </Tooltip>
