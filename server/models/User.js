@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const colors = require('./colors');
+const color = require('./color');
 
 const userSchema = new Schema({
   name: {
@@ -7,7 +7,7 @@ const userSchema = new Schema({
     required: true,
     index: true
   },
-  colors
+  color
 });
 
 const User = model('User', userSchema);

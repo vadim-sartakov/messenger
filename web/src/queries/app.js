@@ -1,28 +1,19 @@
-export const ME = `query {
+export const HOME = `query {
   me {
     _id
     name
-    colors {
-      ...colorsFields
-    }
-    chats {
+    color
+  }
+  chats {
+    _id
+    name
+    inviteLink
+    participants {
       _id
       name
-      inviteLink
-      participants {
-        _id
-        name
-      }
-      colors {
-        ...colorsFields
-      }
     }
+    color
   }
-}
-
-fragment colorsFields on Colors {
-  text
-  background
 }
 `;
 
@@ -36,10 +27,7 @@ export const CREATE_CHAT = `
         _id
         name
       }
-      colors {
-        text
-        background
-      }
+      color
     }
   }
 `;

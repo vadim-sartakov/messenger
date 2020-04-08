@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
   logout,
-  clearApp,
+  destroyApp,
   requestGraphqlFetch,
   graphqlSetData,
   graphqlFetchClearAll,
@@ -11,7 +11,7 @@ import {
 } from '../../actions';
 import Home from './Home';
 import graphqlFetch from '../../utils/graphqlFetch';
-import { ME, CREATE_CHAT } from '../../queries';
+import { HOME, CREATE_CHAT } from '../../queries';
 
 function HomeContainer({
   logout,
@@ -19,29 +19,26 @@ function HomeContainer({
   requestGraphqlFetch,
   graphqlFetchClear,
   graphqlSetData,
-  clearApp,
+  destroyApp,
   token,
   ...props
 }) {
   const history = useHistory();
 
   useEffect(() => {
-    requestGraphqlFetch('root', ME);
+    requestGraphqlFetch('home', HOME);
     return () => {
       graphqlFetchClearAll();
-      clearApp();
+      destroyApp();
     }
-  }, [requestGraphqlFetch, graphqlFetchClear, clearApp]);
+  }, [requestGraphqlFetch, graphqlFetchClear, destroyApp]);
 
   const handleCreateChat = useCallback(async chat => {
     try {
       const response = await graphqlFetch(CREATE_CHAT, { variables: { value: chat }, token });
-      graphqlSetData('root', {
+      graphqlSetData('home', {
         ...data,
-        me: {
-          ...data.me,
-          chats: [...data.me.chats, response.createChat]
-        }
+        chats: [...data.chats, response.createChat]
       });
     } catch (e) {
       // TODO: Show error message
@@ -57,7 +54,8 @@ function HomeContainer({
     <Home
       {...props}
       logout={handleLogout}
-      data={data}
+      me={data.me}
+      chats={data.chats}
       onCreateChat={handleCreateChat}
       onSelectChat={selectChat}
     />
@@ -66,14 +64,14 @@ function HomeContainer({
 
 const mapStateToProps = state => ({
   token: state.auth.token,
-  data: state.graphql.root || { isLoading: true },
+  data: state.graphql.home || { isLoading: true },
   selectedChat: state.app.selectedChat
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
   requestGraphqlFetch: (id, query) => dispatch(requestGraphqlFetch(id, query)),
   graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
-  clearApp: () => dispatch(clearApp()),
+  destroyApp: () => dispatch(destroyApp()),
   selectChat: id => dispatch(selectChat(id))
 });
 

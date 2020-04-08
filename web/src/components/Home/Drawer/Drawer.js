@@ -22,7 +22,9 @@ const useStyles = makeStyles(theme => {
       width: DRAWER_WIDTH,
     },
     avatar: {
-      marginRight: theme.spacing(2)
+      marginRight: theme.spacing(2),
+      backgroundColor: props => props.me && props.me.color,
+      color: props => props.me && theme.palette.getContrastText(props.me.color)
     }
   }
 });
@@ -56,14 +58,15 @@ function ResponsiveDrawer({ open, onClose, children }) {
 
 function Drawer({
   classes: rootClasses,
-  user,
+  me,
+  chats,
   open,
   onClose,
   selectedChat,
   onChatSelect,
   onCreateChat
 }) {
-  const classes = useStyles();
+  const classes = useStyles({ me });
   return (
     <ResponsiveDrawer
       open={open}
@@ -75,22 +78,16 @@ function Drawer({
         wrap="nowrap"
         className={rootClasses.toolbar}
       >
-        <Avatar
-          className={classes.avatar}
-          style={{
-            color: user.colors.text,
-            backgroundColor: user.colors.background
-          }}
-        >
-          {getShortName(user.name)}
+        <Avatar className={classes.avatar}>
+          {getShortName(me.name)}
         </Avatar>
         <Typography variant="h6" noWrap>
-          {user.name}
+          {me.name}
         </Typography>
       </Grid>
       <Divider />
       <ChatList
-        chats={user.chats}
+        chats={chats}
         selected={selectedChat}
         onSelect={onChatSelect}
         onCreateChat={onCreateChat}

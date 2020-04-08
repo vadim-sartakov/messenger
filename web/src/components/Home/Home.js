@@ -7,7 +7,7 @@ import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
-import Drawer from './Drawer/Drawer';
+import Drawer from './Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
 import Chat from '../Chat';
 import NoChats from './NoChats';
@@ -43,13 +43,12 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ logout, data, selectedChat, onSelectChat, onCreateChat }) {
+function Home({ logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
-  const currentChat = data.me.chats.find(chat => chat._id === selectedChat);
-
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
+  const currentChat = chats.find(chat => chat._id === selectedChat);
   return (
     <div className={classes.root}>
       <AppBar position="fixed" className={classes.appBar}>
@@ -74,7 +73,8 @@ function Home({ logout, data, selectedChat, onSelectChat, onCreateChat }) {
       </AppBar>
       <Drawer
         classes={classes}
-        user={data.me}
+        me={me}
+        chats={chats}
         open={openDrawer}
         onClose={handleDrawerClose}
         selectedChat={selectedChat}
@@ -83,7 +83,7 @@ function Home({ logout, data, selectedChat, onSelectChat, onCreateChat }) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {data.me.chats.length === 0 ? <NoChats /> : <Chat chat={currentChat} />}
+        {!currentChat || chats.length === 0 ? <NoChats /> : <Chat chat={currentChat} />}
       </main>
       <SessionExpiredDialog />
     </div>

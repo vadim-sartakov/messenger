@@ -1,13 +1,7 @@
-type Colors {
-  text: String!
-  background: String!
-}
-
 type User {
   _id: ID!
   name: String!
-  colors: Colors!
-  chats: [Chat!]
+  color: String!
 }
 
 type Message {
@@ -23,12 +17,13 @@ type Chat {
   name: String
   inviteLink: String!
   participants: [User!]!
-  colors: Colors!
+  color: String!
   messages: [Message!]!
 }
 
 type Query {
   me: User!
+  chats: [Chat!]!
 }
 
 input ChatInput {

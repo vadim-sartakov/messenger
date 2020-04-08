@@ -15,36 +15,43 @@ import { makeStyles } from '@material-ui/core/styles';
 import CreateNewChat from '../CreateNewChat';
 import getShortName from '../../../utils/getShortName';
 
-const useStyles = makeStyles({
-  subheaderText: {
-    flex: '1 0'
-  },
-  chat: {
-    // For some reason root list class does not contain actions
-    // All children list elements placed to wrapper except actions
-    // So to target actions using sibling selector (+)
-    '&:hover + $actions': {
-      opacity: 1,
+const useStyles = makeStyles(theme => {
+  return {
+    subheaderText: {
+      flex: '1 0'
+    },
+    chat: {
+      // For some reason root list class does not contain actions
+      // All children list elements placed to wrapper except actions
+      // So to target actions using sibling selector (+)
+      '&:hover + $actions': {
+        opacity: 1,
+        transition: 'opacity 200ms ease-in-out'
+      }
+    },
+    avatar: {
+      marginRight: theme.spacing(2),
+      backgroundColor: props => props.color,
+      color: props => props.color && theme.palette.getContrastText(props.color)
+    },
+    actions: {
+      '&:hover': {
+        opacity: 1
+      },
+      opacity: 0,
       transition: 'opacity 200ms ease-in-out'
     }
-  },
-  actions: {
-    '&:hover': {
-      opacity: 1
-    },
-    opacity: 0,
-    transition: 'opacity 200ms ease-in-out'
   }
 });
 
-function Chat({ name, messages, participants, colors = {}, selected, onClick }) {
-  const classes = useStyles();
+function Chat({ name, messages, participants, color, selected, onClick }) {
+  const classes = useStyles({ color });
   const title = name || participants[participants.length - 1].name;
   const lastMessage = messages && messages[messages.length - 1];
   return (
     <ListItem button selected={selected} onClick={onClick} className={classes.chat}>
       <ListItemAvatar>
-        <Avatar style={{ color: colors.text, backgroundColor: colors.background }}>
+        <Avatar className={classes.avatar}>
           {getShortName(title)}
         </Avatar>
       </ListItemAvatar>
