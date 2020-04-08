@@ -25,7 +25,7 @@ const root = {
     },
     chats: async (parent, args, req) => {
       const currentUserId = req.user.subject;
-      const chats = await Chat.find({ owner: currentUserId });
+      const chats = await Chat.find({ $or: [{ owner: currentUserId }, { 'participants': currentUserId }] });
       return chats;
     }
   },
@@ -39,10 +39,10 @@ const root = {
     joinChat: async (parent, { inviteLink }, req) => {
       // TODO: protect from bruteforce
       const currentUserId = req.user.subject;
-      const chat = await Chat.find({ inviteLink });
+      const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid id');
-      chat.participants = [...chat.participants, currentUserId];
-      await chat.save();
+      chat.participants = [...(chat.participants || []), currentUserId];
+      return await chat.save();
     }
   }
 };

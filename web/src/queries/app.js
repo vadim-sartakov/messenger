@@ -32,6 +32,9 @@ export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
 `;
 
 export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
-  joinChat(inviteLink: $inviteLink)
+  joinChat(inviteLink: $inviteLink) {
+    _id
+    name
+  }
 }
 `;
