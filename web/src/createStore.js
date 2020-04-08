@@ -8,6 +8,7 @@ import saga from './sagas';
 const sagaMiddleware = createSagaMiddleware();
 const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
 
+// TODO: exclude app.systemError state from persisting
 const persistConfig = {
   key: 'state',
   storage

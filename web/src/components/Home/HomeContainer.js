@@ -10,7 +10,6 @@ import {
   selectChat
 } from '../../actions';
 import Home from './Home';
-import graphqlFetch from '../../utils/graphqlFetch';
 import { HOME, CREATE_CHAT } from '../../queries';
 
 function HomeContainer({
@@ -20,7 +19,6 @@ function HomeContainer({
   graphqlFetchClear,
   graphqlSetData,
   destroyApp,
-  token,
   selectedChat,
   selectChat,
   ...props
@@ -35,27 +33,29 @@ function HomeContainer({
     }
   }, [requestGraphqlFetch, graphqlFetchClear, destroyApp]);
 
-  const handleCreateChat = useCallback(async chat => {
-    try {
-      const response = await graphqlFetch(CREATE_CHAT, { variables: { value: chat }, token });
+  const handleCreateChat = useCallback(chat => {
+    const onSuccess = content => {
       graphqlSetData('home', {
         ...data,
-        chats: [...data.chats, response.createChat]
+        chats: [...data.chats, content.createChat]
       });
-      selectChat(response.createChat._id);
-    } catch (e) {
-      // TODO: Show error message
-    }
-  }, [graphqlSetData, data, token, selectChat]);
+      selectChat(content.createChat._id);
+    };
+    requestGraphqlFetch('createChat', CREATE_CHAT, { variables: { value: chat, noCache: true }, onSuccess });
+  }, [graphqlSetData, data, selectChat, requestGraphqlFetch]);
 
   const handleLogout = useCallback(() => {
     logout(history);
     history.replace({ pathname: '/' });
   }, [history, logout]);
 
+  const { protocol, hostname, port } = window.location;
+  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
+
   return data.isLoading ? null : (
     <Home
       {...props}
+      location={location}
       logout={handleLogout}
       me={data.me}
       chats={data.chats}
@@ -67,13 +67,12 @@ function HomeContainer({
 }
 
 const mapStateToProps = state => ({
-  token: state.auth.token,
   data: state.graphql.home || { isLoading: true },
   selectedChat: state.app.selectedChat
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
-  requestGraphqlFetch: (id, query) => dispatch(requestGraphqlFetch(id, query)),
+  requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
   graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
   destroyApp: () => dispatch(destroyApp()),
   selectChat: id => dispatch(selectChat(id))

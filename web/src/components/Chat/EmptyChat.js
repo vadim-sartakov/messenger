@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-function EmptyChat({ chat }) {
+function EmptyChat({ chat, location }) {
   const classes = useStyles();
   const inputRef = useRef();
   const [copied, setCopied] = useState(false);
@@ -39,11 +39,11 @@ function EmptyChat({ chat }) {
             No one invited yet...
           </Typography>
           <Typography variant="subtitle1" className={classes.subtitle}>
-            Share this link with others to invite them to the chat:
+            Share this link with others for invite:
           </Typography>
           <TextField
             variant="outlined"
-            value={chat.inviteLink}
+            value={`${location}/${chat.inviteLink}`}
             fullWidth
             InputProps={{
               inputRef,

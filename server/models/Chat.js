@@ -9,7 +9,8 @@ const chatSchema = new Schema({
   },
   inviteLink: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   owner: {
     type: Schema.Types.ObjectId,

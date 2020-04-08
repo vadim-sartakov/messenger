@@ -32,4 +32,5 @@ input ChatInput {
 
 type Mutation {
   createChat(value: ChatInput!): Chat!
+  joinChat(inviteLink: String!): Boolean
 }

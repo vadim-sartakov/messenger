@@ -6,11 +6,7 @@ function graphqlFetch(query, options = {}) {
   } = options;
   return new Promise((resolve, reject) => {
     const onContentParse = content => {
-      if (content.errors) {
-        reject(content.errors);
-      } else {
-        resolve(content.data)
-      }
+      resolve(content);
     };
     const onFetchSuccess = response => {
       if (!response.ok) reject();

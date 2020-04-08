@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
+function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
@@ -83,7 +83,7 @@ function Home({ logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} />}
+        {chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} location={location} />}
       </main>
       <SessionExpiredDialog />
     </div>

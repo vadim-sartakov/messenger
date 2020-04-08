@@ -17,17 +17,21 @@ export const HOME = `query {
 }
 `;
 
-export const CREATE_CHAT = `
-  mutation CreateChat($value: ChatInput!) {
-    createChat(value: $value) {
+export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
+  createChat(value: $value) {
+    _id
+    name
+    inviteLink
+    participants {
       _id
       name
-      inviteLink
-      participants {
-        _id
-        name
-      }
-      color
     }
+    color
   }
+}
+`;
+
+export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
+  joinChat(inviteLink: $inviteLink)
+}
 `;

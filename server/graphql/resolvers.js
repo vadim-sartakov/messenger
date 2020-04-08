@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { GraphQLError } = require('graphql');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 
@@ -31,9 +32,17 @@ const root = {
   Mutation: {
     createChat: async (parent, { value }, req) => {
       const currentUserId = req.user.subject;
-      const inviteLink = req.protocol + '://' + req.get('host') + '/' + uuidv4();
+      const inviteLink = uuidv4();
       const newChat = new Chat({ ...value, inviteLink, owner: currentUserId });
       return await newChat.save();
+    },
+    joinChat: async (parent, { inviteLink }, req) => {
+      // TODO: protect from bruteforce
+      const currentUserId = req.user.subject;
+      const chat = await Chat.find({ inviteLink });
+      if (!chat) throw new GraphQLError('Invalid id');
+      chat.participants = [...chat.participants, currentUserId];
+      await chat.save();
     }
   }
 };
