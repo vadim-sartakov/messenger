@@ -6,9 +6,10 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
-import { DRAWER_WIDTH } from '../constants';
 import ChatList from './ChatList';
 import getShortName from '../../../utils/getShortName';
+
+const DRAWER_WIDTH = 240;
 
 const useStyles = makeStyles(theme => {
   return {
@@ -17,6 +18,10 @@ const useStyles = makeStyles(theme => {
         width: DRAWER_WIDTH,
         flexShrink: 0
       }
+    },
+    user: {
+      padding: `0 ${theme.spacing(2)}px`,
+      ...theme.mixins.toolbar
     },
     drawerPaper: {
       width: DRAWER_WIDTH,
@@ -57,7 +62,6 @@ function ResponsiveDrawer({ open, onClose, children }) {
 }
 
 function Drawer({
-  classes: rootClasses,
   me,
   chats,
   open,
@@ -76,7 +80,7 @@ function Drawer({
         container
         alignItems="center"
         wrap="nowrap"
-        className={rootClasses.toolbar}
+        className={classes.user}
       >
         <Avatar className={classes.avatar}>
           {getShortName(me.name)}
