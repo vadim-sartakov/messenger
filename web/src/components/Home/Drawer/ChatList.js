@@ -11,9 +11,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import Settings from '@material-ui/icons/Settings';
-import PersonAdd from '@material-ui/icons/PersonAdd';
 import { makeStyles } from '@material-ui/core/styles';
-import CreateNewChat from './CreateNewChat';
+import CreateNewChat from '../CreateNewChat';
 import getShortName from '../../../utils/getShortName';
 
 const useStyles = makeStyles({
@@ -65,7 +64,7 @@ function Chat({ name, messages, participants, colors = {}, selected, onClick }) 
   )
 }
 
-function ChatList({ chats = [], onCreateChat, selectedChat, selectChat }) {
+function ChatList({ chats = [], onCreateChat, selected, onSelect }) {
   const classes = useStyles();
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -101,8 +100,8 @@ function ChatList({ chats = [], onCreateChat, selectedChat, selectChat }) {
           <Chat
             key={chat._id}
             {...chat}
-            selected={selectedChat === chat._id}
-            onClick={() => selectChat(chat._id)}
+            selected={selected === chat._id}
+            onClick={() => onSelect(chat._id)}
           />
         )
       })}

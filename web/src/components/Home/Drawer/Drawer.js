@@ -6,9 +6,9 @@ import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
-import { DRAWER_WIDTH } from './constants';
+import { DRAWER_WIDTH } from '../constants';
 import ChatList from './ChatList';
-import getShortName from '../../utils/getShortName';
+import getShortName from '../../../utils/getShortName';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -60,7 +60,8 @@ function Drawer({
   open,
   onClose,
   selectedChat,
-  onSelectedChatChange
+  onChatSelect,
+  onCreateChat
 }) {
   const classes = useStyles();
   return (
@@ -90,8 +91,9 @@ function Drawer({
       <Divider />
       <ChatList
         chats={user.chats}
-        selectedChat={selectedChat}
-        onSelectedChatChange={onSelectedChatChange}
+        selected={selectedChat}
+        onSelect={onChatSelect}
+        onCreateChat={onCreateChat}
       />
     </ResponsiveDrawer>
   )

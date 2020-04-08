@@ -7,9 +7,10 @@ import ExitToApp from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
-import Drawer from './Drawer';
+import Drawer from './Drawer/Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
 import Chat from '../Chat';
+import NoChats from './NoChats';
 import { DRAWER_WIDTH } from './constants';
 
 const useStyles = makeStyles(theme => {
@@ -42,9 +43,10 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ logout, data, selectedChat }) {
+function Home({ logout, data, selectedChat, onSelectChat, onCreateChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
+  const currentChat = data.me.chats.find(chat => chat._id === selectedChat);
 
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
@@ -75,10 +77,13 @@ function Home({ logout, data, selectedChat }) {
         user={data.me}
         open={openDrawer}
         onClose={handleDrawerClose}
+        selectedChat={selectedChat}
+        onSelectChat={onSelectChat}
+        onCreateChat={onCreateChat}
       />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        {selectedChat !== undefined && <Chat chat={data.me.chats.find(chat => chat._id === selectedChat)} />}
+        {data.me.chats.length === 0 ? <NoChats /> : <Chat chat={currentChat} />}
       </main>
       <SessionExpiredDialog />
     </div>

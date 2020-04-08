@@ -6,6 +6,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import Grow from '@material-ui/core/Grow';
 import { useHistory } from 'react-router-dom';
 import { logout } from '../../actions';
 
@@ -16,7 +17,7 @@ function SessionExpiredDialog({ open = false, logout }) {
     history.replace({ pathname: '/login' });
   };
   return (
-    <Dialog open={open}>
+    <Dialog open={open} TransitionComponent={Grow}>
       <DialogTitle>The session has expired</DialogTitle>
       <DialogContent>
         <DialogContentText>It is required to login again</DialogContentText>
