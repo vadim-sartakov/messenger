@@ -4,18 +4,20 @@ const messageSchema = new Schema({
   chat: {
     type: Schema.Types.ObjectId,
     ref: 'Chat',
-    required: true
+    required: true,
+    index: true
   },
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true
   },
   content: {
     type: String,
     required: true
   }
-});
+}, { timestamps: true });
 
 const Message = model('Message', messageSchema);
 

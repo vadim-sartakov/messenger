@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const { GraphQLError } = require('graphql');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
+const Message = require('../models/Message');
 
 async function populateArray(array, populate) {
   return array.reduce(async (prev, cur) => {
@@ -43,6 +44,11 @@ const root = {
       if (!chat) throw new GraphQLError('Invalid id');
       chat.participants = [...(chat.participants || []), currentUserId];
       return await chat.save();
+    },
+    postMessage: async (parent, { chat, content }, req) => {
+      const currentUserId = req.user.subject;
+      const message = new Message({ author: currentUserId, content, chat  });
+      return await message.save();
     }
   }
 };

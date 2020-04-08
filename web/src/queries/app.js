@@ -38,3 +38,16 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
   }
 }
 `;
+
+export const POST_MESSAGE = `mutation PostMessage($chat: ID!, content: String!) {
+  postMessage(chat: $chat, content: $content) {
+    _id
+    author {
+      _id
+      name
+    }
+    content
+    createdAt
+  }
+}
+`;
