@@ -15,8 +15,8 @@ import NoChats from './NoChats';
 
 const useStyles = makeStyles(theme => {
   return {
-    root: {
-      display: 'flex'
+    vertContainer: {
+      height: '100vh'
     },
     menuButton: {
       [theme.breakpoints.up('sm')]: {
@@ -26,9 +26,9 @@ const useStyles = makeStyles(theme => {
     title: {
       flexGrow: 1
     },
-    content: {
-      flexGrow: 1,
-      padding: theme.spacing(3),
+    main: {
+      overflow: 'auto',
+      height: '100%'
     }
   };
 });
@@ -50,7 +50,7 @@ function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreat
         onSelectChat={onSelectChat}
         onCreateChat={onCreateChat}
       />
-      <Grid container direction="column" wrap="nowrap">
+      <Grid container direction="column" wrap="nowrap" className={classes.vertContainer}>
         <AppBar position="sticky">
           <Toolbar>
             <IconButton
@@ -72,7 +72,7 @@ function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreat
           </Toolbar>
         </AppBar>
         
-        <main className={classes.content}>
+        <main className={classes.main}>
           {chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} location={location} />}
         </main>
       </Grid>
