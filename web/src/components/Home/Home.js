@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -28,16 +29,18 @@ const useStyles = makeStyles(theme => {
     },
     main: {
       overflow: 'auto',
-      height: '100%'
+      height: '100%',
+      padding: theme.spacing(3)
     }
   };
 });
 
-function Home({ location, logout, me, chats, onCreateChat }) {
+function Home({ logout, me, chats, onCreateChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
+  const { chatId } = useParams();
   return (
     <Grid container wrap="nowrap">
       <Drawer
@@ -70,7 +73,7 @@ function Home({ location, logout, me, chats, onCreateChat }) {
         </AppBar>
         
         <main className={classes.main}>
-          {/*chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} location={location} />*/}
+          {chats.length === 0 ? <NoChats /> : !chatId ? null : <Chat id={chatId} />}
         </main>
       </Grid>
       <SessionExpiredDialog />

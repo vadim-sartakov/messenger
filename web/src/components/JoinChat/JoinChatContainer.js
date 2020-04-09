@@ -5,17 +5,16 @@ import { requestGraphqlFetch, graphqlFetchClear } from '../../actions';
 import { JOIN_CHAT } from '../../queries';
 import JoinChat from './JoinChat';
 
-function JoinChatContainer({ requestGraphqlFetch, graphqlFetchClear, selectChat, error }) {
+function JoinChatContainer({ requestGraphqlFetch, graphqlFetchClear, error }) {
   const { id } = useParams();
   const history = useHistory();
   useEffect(() => {
     const onSuccess = content => {
-      selectChat(content.joinChat._id);
       history.replace({ pathname: `/chats/${content.joinChat._id}` });
     }
     requestGraphqlFetch('joinChat', JOIN_CHAT, { variables: { inviteLink: id }, onSuccess });
     return () => graphqlFetchClear('joinChat');
-  }, [id, requestGraphqlFetch, graphqlFetchClear, selectChat, history]);
+  }, [id, requestGraphqlFetch, graphqlFetchClear, history]);
   return <JoinChat error={error} />;
 }
 

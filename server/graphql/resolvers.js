@@ -24,9 +24,19 @@ const root = {
       const currentUser = await User.findById(currentUserId);
       return currentUser;
     },
-    chats: async (parent, args, req) => {
+    getChats: async (parent, args, req) => {
       const currentUserId = req.user.subject;
-      const chats = await Chat.find({ $or: [{ owner: currentUserId }, { 'participants': currentUserId }] });
+      const chats = await Chat.find({
+        $or: [{ owner: currentUserId }, { 'participants': currentUserId }]
+      });
+      return chats;
+    },
+    getChat: async (parent, { id }, req) => {
+      const currentUserId = req.user.subject;
+      const chats = await Chat.findOne({
+        _id: id,
+        $or: [{ owner: currentUserId }, { 'participants': currentUserId }]
+      });
       return chats;
     }
   },

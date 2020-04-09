@@ -43,7 +43,7 @@ function EmptyChat({ chat, location }) {
           </Typography>
           <TextField
             variant="outlined"
-            value={`${location}/${chat.inviteLink}`}
+            value={`${location}/invite/${chat.inviteLink}`}
             fullWidth
             InputProps={{
               inputRef,

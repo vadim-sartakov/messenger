@@ -4,7 +4,7 @@ export const HOME = `query {
     name
     color
   }
-  chats {
+  chats: getChats {
     _id
     name
     inviteLink
@@ -13,6 +13,28 @@ export const HOME = `query {
       name
     }
     color
+  }
+}
+`;
+
+export const CHAT_DETAILS = `query GetChat($id: ID!){
+  chat: getChat(id: $id) {
+    _id
+    name
+    inviteLink
+    participants {
+      _id
+      name
+    }
+    color
+    messages {
+      author {
+        _id
+        name
+      }
+      content
+      createdAt
+    }
   }
 }
 `;

@@ -23,7 +23,8 @@ type Chat {
 
 type Query {
   me: User!
-  chats: [Chat!]!
+  getChats: [Chat!]!
+  getChat(id: ID!): Chat!
 }
 
 input ChatInput {

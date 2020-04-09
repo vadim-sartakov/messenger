@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 function NoChats({ onCreate }) {
   const classes = useStyles();
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" disableGutters>
       <Paper className={classes.paper}>
         <Grid container direction="column" alignItems="center">
           <Typography variant="h5" className={classes.title}>

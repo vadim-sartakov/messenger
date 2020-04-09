@@ -17,7 +17,7 @@ const chatSchema = new Schema({
     ref: 'User',
     required: true
   },
-  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  participants: [{ type: Schema.Types.ObjectId, ref: 'User', index: true }],
   color,
   messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }]
 });

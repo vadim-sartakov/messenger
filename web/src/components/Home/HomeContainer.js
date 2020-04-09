@@ -23,9 +23,6 @@ function HomeContainer({
 }) {
   const history = useHistory();
 
-  const { protocol, hostname, port } = window.location;
-  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
-
   useEffect(() => {
     requestGraphqlFetch('home', HOME);
     return () => {
@@ -53,7 +50,6 @@ function HomeContainer({
   return data.isLoading ? null : (
     <Home
       {...props}
-      location={location}
       logout={handleLogout}
       me={data.me}
       chats={data.chats}
