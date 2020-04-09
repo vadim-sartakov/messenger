@@ -23,6 +23,9 @@ function HomeContainer({
 }) {
   const history = useHistory();
 
+  const { protocol, hostname, port } = window.location;
+  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
+
   useEffect(() => {
     requestGraphqlFetch('home', HOME);
     return () => {
@@ -46,9 +49,6 @@ function HomeContainer({
     logout(history);
     history.replace({ pathname: '/' });
   }, [history, logout]);
-
-  const { protocol, hostname, port } = window.location;
-  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
 
   return data.isLoading ? null : (
     <Home

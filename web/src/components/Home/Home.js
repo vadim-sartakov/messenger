@@ -33,12 +33,11 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreateChat }) {
+function Home({ location, logout, me, chats, onCreateChat }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
-  const currentChat = chats.find(chat => chat._id === selectedChat);
   return (
     <Grid container wrap="nowrap">
       <Drawer
@@ -46,8 +45,6 @@ function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreat
         chats={chats}
         open={openDrawer}
         onClose={handleDrawerClose}
-        selectedChat={selectedChat}
-        onSelectChat={onSelectChat}
         onCreateChat={onCreateChat}
       />
       <Grid container direction="column" wrap="nowrap" className={classes.vertContainer}>
@@ -73,7 +70,7 @@ function Home({ location, logout, me, chats, selectedChat, onSelectChat, onCreat
         </AppBar>
         
         <main className={classes.main}>
-          {chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} location={location} />}
+          {/*chats.length === 0 ? <NoChats /> : !currentChat ? null : <Chat chat={currentChat} location={location} />*/}
         </main>
       </Grid>
       <SessionExpiredDialog />

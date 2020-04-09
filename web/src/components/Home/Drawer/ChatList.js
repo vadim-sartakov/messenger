@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import ListItem from '@material-ui/core/ListItem';
@@ -71,8 +72,10 @@ function Chat({ name, messages, participants, color, selected, onClick }) {
   )
 }
 
-function ChatList({ chats = [], onCreateChat, selected, onSelect }) {
+function ChatList({ chats = [], onCreateChat }) {
   const classes = useStyles();
+  const history = useHistory();
+  const { chatId: selected } = useParams();
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleOpenDialog = () => setOpenDialog(true);
@@ -108,7 +111,7 @@ function ChatList({ chats = [], onCreateChat, selected, onSelect }) {
             key={chat._id}
             {...chat}
             selected={selected === chat._id}
-            onClick={() => onSelect(chat._id)}
+            onClick={() => history.replace({ pathname: `/chats/${chat._id}` })}
           />
         )
       })}

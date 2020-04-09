@@ -8,7 +8,8 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     // In development mode and hot reload we can't use contenthash
-    filename: `js/[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.js`
+    filename: `js/[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.js`,
+    publicPath: '/'
   },
   module: {
     rules: [

@@ -66,8 +66,6 @@ function Drawer({
   chats,
   open,
   onClose,
-  selectedChat,
-  onSelectChat,
   onCreateChat
 }) {
   const classes = useStyles({ me });
@@ -92,8 +90,6 @@ function Drawer({
       <Divider />
       <ChatList
         chats={chats}
-        selected={selectedChat}
-        onSelect={onSelectChat}
         onCreateChat={onCreateChat}
       />
     </ResponsiveDrawer>
