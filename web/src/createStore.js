@@ -1,28 +1,19 @@
 import { createStore as reduxCreateStore, compose, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import { persistStore } from 'redux-persist';
 import reducer from './reducers';
 import saga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
 const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
 
-// TODO: exclude app.systemError state from persisting
-const persistConfig = {
-  key: 'state',
-  storage
-};
-
-const persistedReducer = persistReducer(persistConfig, reducer);
-
-function createStore(preloadedState, persist) {
-  const store = reduxCreateStore(persist ? persistedReducer : reducer, preloadedState, composeEnhancers(
+function createStore(preloadedState) {
+  const store = reduxCreateStore(reducer, preloadedState, composeEnhancers(
     applyMiddleware(sagaMiddleware)
   ));
   const persistor = persistStore(store);
   sagaMiddleware.run(saga);  
-  return persist ? { store, persistor } : store;
+  return { store, persistor };
 }
 
 export default createStore;

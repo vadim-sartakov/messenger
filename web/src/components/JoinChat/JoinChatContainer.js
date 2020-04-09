@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
-import { requestGraphqlFetch, graphqlFetchClear, selectChat } from '../../actions';
+import { requestGraphqlFetch, graphqlFetchClear } from '../../actions';
 import { JOIN_CHAT } from '../../queries';
 import JoinChat from './JoinChat';
 
@@ -11,7 +11,7 @@ function JoinChatContainer({ requestGraphqlFetch, graphqlFetchClear, selectChat,
   useEffect(() => {
     const onSuccess = content => {
       selectChat(content.joinChat._id);
-      history.replace({ pathname: '/' });
+      history.replace({ pathname: `/chats/${content.joinChat._id}` });
     }
     requestGraphqlFetch('joinChat', JOIN_CHAT, { variables: { inviteLink: id }, onSuccess });
     return () => graphqlFetchClear('joinChat');
@@ -26,8 +26,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
-    graphqlFetchClear: id => dispatch(graphqlFetchClear(id)),
-    selectChat: id => dispatch(selectChat(id))
+    graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
   }
 }
 

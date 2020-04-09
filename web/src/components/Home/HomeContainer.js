@@ -6,8 +6,7 @@ import {
   destroyApp,
   requestGraphqlFetch,
   graphqlSetData,
-  graphqlFetchClearAll,
-  selectChat
+  graphqlFetchDestroy
 } from '../../actions';
 import Home from './Home';
 import { HOME, CREATE_CHAT } from '../../queries';
@@ -17,10 +16,9 @@ function HomeContainer({
   data,
   requestGraphqlFetch,
   graphqlFetchClear,
+  graphqlFetchDestroy,
   graphqlSetData,
   destroyApp,
-  selectedChat,
-  selectChat,
   ...props
 }) {
   const history = useHistory();
@@ -28,10 +26,10 @@ function HomeContainer({
   useEffect(() => {
     requestGraphqlFetch('home', HOME);
     return () => {
-      graphqlFetchClearAll();
+      graphqlFetchDestroy();
       destroyApp();
     }
-  }, [requestGraphqlFetch, graphqlFetchClear, destroyApp]);
+  }, [requestGraphqlFetch, graphqlFetchClear, destroyApp, graphqlFetchDestroy]);
 
   const handleCreateChat = useCallback(chat => {
     const onSuccess = content => {
@@ -39,10 +37,10 @@ function HomeContainer({
         ...data,
         chats: [...data.chats, content.createChat]
       });
-      selectChat(content.createChat._id);
+      history.replace({ pathname: `/chats/${content.createChat._id}` });
     };
     requestGraphqlFetch('createChat', CREATE_CHAT, { variables: { value: chat, noCache: true }, onSuccess });
-  }, [graphqlSetData, data, selectChat, requestGraphqlFetch]);
+  }, [graphqlSetData, data, requestGraphqlFetch, history]);
 
   const handleLogout = useCallback(() => {
     logout(history);
@@ -60,22 +58,19 @@ function HomeContainer({
       me={data.me}
       chats={data.chats}
       onCreateChat={handleCreateChat}
-      selectedChat={selectedChat}
-      onSelectChat={selectChat}
     />
   );
 }
 
 const mapStateToProps = state => ({
-  data: state.graphql.home || { isLoading: true },
-  selectedChat: state.app.selectedChat
+  data: state.graphql.home || { isLoading: true }
 });
 const mapDispatchToProps = dispatch => ({
   logout: history => dispatch(logout(history)),
   requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
   graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
-  destroyApp: () => dispatch(destroyApp()),
-  selectChat: id => dispatch(selectChat(id))
+  graphqlFetchDestroy: () => dispatch(graphqlFetchDestroy()),
+  destroyApp: () => dispatch(destroyApp())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);

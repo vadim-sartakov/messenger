@@ -1,4 +1,4 @@
-import { GRAPHQL_FETCH_REQUESTED, GRAPHQL_FETCH_SUCCEEDED, GRAPHQL_FETCH_FAILED, SET_SYSTEM_ERROR } from '../actions';
+import { GRAPHQL_FETCH_REQUESTED, GRAPHQL_FETCH_SUCCEEDED, GRAPHQL_FETCH_FAILED, SHOW_ERROR } from '../actions';
 import { takeEvery, select, call, put } from 'redux-saga/effects';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 
@@ -16,7 +16,8 @@ function* graphqlFetch({ id, query, variables, noCache, onSuccess, onError }) {
       onSuccess && onSuccess(content.data);
     }
   } catch (error) {
-    yield put({ type: SET_SYSTEM_ERROR });
+    yield put({ type: GRAPHQL_FETCH_FAILED, id, noCache, data: content.errors });
+    yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
   }
 }
 

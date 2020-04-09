@@ -8,8 +8,8 @@ function graphqlFetch(query, options = {}) {
     const onContentParse = content => {
       resolve(content);
     };
-    const onFetchSuccess = response => {
-      if (!response.ok) reject();
+    const onFetch = response => {
+      if (!response.ok) reject(response);
       return response.json().then(onContentParse);
     };
     return fetch(
@@ -22,7 +22,7 @@ function graphqlFetch(query, options = {}) {
         },
         body: JSON.stringify({ query, variables })
       }
-    ).then(onFetchSuccess)
+    ).then(onFetch)
   });
 }
 

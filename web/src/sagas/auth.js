@@ -4,7 +4,8 @@ import {
   AUTH_REQUESTED,
   AUTH_SUCCEEDED,
   AUTH_FAILED,
-  TOKEN_EXPIRED
+  TOKEN_EXPIRED,
+  SHOW_ERROR
 } from '../actions';
 
 function* watchTokenExpiration() {
@@ -33,6 +34,7 @@ function* authorize({ credentials, onSuccess, onError }) {
     onSuccess && onSuccess();
   } else {
     yield put({ type: AUTH_FAILED });
+    yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
     onError && onError();
   }
 }

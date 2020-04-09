@@ -9,7 +9,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import { makeStyles } from '@material-ui/core/styles';
 import { Formik, Form } from 'formik';
 import { isRequired } from '../../utils/validators';
-import InputTextField from '../InputTextField';
+import InputTextField from '../ui/InputTextField';
 
 const useStyles = makeStyles(theme => {
   return {

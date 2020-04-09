@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { Formik, Form } from 'formik';
-import InputTextField from '../InputTextField';
+import InputTextField from '../ui/InputTextField';
 import { isRequired } from '../../utils/validators';
 
 const initialValues = {
