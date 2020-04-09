@@ -16,7 +16,11 @@ const root = {
   Chat: {
     participants: async parent => {
       return populateArray(parent.participants, id => User.findById(id));
-    }
+    },
+    messages: async parent => Message.find({ chat: parent._id })
+  },
+  Message: {
+    author: async parent => User.findById(parent.author)
   },
   Query: {
     me: async (parent, args, req) => {
@@ -57,7 +61,7 @@ const root = {
     },
     postMessage: async (parent, { chat, content }, req) => {
       const currentUserId = req.user.subject;
-      const message = new Message({ author: currentUserId, content, chat  });
+      const message = new Message({ author: currentUserId, content, chat });
       return await message.save();
     }
   }

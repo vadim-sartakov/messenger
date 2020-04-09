@@ -29,8 +29,7 @@ const useStyles = makeStyles(theme => {
     },
     main: {
       overflow: 'auto',
-      height: '100%',
-      padding: theme.spacing(3)
+      height: '100%'
     }
   };
 });

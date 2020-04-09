@@ -6,7 +6,6 @@ type User {
 
 type Message {
   _id: ID!
-  chat: Chat!
   author: User!
   content: String!
   createdAt: String!
