@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { requestGraphqlFetch, graphqlFetchClear, graphqlSetData } from '../../actions';
 import { CHAT_DETAILS, POST_MESSAGE } from '../../queries';
 import Chat from './Chat';
+import { WS_URL } from '../../constants';
 
 function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
   const { protocol, hostname, port } = window.location;
@@ -10,7 +11,11 @@ function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, grap
 
   useEffect(() => {
     requestGraphqlFetch('chat', CHAT_DETAILS, { variables: { id } });
-    return () => graphqlFetchClear();
+    const ws = new WebSocket(WS_URL);
+    return () => {
+      graphqlFetchClear();
+      ws.close();
+    }
   }, [id, requestGraphqlFetch, graphqlFetchClear]);
 
   const postMessage = useCallback(({ content }) => {

@@ -1,11 +1,14 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const express = require('express');
+const http = require('http');
 const bodyParser = require('body-parser');
+const { Server } = require('ws');
 const auth = require('./middlewares/auth');
 const login = require('./middlewares/login');
 const graphqlServer = require('./graphql/server');
 
+const port = process.env.PORT || 8080;
 const apiPrefix = '/api';
 
 mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }, err => {
@@ -14,7 +17,6 @@ mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology
 });
 
 const app = express();
-const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.post(`${apiPrefix}/login`, login);
@@ -22,6 +24,13 @@ app.post(`${apiPrefix}/login`, login);
 app.use(auth);
 graphqlServer.applyMiddleware({ app, path: '/graphql' });
 
-app.listen(port, () => {
-  console.log(`Application started at port ${port}`);
+
+const server = http.createServer(app);
+const wss = new Server({ noServer: true, path: '/ws' });
+wss.on('connection', (socket, req) => {
+  console.log('Connected');
+});
+
+server.listen(port, () => {
+  console.log(`Server started on port ${port}`);
 });

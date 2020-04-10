@@ -7,6 +7,7 @@ import {
   TOKEN_EXPIRED,
   SHOW_ERROR
 } from '../actions';
+import { API_URL } from '../constants';
 
 function* watchTokenExpiration() {
   const state = yield select();
@@ -21,7 +22,7 @@ function* watchTokenExpiration() {
 }
 
 function* authorize({ credentials, onSuccess, onError }) {
-  const response = yield call(fetch, '/api/login', {
+  const response = yield call(fetch, `${API_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

@@ -1,4 +1,5 @@
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -65,6 +66,7 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   plugins: [
+    new Dotenv({ path: process.env.NODE_ENV === 'development' ? './.dev.env' : './.prod.env' }),
     // Extract CSS
     new MiniCssExtractPlugin({
       // In development mode and hot reload we can't use contenthash

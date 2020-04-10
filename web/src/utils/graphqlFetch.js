@@ -1,6 +1,6 @@
 function graphqlFetch(query, options = {}) {
   const {
-    url = '/graphql',
+    url,
     variables,
     token
   } = options;
