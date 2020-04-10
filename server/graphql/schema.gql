@@ -19,7 +19,7 @@ type Chat {
   inviteLink: String!
   participants: [User!]!
   color: String!
-  messages: [Message!]!
+  messages(limit: Int): [Message!]!
 }
 
 type Query {

@@ -19,7 +19,11 @@ const root = {
     participants: async parent => {
       return populateArray(parent.participants, id => User.findById(id));
     },
-    messages: async parent => Message.find({ chat: parent._id }).sort({ 'createdAt': 1 })
+    messages: async (parent, { limit }) => {
+      let query = Message.find({ chat: parent._id }).sort({ 'createdAt': 1 });
+      if (limit) query = query.limit(limit);
+      return query.exec();
+    }
   },
   Message: {
     author: async parent => User.findById(parent.author)

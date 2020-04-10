@@ -13,6 +13,13 @@ export const HOME = `query {
       name
     }
     color
+    messages(limit: 1) {
+      author {
+        _id
+        name
+      }
+      content
+    }
   }
 }
 `;
