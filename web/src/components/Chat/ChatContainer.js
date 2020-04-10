@@ -11,10 +11,13 @@ function ChatContainer({ token, id, me, chat, requestGraphqlFetch, graphqlSetDat
 
   useEffect(() => {
     requestGraphqlFetch('chat', CHAT_DETAILS, { variables: { id } });
-    const ws = new WebSocket(`${WS_URL}?token=${token}`);
+    const socket = new WebSocket(`${WS_URL}?token=${token}`);
+    socket.onopen = () => {
+      socket.send(JSON.stringify({ type: 'MESSAGE', content: 'Test' }));
+    };
     return () => {
       graphqlFetchClear('chat');
-      ws.close();
+      socket.close();
     }
   }, [id, token, requestGraphqlFetch, graphqlFetchClear]);
 
