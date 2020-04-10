@@ -12,6 +12,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 const useStyles = makeStyles(theme => ({
   paper: {
+    height: '100%',
     padding: theme.spacing(4)
   },
   title: {
@@ -32,8 +33,8 @@ function EmptyChat({ chat, location }) {
     document.execCommand('copy');
   };
   return (
-    <Container maxWidth="sm">
-      <Paper className={classes.paper}>
+    <Paper className={classes.paper}>
+      <Container maxWidth="xs" disableGutters>
         <Grid container direction="column">
           <Typography variant="h5" className={classes.title}>
             No one invited yet...
@@ -66,8 +67,8 @@ function EmptyChat({ chat, location }) {
             }}
           />
         </Grid>
-      </Paper>
-    </Container>
+      </Container>
+    </Paper>
   )
 }
 

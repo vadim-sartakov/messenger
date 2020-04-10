@@ -21,6 +21,7 @@ function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, grap
         messages: [...chat.messages, newMessage]
       }
     });
+    // TODO: The message is lost once page updated. Need to preserve not sent messages.
     const onError = () => {
       graphqlSetData('chat', {
         chat: {

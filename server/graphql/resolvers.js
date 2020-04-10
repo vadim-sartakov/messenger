@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { GraphQLError } = require('graphql');
+const { GraphQLDateTime } = require('graphql-iso-date');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
@@ -13,6 +14,7 @@ async function populateArray(array, populate) {
 }
 
 const root = {
+  Date: GraphQLDateTime,
   Chat: {
     participants: async parent => {
       return populateArray(parent.participants, id => User.findById(id));

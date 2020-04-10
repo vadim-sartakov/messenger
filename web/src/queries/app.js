@@ -31,6 +31,7 @@ export const CHAT_DETAILS = `query GetChat($id: ID!){
       author {
         _id
         name
+        color
       }
       content
       createdAt

@@ -15,7 +15,6 @@ function HomeContainer({
   logout,
   data,
   requestGraphqlFetch,
-  graphqlFetchClear,
   graphqlFetchDestroy,
   graphqlSetData,
   destroyApp,
@@ -25,11 +24,7 @@ function HomeContainer({
 
   useEffect(() => {
     requestGraphqlFetch('home', HOME);
-    return () => {
-      graphqlFetchDestroy();
-      destroyApp();
-    }
-  }, [requestGraphqlFetch, graphqlFetchClear, destroyApp, graphqlFetchDestroy]);
+  }, [requestGraphqlFetch, destroyApp]);
 
   const handleCreateChat = useCallback(chat => {
     const onSuccess = content => {
@@ -45,7 +40,9 @@ function HomeContainer({
   const handleLogout = useCallback(() => {
     logout(history);
     history.replace({ pathname: '/' });
-  }, [history, logout]);
+    graphqlFetchDestroy();
+    destroyApp();
+  }, [history, logout, graphqlFetchDestroy, destroyApp]);
 
   return data.isLoading ? null : (
     <Home
