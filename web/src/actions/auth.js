@@ -4,8 +4,8 @@ export const AUTH_FAILED = 'AUTH_FAILED';
 export const LOGOUT = 'LOGOUT';
 export const TOKEN_EXPIRED = 'TOKEN_EXPIRED';
 
-export function login({ credentials, onSuccess, onError }) {
-  return { type: AUTH_REQUESTED, credentials, onSuccess, onError };
+export function login({ credentials }) {
+  return { type: AUTH_REQUESTED, credentials };
 }
 
 export function logout() {

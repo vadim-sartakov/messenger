@@ -21,7 +21,7 @@ function* watchTokenExpiration() {
   yield put({ type: TOKEN_EXPIRED });
 }
 
-function* authorize({ credentials, onSuccess, onError }) {
+function* authorize({ credentials }) {
   const response = yield call(fetch, `${API_URL}/login`, {
     method: 'POST',
     headers: {
@@ -32,11 +32,9 @@ function* authorize({ credentials, onSuccess, onError }) {
   if (response.ok) {
     const { token } = yield call([response, 'json']);
     yield put({ type: AUTH_SUCCEEDED, token });
-    onSuccess && onSuccess();
   } else {
     yield put({ type: AUTH_FAILED });
     yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
-    onError && onError();
   }
 }
 
