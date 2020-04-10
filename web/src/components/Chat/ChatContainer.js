@@ -5,18 +5,18 @@ import { CHAT_DETAILS, POST_MESSAGE } from '../../queries';
 import Chat from './Chat';
 import { WS_URL } from '../../constants';
 
-function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
+function ChatContainer({ token, id, me, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
   const { protocol, hostname, port } = window.location;
   const location = `${protocol}//${hostname}${port.length && ':' + port}`;
 
   useEffect(() => {
     requestGraphqlFetch('chat', CHAT_DETAILS, { variables: { id } });
-    const ws = new WebSocket(WS_URL);
+    const ws = new WebSocket(`${WS_URL}?token=${token}`);
     return () => {
       graphqlFetchClear('chat');
       ws.close();
     }
-  }, [id, requestGraphqlFetch, graphqlFetchClear]);
+  }, [id, token, requestGraphqlFetch, graphqlFetchClear]);
 
   const postMessage = useCallback(({ content }) => {
     const newMessage = { content, author: me, createdAt: new Date() };
@@ -43,6 +43,7 @@ function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, grap
 
 function mapStateToProps(state) {
   return {
+    token: state.auth.token,
     me: state.graphql.home.me,
     chat: (state.graphql.chat && state.graphql.chat.chat) || { isLoading: true }
   };

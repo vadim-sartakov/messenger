@@ -4,9 +4,11 @@ const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const { Server } = require('ws');
-const auth = require('./middlewares/auth');
+const jwtAuth = require('./middlewares/auth');
 const login = require('./middlewares/login');
 const graphqlServer = require('./graphql/server');
+const wsUpgrade = require('./ws/upgrade');
+const wsConnection = require('./ws/connection');
 
 const port = process.env.PORT || 8080;
 const apiPrefix = '/api';
@@ -21,30 +23,14 @@ const app = express();
 app.use(bodyParser.json());
 app.post(`${apiPrefix}/login`, login);
 
-app.use(auth.unless({ path: ['/ws'] }));
+app.use(jwtAuth.unless({ path: ['/ws'] }));
 graphqlServer.applyMiddleware({ app, path: '/graphql' });
 
 const server = http.createServer(app);
 const wss = new Server({ noServer: true, path: '/ws' });
 
-server.on('upgrade', function(request, socket, head) {
-  /*sessionParser(request, {}, () => {
-    if (!request.session.userId) {
-      socket.destroy();
-      return;
-    }
-    wss.handleUpgrade(request, socket, head, function(ws) {
-      wss.emit('connection', ws, request);
-    });
-  });*/
-  wss.handleUpgrade(request, socket, head, function(ws) {
-    wss.emit('connection', ws, request);
-  });
-});
-
-wss.on('connection', (socket, req) => {
-  console.log('Connected');
-});
+server.on('upgrade', wsUpgrade(wss));
+wss.on('connection', wsConnection);
 
 server.listen(port, () => {
   console.log(`Server started on port ${port}`);
