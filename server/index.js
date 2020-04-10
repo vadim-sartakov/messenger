@@ -21,12 +21,27 @@ const app = express();
 app.use(bodyParser.json());
 app.post(`${apiPrefix}/login`, login);
 
-app.use(auth);
+app.use(auth.unless({ path: ['/ws'] }));
 graphqlServer.applyMiddleware({ app, path: '/graphql' });
-
 
 const server = http.createServer(app);
 const wss = new Server({ noServer: true, path: '/ws' });
+
+server.on('upgrade', function(request, socket, head) {
+  /*sessionParser(request, {}, () => {
+    if (!request.session.userId) {
+      socket.destroy();
+      return;
+    }
+    wss.handleUpgrade(request, socket, head, function(ws) {
+      wss.emit('connection', ws, request);
+    });
+  });*/
+  wss.handleUpgrade(request, socket, head, function(ws) {
+    wss.emit('connection', ws, request);
+  });
+});
+
 wss.on('connection', (socket, req) => {
   console.log('Connected');
 });

@@ -13,7 +13,7 @@ function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, grap
     requestGraphqlFetch('chat', CHAT_DETAILS, { variables: { id } });
     const ws = new WebSocket(WS_URL);
     return () => {
-      graphqlFetchClear();
+      graphqlFetchClear('chat');
       ws.close();
     }
   }, [id, requestGraphqlFetch, graphqlFetchClear]);

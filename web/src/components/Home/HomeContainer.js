@@ -44,7 +44,7 @@ function HomeContainer({
     destroyApp();
   }, [history, logout, graphqlFetchDestroy, destroyApp]);
 
-  return data.isLoading ? null : (
+  return !data.me ? null : (
     <Home
       {...props}
       logout={handleLogout}
