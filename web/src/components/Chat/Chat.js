@@ -105,6 +105,8 @@ function InputMessage({ onSubmit }) {
   )
 }
 
+// TODO: focus message input on mount;
+// Add messages transition group
 function Chat({ chat, location, postMessage }) {
   const classes = useStyles();
   return chat.participants.length === 0 ? <EmptyChat chat={chat} location={location} /> : (
