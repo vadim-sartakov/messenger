@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -11,6 +11,7 @@ import InputTextField from '../ui/InputTextField';
 import EmptyChat from './EmptyChat';
 import Message from './Message';
 import { isRequired } from '../../utils/validators';
+import Fade from '@material-ui/core/Fade';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -119,9 +120,11 @@ function Chat({ chat, location, postMessage }) {
         >
           {chat.messages.map((message, index) => {
             return (
-              <Grid key={index} item>
-                <Message {...message} />
-              </Grid>
+              <Fade key={index} in>
+                <Grid item>
+                  <Message {...message} />
+                </Grid>
+              </Fade>
             )
           })}
         </Grid>

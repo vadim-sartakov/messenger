@@ -9,7 +9,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    padding: theme.spacing(4)
+    padding: theme.spacing(4),
+    height: '100%'
   },
   title: {
     marginBottom: theme.spacing(2),
@@ -24,8 +25,8 @@ const useStyles = makeStyles(theme => ({
 function NoChats({ onCreate }) {
   const classes = useStyles();
   return (
-    <Container maxWidth="sm" disableGutters>
-      <Paper className={classes.paper}>
+    <Paper className={classes.paper}>
+      <Container maxWidth="sm" disableGutters>
         <Grid container direction="column" alignItems="center">
           <Typography variant="h5" className={classes.title}>
             There are no chats available
@@ -36,11 +37,11 @@ function NoChats({ onCreate }) {
             color="primary"
             onClick={onCreate}
           >
-              Create new chat
-            </Button>
+            Create new chat
+          </Button>
         </Grid>
-      </Paper>
-    </Container>
+      </Container>
+    </Paper>
   )
 }
 
