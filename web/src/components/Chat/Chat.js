@@ -14,19 +14,21 @@ import { isRequired } from '../../utils/validators';
 const useStyles = makeStyles(theme => {
   return {
     paper: {
-      height: '100%'
+      height: '100%',
+      padding: theme.spacing(3),
+      paddingTop: 0,
+      overflow: 'auto'
     },
     innerContainer: {
       height: '100%'
     },
     messagesContainer: {
-      overflow: 'auto',
       flexGrow: 1
     },
     inputContainer: {
-      padding: theme.spacing(3),
-      paddingTop: 0,
       width: '100%',
+      position: 'sticky',
+      bottom: 0,
       [theme.breakpoints.up('md')]: {
         width: theme.breakpoints.values.sm
       }
@@ -41,14 +43,19 @@ function validate({ content }) {
 }
 
 function InputMessage({ onSubmit }) {
+  const handleSubmit = (value, { resetForm }) => {
+    onSubmit(value);
+    resetForm();
+  };
   return (
     <Formik
       initialValues={inputInitialValues}
       validate={validate}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
     >
       <Form>
         <InputTextField
+            ignoreError
             id="content"
             name="content"
             placeholder="Type a message"
@@ -77,11 +84,17 @@ function Chat({ chat, location, postMessage }) {
   return chat.participants.length === 0 ? <EmptyChat chat={chat} location={location} /> : (
     <Paper className={classes.paper}>
       <Grid container direction="column" alignItems="center" className={classes.innerContainer}>
-        <div className={classes.messagesContainer}>
+        <Grid
+          container
+          direction="column"
+          justify="flex-end"
+          alignItems="center"
+          className={classes.messagesContainer}
+        >
           {chat.messages.map((message, index) => {
             return <div key={index}>{message.content}</div>
           })}
-        </div>
+        </Grid>
         <div className={classes.inputContainer}>
           <InputMessage onSubmit={postMessage} />
         </div>

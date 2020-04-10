@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -13,6 +12,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import Settings from '@material-ui/icons/Settings';
 import { makeStyles } from '@material-ui/core/styles';
+import ColoredAvatar from '../../ui/ColoredAvatar';
 import CreateNewChat from '../CreateNewChat';
 import getShortName from '../../../utils/getShortName';
 
@@ -46,15 +46,15 @@ const useStyles = makeStyles(theme => {
 });
 
 function Chat({ name, messages, participants, color, selected, onClick }) {
-  const classes = useStyles({ color });
+  const classes = useStyles();
   const title = name || participants[participants.length - 1].name;
   const lastMessage = messages && messages[messages.length - 1];
   return (
     <ListItem button selected={selected} onClick={onClick} className={classes.chat}>
       <ListItemAvatar>
-        <Avatar className={classes.avatar}>
+        <ColoredAvatar className={classes.avatar} color={color}>
           {getShortName(title)}
-        </Avatar>
+        </ColoredAvatar>
       </ListItemAvatar>
       <ListItemText
         primary={title}

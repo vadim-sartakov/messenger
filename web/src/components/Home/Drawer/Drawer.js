@@ -3,10 +3,10 @@ import Hidden from '@material-ui/core/Hidden';
 import MuiDrawer from '@material-ui/core/Drawer';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import ChatList from './ChatList';
+import ColoredAvatar from '../../ui/ColoredAvatar';
 import getShortName from '../../../utils/getShortName';
 
 const DRAWER_WIDTH = 240;
@@ -27,9 +27,7 @@ const useStyles = makeStyles(theme => {
       width: DRAWER_WIDTH,
     },
     avatar: {
-      marginRight: theme.spacing(2),
-      backgroundColor: props => props.me && props.me.color,
-      color: props => props.me && theme.palette.getContrastText(props.me.color)
+      marginRight: theme.spacing(2)
     }
   }
 });
@@ -68,7 +66,7 @@ function Drawer({
   onClose,
   onCreateChat
 }) {
-  const classes = useStyles({ me });
+  const classes = useStyles();
   return (
     <ResponsiveDrawer
       open={open}
@@ -80,9 +78,9 @@ function Drawer({
         wrap="nowrap"
         className={classes.user}
       >
-        <Avatar className={classes.avatar}>
+        <ColoredAvatar className={classes.avatar} color={me.color}>
           {getShortName(me.name)}
-        </Avatar>
+        </ColoredAvatar>
         <Typography variant="h6" noWrap>
           {me.name}
         </Typography>

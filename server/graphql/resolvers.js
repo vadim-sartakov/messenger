@@ -17,7 +17,7 @@ const root = {
     participants: async parent => {
       return populateArray(parent.participants, id => User.findById(id));
     },
-    messages: async parent => Message.find({ chat: parent._id })
+    messages: async parent => Message.find({ chat: parent._id }).sort({ 'createdAt': 1 })
   },
   Message: {
     author: async parent => User.findById(parent.author)

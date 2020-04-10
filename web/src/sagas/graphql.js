@@ -18,6 +18,7 @@ function* graphqlFetch({ id, query, variables, noCache, onSuccess, onError }) {
   } catch (error) {
     yield put({ type: GRAPHQL_FETCH_FAILED, id, noCache });
     yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
+    onError && onError();
   }
 }
 

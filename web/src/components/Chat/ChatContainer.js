@@ -4,7 +4,7 @@ import { requestGraphqlFetch, graphqlFetchClear, graphqlSetData } from '../../ac
 import { CHAT_DETAILS, POST_MESSAGE } from '../../queries';
 import Chat from './Chat';
 
-function ChatContainer({ id, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
+function ChatContainer({ id, me, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
   const { protocol, hostname, port } = window.location;
   const location = `${protocol}//${hostname}${port.length && ':' + port}`;
 
@@ -14,20 +14,30 @@ function ChatContainer({ id, chat, requestGraphqlFetch, graphqlSetData, graphqlF
   }, [id, requestGraphqlFetch, graphqlFetchClear]);
 
   const postMessage = useCallback(({ content }) => {
+    const newMessage = { content, author: me, createdAt: new Date() };
     graphqlSetData('chat', {
       chat: {
         ...chat,
-        messages: [...chat.messages, { content }]
+        messages: [...chat.messages, newMessage]
       }
     });
-    requestGraphqlFetch('postMessage', POST_MESSAGE, { variables: { chat: id, content }, noCache: true });
-  }, [id, chat, requestGraphqlFetch, graphqlSetData]);
+    const onError = () => {
+      graphqlSetData('chat', {
+        chat: {
+          ...chat,
+          messages: [...chat.messages, { ...newMessage, notSent: true }]
+        }
+      });
+    };
+    requestGraphqlFetch('postMessage', POST_MESSAGE, { variables: { chat: id, content }, onError, noCache: true });
+  }, [id, me, chat, requestGraphqlFetch, graphqlSetData]);
 
   return chat.isLoading ? null : <Chat {...props} chat={chat} location={location} postMessage={postMessage} />;
 }
 
 function mapStateToProps(state) {
   return {
+    me: state.graphql.home.me,
     chat: (state.graphql.chat && state.graphql.chat.chat) || { isLoading: true }
   };
 }
