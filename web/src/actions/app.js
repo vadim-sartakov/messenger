@@ -6,9 +6,7 @@ export const DESTROY_SUCCEEDED = 'DESTROY_SUCCEEDED';
 export const SHOW_ERROR = 'SHOW_ERROR';
 export const HIDE_ERROR = 'HIDE_ERROR';
 
-export const CREATE_CHAT_REQUESTED = 'CREATE_CHAT_REQUESTED';
-export const CREATE_CHAT_SUCCEEDED = 'CREATE_CHAT_SUCCEEDED';
-export const CREATE_CHAT_FAILED = 'CREATE_CHAT_FAILED';
+export const ADD_CHAT = 'ADD_CHAT';
 
 export const POST_MESSAGE_REQUESTED = 'POST_MESSAGE_REQUESTED';
 export const POST_MESSAGE_SUCCEEDED = 'POST_MESSAGE_SUCCEEDED';
@@ -21,10 +19,6 @@ export function initialize() {
   return { type: INITIALIZE_REQUESTED };
 }
 
-export function destroy() {
-  return { type: DESTROY_REQUESTED };
-}
-
 export function showError(message) {
   return { type: SHOW_ERROR, message };
 }
@@ -33,10 +27,10 @@ export function hideError(message) {
   return { type: HIDE_ERROR, message };
 }
 
-export function destroyApp() {
-  return { type: DESTROY_APP };
+export function addChat(chat) {
+  return { type: ADD_CHAT, chat };
 }
 
-export function createChat(chat) {
-  return { type: CREATE_CHAT_REQUESTED, chat };
+export function destroy() {
+  return { type: DESTROY_REQUESTED };
 }

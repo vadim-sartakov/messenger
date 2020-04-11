@@ -6,6 +6,7 @@ import {
   INITIALIZE_FAILED,
   SHOW_ERROR,
   HIDE_ERROR,
+  ADD_CHAT,
   DESTROY_SUCCEEDED
 } from '../actions';
 
@@ -23,6 +24,8 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, error: { open: true, message: action.message } };
     case HIDE_ERROR:
       return { ...state, error: { ...state.error, open: false } };
+    case ADD_CHAT:
+      return { ...state, chats: [...state.chats, action.chat] };
     case DESTROY_SUCCEEDED:
       return initialState;
     default:

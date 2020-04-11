@@ -13,7 +13,7 @@ import AddCommentIcon from '@material-ui/icons/AddComment';
 import Settings from '@material-ui/icons/Settings';
 import { makeStyles } from '@material-ui/core/styles';
 import ColoredAvatar from '../../ui/ColoredAvatar';
-import CreateNewChat from '../CreateNewChat';
+import CreateNewChat from '../ChatDialog';
 import getShortName from '../../../utils/getShortName';
 
 const useStyles = makeStyles(theme => {

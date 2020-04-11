@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { connect } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -7,9 +8,13 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { Formik, Form } from 'formik';
 import InputTextField from '../ui/InputTextField';
+import { addChat } from '../../actions';
+import { CREATE_CHAT } from '../../queries';
+import graphqlFetch from '../../utils/graphqlFetch';
 import { isRequired } from '../../utils/validators';
+import { GRAPHQL_URL } from '../../constants';
 
-const initialValues = {
+const defaultInitialValues = {
   name: ''
 };
 
@@ -19,17 +24,13 @@ function validate(value) {
   return errors;
 }
 
-function CreateNewChat({ open, onClose, onCreate }) {
-  const handleSubmit = async newChat => {
-    await onCreate(newChat);
-    onClose();
-  };
+function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSubmit }) {
   return (
     <Dialog maxWidth="xs" fullWidth open={open} onClose={onClose} TransitionComponent={Grow}>
       <Formik
         initialValues={initialValues}
         validate={validate}
-        onSubmit={handleSubmit}
+        onSubmit={onSubmit}
       >
         <Form noValidate>
           <DialogTitle>Create New Chat</DialogTitle>
@@ -60,4 +61,27 @@ function CreateNewChat({ open, onClose, onCreate }) {
   )
 }
 
-export default CreateNewChat;
+function ChatDialogContainer({ token, id, addChat, onClose, ...props }) {
+  const handleSubmit = useCallback(async chat => {
+    if (!id) {
+      const response = await graphqlFetch(CREATE_CHAT, { url: GRAPHQL_URL, variables: { value: chat }, token });
+      addChat(response.data.createChat);
+    }
+    onClose();
+  }, [id, addChat, token, onClose]);
+  return <ChatDialog {...props} onClose={onClose} onSubmit={handleSubmit} />;
+}
+
+function mapStateToProps(state) {
+  return {
+    token: state.auth.token
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    addChat: chat => dispatch(addChat(chat))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ChatDialogContainer);
