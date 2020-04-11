@@ -6,7 +6,7 @@ import {
   INITIALIZE_FAILED,
   SHOW_ERROR,
   HIDE_ERROR,
-  DESTROY_APP
+  DESTROY_SUCCEEDED
 } from '../actions';
 
 const initialState = { isLoading: true };
@@ -23,7 +23,7 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, error: { open: true, message: action.message } };
     case HIDE_ERROR:
       return { ...state, error: { ...state.error, open: false } };
-    case DESTROY_APP:
+    case DESTROY_SUCCEEDED:
       return initialState;
     default:
       return state;

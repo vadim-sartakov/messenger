@@ -1,11 +1,13 @@
-import { takeLatest, call, put, all, delay, select } from 'redux-saga/effects';
+import { takeLatest, call, put, all, delay, select, take } from 'redux-saga/effects';
 import { REHYDRATE } from 'redux-persist/es/constants'
 import {
-  AUTH_REQUESTED,
-  AUTH_SUCCEEDED,
-  AUTH_FAILED,
+  LOGIN_REQUESTED,
+  LOGIN_SUCCEEDED,
+  LOGIN_FAILED,
+  LOGOUT_REQUESTED,
+  LOGOUT_SUCCEEDED,
   TOKEN_EXPIRED,
-  SHOW_ERROR
+  SHOW_ERROR,
 } from '../actions';
 import { API_URL } from '../constants';
 
@@ -21,7 +23,12 @@ function* watchTokenExpiration() {
   yield put({ type: TOKEN_EXPIRED });
 }
 
-function* authorize({ credentials }) {
+function* logout({ history }) {
+  yield put({ type: LOGOUT_SUCCEEDED });
+  yield call([history, 'replace'], { pathname: '/' });
+}
+
+function* authorize({ credentials, location, history }) {
   const response = yield call(fetch, `${API_URL}/login`, {
     method: 'POST',
     headers: {
@@ -31,16 +38,19 @@ function* authorize({ credentials }) {
   });
   if (response.ok) {
     const { token } = yield call([response, 'json']);
-    yield put({ type: AUTH_SUCCEEDED, token });
+    yield put({ type: LOGIN_SUCCEEDED, token });
+    const { from } = location.state || { from: { pathname: '/' } };
+    yield call([history, 'replace'], from);
   } else {
-    yield put({ type: AUTH_FAILED });
+    yield put({ type: LOGIN_FAILED });
     yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
   }
 }
 
 export default function* authSaga() {
   yield all([
-    takeLatest([REHYDRATE, AUTH_SUCCEEDED], watchTokenExpiration),
-    takeLatest(AUTH_REQUESTED, authorize)
+    takeLatest([REHYDRATE, LOGIN_SUCCEEDED], watchTokenExpiration),
+    takeLatest(LOGIN_REQUESTED, authorize),
+    takeLatest(LOGOUT_REQUESTED, logout)
   ]);
 }

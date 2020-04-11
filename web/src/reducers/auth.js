@@ -1,18 +1,24 @@
-import { AUTH_REQUESTED, AUTH_SUCCEEDED, AUTH_FAILED, LOGOUT, TOKEN_EXPIRED } from '../actions';
+import {
+  LOGIN_REQUESTED,
+  LOGIN_SUCCEEDED,
+  LOGIN_FAILED,
+  LOGOUT_SUCCEEDED,
+  TOKEN_EXPIRED
+} from '../actions';
 
 const initialState = {};
 
 function auth(state = initialState, { type, token }) {
   switch (type) {
-    case AUTH_REQUESTED:
+    case LOGIN_REQUESTED:
       return { isLoading: true };
-    case AUTH_SUCCEEDED:
+    case LOGIN_SUCCEEDED:
       return { token };
-    case AUTH_FAILED:
+    case LOGIN_FAILED:
       return { error: true };
     case TOKEN_EXPIRED:
       return { ...state, tokenExpired: true };
-    case LOGOUT:
+    case LOGOUT_SUCCEEDED:
       return initialState;
     default:
       return state;

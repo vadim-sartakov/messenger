@@ -1,28 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
-import { login } from '../../actions';
+import { logIn } from '../../actions';
 import Login from './Login';
 
-function LoginContainer({ token, login, ...props }) {
+function LoginContainer({ logIn, ...props }) {
   const history = useHistory();
   const location = useLocation();
-  const { from } = location.state || { from: { pathname: '/' } };
-
-  useEffect(() => {
-    if (token) history.replace(from);
-  }, [token, from, history]);
-
-  const onSubmit = credentials => login({ credentials });
+  const onSubmit = credentials => logIn(credentials, location, history);
   return <Login {...props} onSubmit={onSubmit} />;
 }
 
-function mapStateToProps(state) {
-  return { token: state.auth.token };
-}
-
 function mapDispatchToProps(dispatch) {
-  return { login: options => dispatch(login(options)) };
+  return { logIn: (credentials, location, history) => dispatch(logIn(credentials, location, history)) };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoginContainer);
+export default connect(undefined, mapDispatchToProps)(LoginContainer);

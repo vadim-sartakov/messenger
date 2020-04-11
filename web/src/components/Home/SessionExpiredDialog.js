@@ -8,14 +8,11 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { useHistory } from 'react-router-dom';
-import { logout } from '../../actions';
+import { logOut } from '../../actions';
 
-function SessionExpiredDialog({ open = false, logout }) {
+function SessionExpiredDialog({ open = false, logOut }) {
   const history = useHistory();
-  const handleLogin = () => {
-    logout();
-    history.replace({ pathname: '/login' });
-  };
+  const handleLogout = () => logOut(history);
   return (
     <Dialog open={open} TransitionComponent={Grow}>
       <DialogTitle>The session has expired</DialogTitle>
@@ -26,7 +23,7 @@ function SessionExpiredDialog({ open = false, logout }) {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleLogin}
+          onClick={handleLogout}
         >
           Login
         </Button>
@@ -40,7 +37,7 @@ const mapStateToProps = state => ({
 });
 
 const dispatchToProps = dispatch => ({
-  logout: () => dispatch(logout())
+  logOut: history => dispatch(logOut(history))
 });
 
 export default connect(mapStateToProps, dispatchToProps)(SessionExpiredDialog);

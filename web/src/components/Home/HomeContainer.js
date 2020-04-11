@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
   initialize,
-  logout,
+  destroy,
+  logOut,
   destroyApp,
   requestGraphqlFetch,
   graphqlSetData,
@@ -14,21 +15,21 @@ import { CREATE_CHAT } from '../../queries';
 
 function HomeContainer({
   initialize,
-  logout,
+  destroy,
+  logOut,
   isLoading,
   me,
   chats,
-  requestGraphqlFetch,
-  graphqlFetchDestroy,
-  graphqlSetData,
-  destroyApp,
   ...props
 }) {
   const history = useHistory();
 
   useEffect(() => {
-    initialize()
-  }, [initialize]);
+    initialize();
+    return () => destroy();
+  }, [initialize, destroy]);
+
+  const handleLogout = useCallback(() => logOut(history), [history, logOut]);
 
   /*const handleCreateChat = useCallback(chat => {
     const onSuccess = content => {
@@ -40,13 +41,6 @@ function HomeContainer({
     };
     requestGraphqlFetch('createChat', CREATE_CHAT, { variables: { value: chat, noCache: true }, onSuccess });
   }, [graphqlSetData, data, requestGraphqlFetch, history]);*/
-
-  const handleLogout = useCallback(() => {
-    logout(history);
-    history.replace({ pathname: '/' });
-    graphqlFetchDestroy();
-    destroyApp();
-  }, [history, logout, graphqlFetchDestroy, destroyApp]);
 
   return isLoading ? null : (
     <Home
@@ -66,7 +60,8 @@ const mapStateToProps = ({ app: { isLoading, me, chats } }) => ({
 });
 const mapDispatchToProps = dispatch => ({
   initialize: () => dispatch(initialize()),
-  logout: history => dispatch(logout(history)),
+  destroy: () => dispatch(destroy()),
+  logOut: history => dispatch(logOut(history)),
   requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
   graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
   graphqlFetchDestroy: () => dispatch(graphqlFetchDestroy()),
