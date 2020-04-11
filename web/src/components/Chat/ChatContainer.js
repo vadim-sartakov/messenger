@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { initializeChat, destroyChat, postMessage } from '../../actions';
 import Chat from './Chat';
 
-function ChatContainer({ id, me, chat, initializeChat, postMessage, ...props }) {
+function ChatContainer({ id, chat, initializeChat, postMessage, ...props }) {
   const { protocol, hostname, port } = window.location;
   const location = `${protocol}//${hostname}${port.length && ':' + port}`;
 
@@ -12,10 +12,9 @@ function ChatContainer({ id, me, chat, initializeChat, postMessage, ...props }) 
     return () => destroyChat(id);
   }, [id, initializeChat]);
 
-  const handlePostMessage = useCallback(({ content }) => {
-    const newMessage = { content, author: me, createdAt: new Date() };
-    postMessage(newMessage);
-  }, [me, postMessage]);
+  const handlePostMessage = useCallback(message => {
+    postMessage(id, message);
+  }, [id, postMessage]);
 
   return chat.isLoading || chat.error ? null : (
     <Chat
@@ -29,7 +28,6 @@ function ChatContainer({ id, me, chat, initializeChat, postMessage, ...props }) 
 
 function mapStateToProps(state) {
   return {
-    me: state.app.me,
     chat: state.app.chat
   };
 }
@@ -37,7 +35,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     initializeChat: id => dispatch(initializeChat(id)),
-    postMessage: message => dispatch(postMessage(message))
+    postMessage: (chatId, message) => dispatch(postMessage(chatId, message))
   }
 }
 

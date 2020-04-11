@@ -43,10 +43,11 @@ function* watchSocket(socket) {
 function* watchRequests(socket, token) {
   const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED])
   while(true) {
+    //const newMessage = { content, author: me, createdAt: new Date() };
     const { chatId, message } = yield take(requestChannel);
     yield all([
-      call([socket, 'send'], { type: messageTypes.POST_MESSAGE, chatId, message }),
-      call(graphqlFetchUtil, queries.POST_MESSAGE, { token, variables: { value: { chatId, message } } })
+      call([socket, 'send'], JSON.stringify({ type: messageTypes.POST_MESSAGE, chatId, message: message.content })),
+      call(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } })
     ])
   }
 }
