@@ -65,9 +65,9 @@ const root = {
       chat.participants = [...(chat.participants || []), currentUserId];
       return await chat.save();
     },
-    postMessage: async (parent, { chat, content }, req) => {
+    postMessage: async (parent, { chatId, content }, req) => {
       const currentUserId = req.user.subject;
-      const message = new Message({ author: currentUserId, content, chat });
+      const message = new Message({ author: currentUserId, content, chat: chatId });
       return await message.save();
     }
   }

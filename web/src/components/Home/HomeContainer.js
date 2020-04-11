@@ -4,10 +4,7 @@ import { useHistory } from 'react-router-dom';
 import {
   initialize,
   destroy,
-  logOut,
-  requestGraphqlFetch,
-  graphqlSetData,
-  graphqlFetchDestroy
+  logOut
 } from '../../actions';
 import Home from './Home';
 
@@ -47,10 +44,7 @@ const mapStateToProps = ({ app: { isLoading, me, chats } }) => ({
 const mapDispatchToProps = dispatch => ({
   initialize: () => dispatch(initialize()),
   destroy: () => dispatch(destroy()),
-  logOut: history => dispatch(logOut(history)),
-  requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
-  graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
-  graphqlFetchDestroy: () => dispatch(graphqlFetchDestroy())
+  logOut: history => dispatch(logOut(history))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);

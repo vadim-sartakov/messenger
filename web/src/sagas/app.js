@@ -43,21 +43,21 @@ function* watchSocket(socket) {
 function* watchRequests(socket, token) {
   const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED])
   while(true) {
-    const { chat, content } = yield take(requestChannel);
+    const { chatId, message } = yield take(requestChannel);
     yield all([
-      call([socket, 'send'], { type: messageTypes.POST_MESSAGE, chat, content }),
-      call(graphqlFetchUtil, queries.POST_MESSAGE, { token, variables: { value: { chat, content } } })
+      call([socket, 'send'], { type: messageTypes.POST_MESSAGE, chatId, message }),
+      call(graphqlFetchUtil, queries.POST_MESSAGE, { token, variables: { value: { chatId, message } } })
     ])
   }
 }
 
-function* loadData(token) {
+function* fetchData(token, query, { variables, successAction, failAction }) {
   let content;
   try {
-    content = yield call(graphqlFetchUtil, queries.HOME, { url: GRAPHQL_URL, token });
-    yield put({ type: actions.INITIALIZE_SUCCEEDED, data: content.data });
+    content = yield call(graphqlFetchUtil, query, { url: GRAPHQL_URL, variables, token });
+    yield put({ type: successAction, data: content.data });
   } catch (error) {
-    yield put({ type: actions.INITIALIZE_FAILED });
+    yield put({ type: failAction });
     yield put({ type: actions.SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
   }
 }
@@ -72,7 +72,7 @@ function* initialize() {
     yield put({ type: actions.SHOW_ERROR, message: 'Failed to connect. Please try again later' });
     return;
   }
-  yield fork(loadData, token);  
+  yield fork(fetchData, token, queries.HOME, { successAction: actions.INITIALIZE_SUCCEEDED, failAction: actions.INITIALIZE_FAILED });
   yield fork(watchRequests, socket, token);
   yield fork(watchSocket, socket);
   
@@ -85,6 +85,19 @@ function* initialize() {
   yield put({ type: actions.DESTROY_SUCCEEDED });
 }
 
+function* initializeChat({ id }) {
+  const state = yield select();
+  const { token } = state.auth;
+  yield call(fetchData, token, queries.CHAT_DETAILS, {
+    variables: { id },
+    successAction: actions.INITIALIZE_CHAT_SUCCEEDED,
+    failAction: actions.INITIALIZE_CHAT_FAILED
+  });
+}
+
 export default function* appSaga() {
-  yield takeLatest(actions.INITIALIZE_REQUESTED, initialize);
+  yield all([
+    takeLatest(actions.INITIALIZE_REQUESTED, initialize),
+    takeLatest(actions.INITIALIZE_CHAT_REQUESTED, initializeChat)
+  ])
 }

@@ -1,32 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useParams, useHistory } from 'react-router-dom';
-import { requestGraphqlFetch, graphqlFetchClear } from '../../actions';
 import { JOIN_CHAT } from '../../queries';
+import graphqlFetch from '../../utils/graphqlFetch';
 import JoinChat from './JoinChat';
+import { GRAPHQL_URL } from '../../constants';
 
-function JoinChatContainer({ requestGraphqlFetch, graphqlFetchClear, error }) {
+function JoinChatContainer({ token }) {
   const { id } = useParams();
   const history = useHistory();
+  const [error, setError] = useState(false);
   useEffect(() => {
-    const onSuccess = content => {
-      history.replace({ pathname: `/chats/${content.joinChat._id}` });
+    const join = async () => {
+      try {
+        const response = await graphqlFetch(JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink: id } });
+        history.replace({ pathname: `/chats/${response.data.joinChat._id}` });
+      } catch (err) {
+        setError(true);
+      }
     }
-    requestGraphqlFetch('joinChat', JOIN_CHAT, { variables: { inviteLink: id }, onSuccess });
-    return () => graphqlFetchClear('joinChat');
-  }, [id, requestGraphqlFetch, graphqlFetchClear, history]);
+    join();
+  }, [id, token, history]);
   return <JoinChat error={error} />;
 }
 
 function mapStateToProps(state) {
-  return { error: state.graphql.joinChat && state.graphql.joinChat.error };
+  return { token: state.auth.token };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
-    graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(JoinChatContainer);
+export default connect(mapStateToProps)(JoinChatContainer);

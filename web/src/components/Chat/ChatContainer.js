@@ -1,62 +1,43 @@
 import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
-import { requestGraphqlFetch, graphqlFetchClear, graphqlSetData } from '../../actions';
-import { CHAT_DETAILS, POST_MESSAGE } from '../../queries';
+import { initializeChat, destroyChat, postMessage } from '../../actions';
 import Chat from './Chat';
-import { WS_URL } from '../../constants';
 
-function ChatContainer({ token, id, me, chat, requestGraphqlFetch, graphqlSetData, graphqlFetchClear, ...props }) {
+function ChatContainer({ id, me, chat, initializeChat, postMessage, ...props }) {
   const { protocol, hostname, port } = window.location;
   const location = `${protocol}//${hostname}${port.length && ':' + port}`;
 
   useEffect(() => {
-    requestGraphqlFetch('chat', CHAT_DETAILS, { variables: { id } });
-    const socket = new WebSocket(`${WS_URL}?token=${token}`);
-    socket.onopen = () => {
-      socket.send(JSON.stringify({ type: 'MESSAGE', content: 'Test' }));
-    };
-    return () => {
-      graphqlFetchClear('chat');
-      socket.close();
-    }
-  }, [id, token, requestGraphqlFetch, graphqlFetchClear]);
+    initializeChat(id);
+    return () => destroyChat(id);
+  }, [id, initializeChat]);
 
-  const postMessage = useCallback(({ content }) => {
+  const handlePostMessage = useCallback(({ content }) => {
     const newMessage = { content, author: me, createdAt: new Date() };
-    graphqlSetData('chat', {
-      chat: {
-        ...chat,
-        messages: [...chat.messages, newMessage]
-      }
-    });
-    // TODO: The message is lost once page updated. Need to preserve not sent messages.
-    const onError = () => {
-      graphqlSetData('chat', {
-        chat: {
-          ...chat,
-          messages: [...chat.messages, { ...newMessage, notSent: true }]
-        }
-      });
-    };
-    requestGraphqlFetch('postMessage', POST_MESSAGE, { variables: { chat: id, content }, onError, noCache: true });
-  }, [id, me, chat, requestGraphqlFetch, graphqlSetData]);
+    postMessage(newMessage);
+  }, [me, postMessage]);
 
-  return chat.isLoading ? null : <Chat {...props} chat={chat} location={location} postMessage={postMessage} />;
+  return chat.isLoading || chat.error ? null : (
+    <Chat
+      {...props}
+      chat={chat}
+      location={location}
+      postMessage={handlePostMessage}
+    />
+  );
 }
 
 function mapStateToProps(state) {
   return {
-    token: state.auth.token,
-    me: state.graphql.home.me,
-    chat: (state.graphql.chat && state.graphql.chat.chat) || { isLoading: true }
+    me: state.app.me,
+    chat: state.app.chat
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    requestGraphqlFetch: (id, query, options) => dispatch(requestGraphqlFetch(id, query, options)),
-    graphqlSetData: (id, data) => dispatch(graphqlSetData(id, data)),
-    graphqlFetchClear: id => dispatch(graphqlFetchClear(id))
+    initializeChat: id => dispatch(initializeChat(id)),
+    postMessage: message => dispatch(postMessage(message))
   }
 }
 

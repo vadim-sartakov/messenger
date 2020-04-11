@@ -35,5 +35,5 @@ input ChatInput {
 type Mutation {
   createChat(value: ChatInput!): Chat!
   joinChat(inviteLink: String!): Chat!
-  postMessage(chat: ID!, content: String!): Message!
+  postMessage(chatId: ID!, content: String!): Message!
 }

@@ -8,6 +8,11 @@ export const HIDE_ERROR = 'HIDE_ERROR';
 
 export const ADD_CHAT = 'ADD_CHAT';
 
+export const INITIALIZE_CHAT_REQUESTED = 'INITIALIZE_CHAT_REQUESTED';
+export const INITIALIZE_CHAT_SUCCEEDED = 'INITIALIZE_CHAT_SUCCEEDED';
+export const INITIALIZE_CHAT_FAILED = 'INITIALIZE_CHAT_FAILED';
+export const DESTROY_CHAT = 'DESTROY_CHAT';
+
 export const POST_MESSAGE_REQUESTED = 'POST_MESSAGE_REQUESTED';
 export const POST_MESSAGE_SUCCEEDED = 'POST_MESSAGE_SUCCEEDED';
 export const POST_MESSAGE_FAILED = 'POST_MESSAGE_FAILED';
@@ -29,6 +34,18 @@ export function hideError(message) {
 
 export function addChat(chat) {
   return { type: ADD_CHAT, chat };
+}
+
+export function initializeChat(id) {
+  return { type: INITIALIZE_CHAT_REQUESTED, id };
+}
+
+export function postMessage(chatId, message) {
+  return { type: POST_MESSAGE_REQUESTED, chatId, message };
+}
+
+export function destroyChat(id) {
+  return { type: DESTROY_CHAT, id };
 }
 
 export function destroy() {

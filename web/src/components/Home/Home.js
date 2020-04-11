@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-function Home({ logout, me, chats, onCreateChat }) {
+function Home({ logout, me, chats }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
@@ -47,7 +47,6 @@ function Home({ logout, me, chats, onCreateChat }) {
         chats={chats}
         open={openDrawer}
         onClose={handleDrawerClose}
-        onCreateChat={onCreateChat}
       />
       <Grid container direction="column" wrap="nowrap" className={classes.vertContainer}>
         <AppBar position="sticky">

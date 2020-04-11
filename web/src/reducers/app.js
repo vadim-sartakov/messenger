@@ -7,10 +7,13 @@ import {
   SHOW_ERROR,
   HIDE_ERROR,
   ADD_CHAT,
+  INITIALIZE_CHAT_REQUESTED,
+  INITIALIZE_CHAT_SUCCEEDED,
+  INITIALIZE_CHAT_FAILED,
   DESTROY_SUCCEEDED
 } from '../actions';
 
-const initialState = { isLoading: true };
+const initialState = { isLoading: true, chat: { isLoading: true } };
 
 function app(state = initialState, { type, ...action }) {
   switch (type) {
@@ -26,6 +29,12 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, error: { ...state.error, open: false } };
     case ADD_CHAT:
       return { ...state, chats: [...state.chats, action.chat] };
+    case INITIALIZE_CHAT_REQUESTED:
+      return { ...state, chat: { isLoading: true } };
+    case INITIALIZE_CHAT_SUCCEEDED:
+      return { ...state, chat: action.data.chat };
+    case INITIALIZE_CHAT_FAILED:
+      return { ...state, chat: { error: true } };
     case DESTROY_SUCCEEDED:
       return initialState;
     default:
