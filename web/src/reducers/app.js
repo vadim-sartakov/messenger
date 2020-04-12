@@ -10,10 +10,27 @@ import {
   INITIALIZE_CHAT_REQUESTED,
   INITIALIZE_CHAT_SUCCEEDED,
   INITIALIZE_CHAT_FAILED,
-  DESTROY_SUCCEEDED
+  DESTROY_SUCCEEDED,
+  ADD_MESSAGE
 } from '../actions';
 
 const initialState = { isLoading: true, chat: { isLoading: true } };
+
+function addMessage(state, chatId, message) {
+  let nextState = {
+    ...state,
+    chats: state.chats.map(chat => {
+      return chat._id === chatId ? { ...chat, messages: [message] } : chat
+    })
+  };
+  if (state.chat._id === chatId) {
+    nextState = {
+      ...nextState,
+      chat: { ...nextState.chat, messages: [...nextState.chat.messages, message] }
+    }
+  }
+  return nextState;
+}
 
 function app(state = initialState, { type, ...action }) {
   switch (type) {
@@ -35,6 +52,8 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, chat: action.data.chat };
     case INITIALIZE_CHAT_FAILED:
       return { ...state, chat: { error: true } };
+    case ADD_MESSAGE:
+      return addMessage(state, action.chatId, action.message);
     case DESTROY_SUCCEEDED:
       return initialState;
     default:

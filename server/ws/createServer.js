@@ -8,13 +8,28 @@ const jwt = require('jsonwebtoken');
 
 const publicKey = fs.readFileSync(path.resolve(__dirname, '..', 'public.key'));
 
+const messageTypes = {
+  POST_MESSAGE: 'POST_MESSAGE'
+};
+
 function createWsServer(app) {
   const server = createServer(app);
   const wss = new Server({ noServer: true, path: '/ws' });
 
   wss.on('connection', function(socket, req, user) {
-    socket.on('message', (data) => {
-      console.log('Received from %s data %o', user, data);
+    socket.id = user;
+    socket.on('message', data => {
+      const message = JSON.parse(data);
+      switch (message.type) {
+        case messageTypes.POST_MESSAGE:
+          message.participants.forEach(participant => {
+            if (participant._id !== user) {
+              const curClient = Array.from(wss.clients).find(client => client.id === participant._id);
+              if (curClient) curClient.send(JSON.stringify(message));
+            }
+          });
+        default:
+      }
     });
   });
 

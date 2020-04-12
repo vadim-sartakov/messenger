@@ -17,7 +17,7 @@ function createSocket(token) {
 function createSocketChannel(socket) {
   return eventChannel(emit => {
     const messageHandler = event => {
-      emit(event.data);
+      emit(JSON.parse(event.data));
     };
     socket.onmessage = messageHandler;
     const unsubscribe = () => {
@@ -30,10 +30,10 @@ function createSocketChannel(socket) {
 function* watchSocket(socket) {
   const socketChannel = yield createSocketChannel(socket);
   while(true) {
-    const { type, ...message } = yield take(socketChannel);
+    const { type, chatId, message } = yield take(socketChannel);
     switch (type) {
       case messageTypes.POST_MESSAGE:
-        yield put({ type: actions.RECEIVE_MESSAGE, message });
+        yield put({ type: actions.ADD_MESSAGE, chatId, message });
         break;
       default:
     }
@@ -43,12 +43,18 @@ function* watchSocket(socket) {
 function* watchRequests(socket, token) {
   const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED])
   while(true) {
-    //const newMessage = { content, author: me, createdAt: new Date() };
     const { chatId, message } = yield take(requestChannel);
-    yield all([
-      call([socket, 'send'], JSON.stringify({ type: messageTypes.POST_MESSAGE, chatId, message: message.content })),
-      call(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } })
-    ])
+    const { app: { chats, me } } = yield select();
+    const curChat = chats.find(chat => chat._id === chatId);
+    const newMessage = { content: message.content, author: me, createdAt: new Date() };
+    yield put({ type: actions.ADD_MESSAGE, chatId, message: newMessage });
+    yield fork([socket, 'send'], JSON.stringify({
+      type: messageTypes.POST_MESSAGE,
+      chatId,
+      participants: curChat.participants,
+      message: newMessage
+    }));
+    yield fork(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } });
   }
 }
 

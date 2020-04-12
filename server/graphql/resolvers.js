@@ -54,7 +54,7 @@ const root = {
     createChat: async (parent, { value }, req) => {
       const currentUserId = req.user.subject;
       const inviteLink = uuidv4();
-      const newChat = new Chat({ ...value, inviteLink, owner: currentUserId });
+      const newChat = new Chat({ name: value.name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },
     joinChat: async (parent, { inviteLink }, req) => {

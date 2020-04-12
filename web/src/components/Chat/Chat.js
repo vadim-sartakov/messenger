@@ -110,7 +110,7 @@ function InputMessage({ onSubmit }) {
 // Add messages pagination
 function Chat({ chat, location, postMessage }) {
   const classes = useStyles();
-  return chat.participants.length === 0 ? <EmptyChat chat={chat} location={location} /> : (
+  return chat.participants.length === 1 ? <EmptyChat chat={chat} location={location} /> : (
     <Paper className={classes.paper}>
       <Grid container direction="column" alignItems="center" wrap="nowrap" className={classes.innerContainer}>
         <Grid
