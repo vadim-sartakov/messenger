@@ -11,12 +11,14 @@ export const HOME = `query {
     participants {
       _id
       name
+      color
     }
     color
-    messages(limit: 1) {
+    messages(limit: 30) {
       author {
         _id
         name
+        color
       }
       content
     }

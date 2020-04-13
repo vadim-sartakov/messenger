@@ -40,6 +40,7 @@ function Home({ logout, me, chats }) {
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
   const { chatId } = useParams();
+  const curChat = chats.find(chat => chat._id);
   return (
     <Grid container wrap="nowrap">
       <Drawer
@@ -71,7 +72,7 @@ function Home({ logout, me, chats }) {
         </AppBar>
         
         <main className={classes.main}>
-          {chats.length === 0 ? <NoChats /> : !chatId ? null : <Chat id={chatId} />}
+          {chats.length === 0 ? <NoChats /> : !chatId ? null : <Chat id={chatId} chat={curChat} />}
         </main>
       </Grid>
       <SessionExpiredDialog />

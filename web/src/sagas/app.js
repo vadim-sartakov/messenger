@@ -1,5 +1,5 @@
 import { eventChannel } from 'redux-saga';
-import { takeLatest, select, take, call, put, all, fork, actionChannel, delay, race, cancel } from 'redux-saga/effects';
+import { takeLatest, select, take, call, put, fork, actionChannel, delay, race, cancel } from 'redux-saga/effects';
 import * as actions from '../actions';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
@@ -11,14 +11,8 @@ const messageTypes = {
   POST_MESSAGE: 'POST_MESSAGE'
 };
 
-function* createSocket(token) {
-  let socket;
-  try {
-    socket = new WebSocket(`${WS_URL}?token=${token}`);
-  } catch (err) {
-    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to connect. Please try again later' });
-    return;
-  }
+function createSocket(token) {
+  const socket = new WebSocket(`${WS_URL}?token=${token}`);
   return socket;
 }
 
@@ -29,30 +23,21 @@ function createSocketChannel(socket) {
     };
     socket.onopen = () => {
       emit({ type: messageTypes.OPEN });
-    }
+    };
     socket.onclose = () => {
       emit({ type: messageTypes.CLOSE });
-    }
+    };
     const unsubscribe = () => {
       socket.close();
-    }
+    };
     return unsubscribe;
   });
 }
 
 function* watchSocket(socket, reconnect) {
-  let socketChannel = yield createSocketChannel(socket);
+  let socketChannel = createSocketChannel(socket);
   while(true) {
-    const { listen, close } = yield race({
-      listen: take(socketChannel),
-      close: take(actions.DESTROY_REQUESTED)
-    });
-    if (close) {
-      socketChannel.close();
-      return;
-    }
-    const { type, chatId, message } = listen;
-
+    const { type, chatId, message } = yield take(socketChannel);
     switch (type) {
       case messageTypes.OPEN:
         if (reconnect) {
@@ -87,21 +72,12 @@ function* watchRequests(socket, token) {
   }
 }
 
-function* initializeSocket(token) {
-  let socket = yield call(createSocket, token);
-  let reconnect;
+function* initializeSocket(socket, token, reconnect) {
   while(true) {
     const watchRequestsTask = yield fork(watchRequests, socket, token);
     const disconnected = yield call(watchSocket, socket, reconnect);
-    if (disconnected) {
-      yield cancel(watchRequestsTask);
-      yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
-      yield delay(5000);
-      socket = yield call(createSocket, token);
-      reconnect = true; 
-    } else {
-      return;
-    }
+    yield cancel(watchRequestsTask);
+    return disconnected;
   }
 }
 
@@ -112,32 +88,28 @@ function* fetchData(token, query, { variables, successAction, failAction }) {
     yield put({ type: successAction, data: content.data });
   } catch (error) {
     yield put({ type: failAction });
-    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to execute request. Please try again later' });
   }
 }
 
-function* initialize() {
+function* initialize({ reconnect }) {
   const state = yield select();
   const { token } = state.auth;
-  yield fork(initializeSocket, token);
+  const socket = yield call(createSocket, token);
   yield fork(fetchData, token, queries.HOME, { successAction: actions.INITIALIZE_SUCCEEDED, failAction: actions.INITIALIZE_FAILED });
-  yield take(actions.DESTROY_REQUESTED);
-  yield put({ type: actions.DESTROY_SUCCEEDED });
-}
-
-function* initializeChat({ id }) {
-  const state = yield select();
-  const { token } = state.auth;
-  yield call(fetchData, token, queries.CHAT_DETAILS, {
-    variables: { id },
-    successAction: actions.INITIALIZE_CHAT_SUCCEEDED,
-    failAction: actions.INITIALIZE_CHAT_FAILED
+  const { disconnected, destroy } = yield race({
+    disconnected: call(initializeSocket, socket, token, reconnect),
+    destroy: take(actions.DESTROY_REQUESTED)
   });
+  if (destroy) {
+    yield call([socket, 'close']);
+    yield put({ type: actions.DESTROY_SUCCEEDED });
+  } else if (disconnected) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
+    yield delay(5000);
+    yield initialize({ reconnect: true });
+  }
 }
 
 export default function* appSaga() {
-  yield all([
-    takeLatest(actions.INITIALIZE_REQUESTED, initialize),
-    takeLatest(actions.INITIALIZE_CHAT_REQUESTED, initializeChat)
-  ])
+  yield takeLatest(actions.INITIALIZE_REQUESTED, initialize);
 }

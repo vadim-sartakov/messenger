@@ -7,30 +7,11 @@ import {
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_CHAT,
-  INITIALIZE_CHAT_REQUESTED,
-  INITIALIZE_CHAT_SUCCEEDED,
-  INITIALIZE_CHAT_FAILED,
   DESTROY_SUCCEEDED,
   ADD_MESSAGE
 } from '../actions';
 
 const initialState = { isLoading: true, chat: { isLoading: true } };
-
-function addMessage(state, chatId, message) {
-  let nextState = {
-    ...state,
-    chats: state.chats.map(chat => {
-      return chat._id === chatId ? { ...chat, messages: [message] } : chat
-    })
-  };
-  if (state.chat._id === chatId) {
-    nextState = {
-      ...nextState,
-      chat: { ...nextState.chat, messages: [...nextState.chat.messages, message] }
-    }
-  }
-  return nextState;
-}
 
 function app(state = initialState, { type, ...action }) {
   switch (type) {
@@ -46,14 +27,13 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, message: { ...state.message, open: false } };
     case ADD_CHAT:
       return { ...state, chats: [...state.chats, action.chat] };
-    case INITIALIZE_CHAT_REQUESTED:
-      return { ...state, chat: { isLoading: true } };
-    case INITIALIZE_CHAT_SUCCEEDED:
-      return { ...state, chat: action.data.chat };
-    case INITIALIZE_CHAT_FAILED:
-      return { ...state, chat: { error: true } };
     case ADD_MESSAGE:
-      return addMessage(state, action.chatId, action.message);
+      return {
+        ...state,
+        chats: state.chats.map(chat => {
+          return chat._id === action.chatId ? { ...chat, messages: [...chat.messages, action.message] } : chat
+        })
+      };
     case DESTROY_SUCCEEDED:
       return initialState;
     default:
