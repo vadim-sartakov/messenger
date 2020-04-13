@@ -1,5 +1,5 @@
 import { eventChannel } from 'redux-saga';
-import { takeLatest, select, take, call, put, all, fork, actionChannel, delay } from 'redux-saga/effects';
+import { takeLatest, select, take, call, put, all, fork, actionChannel, delay, race, cancel } from 'redux-saga/effects';
 import * as actions from '../actions';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
@@ -7,11 +7,18 @@ import { GRAPHQL_URL, WS_URL } from '../constants';
 
 const messageTypes = {
   OPEN: 'OPEN',
+  CLOSE: 'CLOSE',
   POST_MESSAGE: 'POST_MESSAGE'
 };
 
-function createSocket(token) {
-  const socket = new WebSocket(`${WS_URL}?token=${token}`);
+function* createSocket(token) {
+  let socket;
+  try {
+    socket = new WebSocket(`${WS_URL}?token=${token}`);
+  } catch (err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to connect. Please try again later' });
+    return;
+  }
   return socket;
 }
 
@@ -24,7 +31,7 @@ function createSocketChannel(socket) {
       emit({ type: messageTypes.OPEN });
     }
     socket.onclose = () => {
-      emit(new Error('Channel was closed'));
+      emit({ type: messageTypes.CLOSE });
     }
     const unsubscribe = () => {
       socket.close();
@@ -36,13 +43,24 @@ function createSocketChannel(socket) {
 function* watchSocket(socket, reconnect) {
   let socketChannel = yield createSocketChannel(socket);
   while(true) {
-    const { type, chatId, message } = yield take(socketChannel);
+    const { listen, close } = yield race({
+      listen: take(socketChannel),
+      close: take(actions.DESTROY_REQUESTED)
+    });
+    if (close) {
+      socketChannel.close();
+      return;
+    }
+    const { type, chatId, message } = listen;
+
     switch (type) {
       case messageTypes.OPEN:
         if (reconnect) {
           yield put({ type: actions.SHOW_MESSAGE, severity: 'success', text: 'Successfully reconnected!', autoHide: true });
         }  
         break;
+      case messageTypes.CLOSE:
+        return true;
       case messageTypes.POST_MESSAGE:
         yield put({ type: actions.ADD_MESSAGE, chatId, message });
         break;
@@ -69,30 +87,21 @@ function* watchRequests(socket, token) {
   }
 }
 
-function* listenSocket(socket, token, reconnect) {
-  yield fork(watchRequests, socket, token);
-  yield fork(watchSocket, socket, reconnect);
-  yield take(actions.DESTROY_REQUESTED);
-  socket.onclose = undefined;
-  socket.close();
-}
-
-function* initializeSocket(token, reconnect) {
-  let socket
-  try {
-    socket = yield call(createSocket, token);
-  } catch (err) {
-    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to connect. Please try again later' });
-    return;
-  }
-
-  try {
-    yield call(listenSocket, socket, token, reconnect);
-  } catch(err) {
-    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
-    yield delay(5000);
-    yield initializeSocket(token, true);
-    return;
+function* initializeSocket(token) {
+  let socket = yield call(createSocket, token);
+  let reconnect;
+  while(true) {
+    const watchRequestsTask = yield fork(watchRequests, socket, token);
+    const disconnected = yield call(watchSocket, socket, reconnect);
+    if (disconnected) {
+      yield cancel(watchRequestsTask);
+      yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
+      yield delay(5000);
+      socket = yield call(createSocket, token);
+      reconnect = true; 
+    } else {
+      return;
+    }
   }
 }
 

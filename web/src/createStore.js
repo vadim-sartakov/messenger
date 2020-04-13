@@ -5,7 +5,7 @@ import reducer from './reducers';
 import saga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
-const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
+const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, traceLimit: 25 })) || compose;
 
 function createStore(preloadedState) {
   const store = reduxCreateStore(reducer, preloadedState, composeEnhancers(
