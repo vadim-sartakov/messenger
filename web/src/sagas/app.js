@@ -1,11 +1,12 @@
 import { eventChannel } from 'redux-saga';
-import { takeLatest, select, take, call, put, all, fork, actionChannel } from 'redux-saga/effects';
+import { takeLatest, select, take, call, put, all, fork, actionChannel, delay } from 'redux-saga/effects';
 import * as actions from '../actions';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
 import { GRAPHQL_URL, WS_URL } from '../constants';
 
 const messageTypes = {
+  OPEN: 'OPEN',
   POST_MESSAGE: 'POST_MESSAGE'
 };
 
@@ -16,10 +17,15 @@ function createSocket(token) {
 
 function createSocketChannel(socket) {
   return eventChannel(emit => {
-    const messageHandler = event => {
+    socket.onmessage = event => {
       emit(JSON.parse(event.data));
     };
-    socket.onmessage = messageHandler;
+    socket.onopen = () => {
+      emit({ type: messageTypes.OPEN });
+    }
+    socket.onclose = () => {
+      emit(new Error('Channel was closed'));
+    }
     const unsubscribe = () => {
       socket.close();
     }
@@ -27,11 +33,16 @@ function createSocketChannel(socket) {
   });
 }
 
-function* watchSocket(socket) {
-  const socketChannel = yield createSocketChannel(socket);
+function* watchSocket(socket, reconnect) {
+  let socketChannel = yield createSocketChannel(socket);
   while(true) {
     const { type, chatId, message } = yield take(socketChannel);
     switch (type) {
+      case messageTypes.OPEN:
+        if (reconnect) {
+          yield put({ type: actions.SHOW_MESSAGE, severity: 'success', text: 'Successfully reconnected!', autoHide: true });
+        }  
+        break;
       case messageTypes.POST_MESSAGE:
         yield put({ type: actions.ADD_MESSAGE, chatId, message });
         break;
@@ -58,6 +69,33 @@ function* watchRequests(socket, token) {
   }
 }
 
+function* listenSocket(socket, token, reconnect) {
+  yield fork(watchRequests, socket, token);
+  yield fork(watchSocket, socket, reconnect);
+  yield take(actions.DESTROY_REQUESTED);
+  socket.onclose = undefined;
+  socket.close();
+}
+
+function* initializeSocket(token, reconnect) {
+  let socket
+  try {
+    socket = yield call(createSocket, token);
+  } catch (err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to connect. Please try again later' });
+    return;
+  }
+
+  try {
+    yield call(listenSocket, socket, token, reconnect);
+  } catch(err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
+    yield delay(5000);
+    yield initializeSocket(token, true);
+    return;
+  }
+}
+
 function* fetchData(token, query, { variables, successAction, failAction }) {
   let content;
   try {
@@ -65,30 +103,16 @@ function* fetchData(token, query, { variables, successAction, failAction }) {
     yield put({ type: successAction, data: content.data });
   } catch (error) {
     yield put({ type: failAction });
-    yield put({ type: actions.SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to execute request. Please try again later' });
   }
 }
 
 function* initialize() {
   const state = yield select();
   const { token } = state.auth;
-  let socket
-  try {
-    socket = yield call(createSocket, token);
-  } catch (err) {
-    yield put({ type: actions.SHOW_ERROR, message: 'Failed to connect. Please try again later' });
-    return;
-  }
+  yield fork(initializeSocket, token);
   yield fork(fetchData, token, queries.HOME, { successAction: actions.INITIALIZE_SUCCEEDED, failAction: actions.INITIALIZE_FAILED });
-  yield fork(watchRequests, socket, token);
-  yield fork(watchSocket, socket);
-  
   yield take(actions.DESTROY_REQUESTED);
-  try {
-    socket.close();
-  } catch (err) {
-    yield put({ type: actions.SHOW_ERROR, message: 'Failed to close connection' });
-  }
   yield put({ type: actions.DESTROY_SUCCEEDED });
 }
 

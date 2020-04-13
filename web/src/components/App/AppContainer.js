@@ -2,7 +2,7 @@ import { hot } from 'react-hot-loader/root';
 import React from 'react';
 import { connect } from 'react-redux';
 import App from './App';
-import { hideError } from '../../actions';
+import { hideMessage } from '../../actions';
 
 function AppContainer(props) {
   return <App {...props} />
@@ -10,13 +10,13 @@ function AppContainer(props) {
 
 function mapStateToProps(state) {
   return {
-    error: state.app.error
+    message: state.app.message
   }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    hideError: () => dispatch(hideError())
+    hideError: () => dispatch(hideMessage())
   }
 }
 

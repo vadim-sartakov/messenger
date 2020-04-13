@@ -4,8 +4,8 @@ import {
   INITIALIZE_REQUESTED,
   INITIALIZE_SUCCEEDED,
   INITIALIZE_FAILED,
-  SHOW_ERROR,
-  HIDE_ERROR,
+  SHOW_MESSAGE,
+  HIDE_MESSAGE,
   ADD_CHAT,
   INITIALIZE_CHAT_REQUESTED,
   INITIALIZE_CHAT_SUCCEEDED,
@@ -40,10 +40,10 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, isLoading: false, me: action.data.me, chats: action.data.chats };
     case INITIALIZE_FAILED:
       return { ...state, isLoading: false, error: true };
-    case SHOW_ERROR:
-      return { ...state, error: { open: true, message: action.message } };
-    case HIDE_ERROR:
-      return { ...state, error: { ...state.error, open: false } };
+    case SHOW_MESSAGE:
+      return { ...state, message: { ...action, open: true } };
+    case HIDE_MESSAGE:
+      return { ...state, message: { ...state.message, open: false } };
     case ADD_CHAT:
       return { ...state, chats: [...state.chats, action.chat] };
     case INITIALIZE_CHAT_REQUESTED:
@@ -64,7 +64,7 @@ function app(state = initialState, { type, ...action }) {
 const persistConfig = {
   key: 'app',
   storage,
-  blacklist: ['error']
+  blacklist: ['message']
 };
 
 export default persistReducer(persistConfig, app);

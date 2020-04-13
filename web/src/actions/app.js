@@ -3,8 +3,8 @@ export const INITIALIZE_SUCCEEDED = 'INITIALIZE_SUCCEEDED';
 export const INITIALIZE_FAILED = 'INITIALIZE_FAILED';
 export const DESTROY_REQUESTED = 'DESTROY_REQUESTED';
 export const DESTROY_SUCCEEDED = 'DESTROY_SUCCEEDED';
-export const SHOW_ERROR = 'SHOW_ERROR';
-export const HIDE_ERROR = 'HIDE_ERROR';
+export const SHOW_MESSAGE = 'SHOW_MESSAGE';
+export const HIDE_MESSAGE = 'HIDE_MESSAGE';
 
 export const ADD_CHAT = 'ADD_CHAT';
 
@@ -24,12 +24,12 @@ export function initialize() {
   return { type: INITIALIZE_REQUESTED };
 }
 
-export function showError(message) {
-  return { type: SHOW_ERROR, message };
+export function showMessage({ text, severity, autoHide }) {
+  return { type: SHOW_MESSAGE, text, severity, autoHide };
 }
 
-export function hideError(message) {
-  return { type: HIDE_ERROR, message };
+export function hideMessage(message) {
+  return { type: HIDE_MESSAGE, message };
 }
 
 export function addChat(chat) {

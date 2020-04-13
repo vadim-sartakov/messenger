@@ -6,7 +6,7 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import IndexPage from '../routes/IndexPage';
 import Alert from '../ui/Alert';
 
-function App({ darkMode, error = {}, hideError }) {
+function App({ darkMode, message = {}, hideError }) {
   const theme = useMemo(() => {
     return createMuiTheme({
       palette: {
@@ -25,11 +25,11 @@ function App({ darkMode, error = {}, hideError }) {
       <CssBaseline />
       <IndexPage />
       <Snackbar
-        open={Boolean(error.open)}
+        open={Boolean(message.open)}
         onClose={hideError}
-        autoHideDuration={5000}
+        autoHideDuration={message.autoHide && 5000}
       >
-        <Alert severity="error" onClose={hideError}>{error.message}</Alert>
+        <Alert severity={message.severity} onClose={hideError}>{message.text}</Alert>
       </Snackbar>
     </ThemeProvider>
   );

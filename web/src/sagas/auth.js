@@ -1,4 +1,4 @@
-import { takeLatest, call, put, all, delay, select, take } from 'redux-saga/effects';
+import { takeLatest, call, put, all, delay, select } from 'redux-saga/effects';
 import { REHYDRATE } from 'redux-persist/es/constants'
 import {
   LOGIN_REQUESTED,
@@ -7,7 +7,7 @@ import {
   LOGOUT_REQUESTED,
   LOGOUT_SUCCEEDED,
   TOKEN_EXPIRED,
-  SHOW_ERROR,
+  SHOW_MESSAGE
 } from '../actions';
 import { API_URL } from '../constants';
 
@@ -43,7 +43,7 @@ function* authorize({ credentials, location, history }) {
     yield call([history, 'replace'], from);
   } else {
     yield put({ type: LOGIN_FAILED });
-    yield put({ type: SHOW_ERROR, message: 'Failed to execute request. Please try again later' });
+    yield put({ type: SHOW_MESSAGE, severity: 'error', text: 'Failed to execute request. Please try again later' });
   }
 }
 
