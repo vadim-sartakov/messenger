@@ -113,6 +113,12 @@ function InputMessage({ onSubmit }) {
 // Add messages pagination
 function Chat({ chat, location, postMessage }) {
   const classes = useStyles();
+
+  useEffect(() => {
+    const lastMessageElement = document.getElementById(`message-${chat.messages.length - 1}`);
+    lastMessageElement && lastMessageElement.scrollIntoView();
+  }, [chat.messages]);
+
   return chat.participants.length === 1 ? <EmptyChat chat={chat} location={location} /> : (
     <Grid container direction="column" alignItems="center" wrap="nowrap" className={classes.container}>
       <Grid
@@ -124,7 +130,7 @@ function Chat({ chat, location, postMessage }) {
       >
         {chat.messages.map((message, index) => {
           return (
-            <Message key={index} {...message} className={classes.message} />
+            <Message id={`message-${index}`} key={index} {...message} className={classes.message} />
           )
         })}
       </Grid>
