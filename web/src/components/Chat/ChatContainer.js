@@ -4,9 +4,6 @@ import { postMessage } from '../../actions';
 import Chat from './Chat';
 
 function ChatContainer({ id, chat, postMessage, ...props }) {
-  const { protocol, hostname, port } = window.location;
-  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
-
   const handlePostMessage = useCallback(message => {
     postMessage(id, message);
   }, [id, postMessage]);

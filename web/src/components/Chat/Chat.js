@@ -111,7 +111,7 @@ function InputMessage({ onSubmit }) {
 // TODO:
 // Add messages transition group
 // Add messages pagination
-function Chat({ chat, location, postMessage }) {
+function Chat({ chat, postMessage }) {
   const classes = useStyles();
 
   useEffect(() => {
@@ -119,7 +119,7 @@ function Chat({ chat, location, postMessage }) {
     lastMessageElement && lastMessageElement.scrollIntoView();
   }, [chat.messages]);
 
-  return chat.participants.length === 1 ? <EmptyChat chat={chat} location={location} /> : (
+  return chat.participants.length === 1 ? <EmptyChat chat={chat} /> : (
     <Grid container direction="column" alignItems="center" wrap="nowrap" className={classes.container}>
       <Grid
         container
