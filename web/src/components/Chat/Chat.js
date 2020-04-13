@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -11,7 +11,6 @@ import InputTextField from '../ui/InputTextField';
 import EmptyChat from './EmptyChat';
 import Message from './Message';
 import { isRequired } from '../../utils/validators';
-import Fade from '@material-ui/core/Fade';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -61,6 +60,10 @@ function InputMessage({ onSubmit }) {
     onSubmit(value);
     resetForm();
   };
+  const inputRef = useRef();
+  useEffect(function focusInput() {
+    inputRef.current.focus();
+  }, []);
   return (
     <Formik
       initialValues={inputInitialValues}
@@ -86,6 +89,7 @@ function InputMessage({ onSubmit }) {
               fullWidth
               onKeyDown={handleKeyDown}
               InputProps={{
+                inputRef,
                 endAdornment: (
                   <InputAdornment position="end">
                     <Tooltip title="Send" placement="top" arrow>
@@ -105,7 +109,7 @@ function InputMessage({ onSubmit }) {
   )
 }
 
-// TODO: focus message input on mount;
+// TODO:
 // Add messages transition group
 // Add messages pagination
 function Chat({ chat, location, postMessage }) {
@@ -123,11 +127,9 @@ function Chat({ chat, location, postMessage }) {
         >
           {chat.messages.map((message, index) => {
             return (
-              <Fade key={index} in>
-                <Grid item>
-                  <Message {...message} />
-                </Grid>
-              </Fade>
+              <Grid key={index} item>
+                <Message {...message} />
+              </Grid>
             )
           })}
         </Grid>

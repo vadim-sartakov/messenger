@@ -38,7 +38,7 @@ function Message({ author, content, createdAt, notSent }) {
           </span>
           <span>, </span>
           <span>
-            {moment(createdAt).format('MMMM D [at] hh:mm')}
+            {moment(createdAt).format('MMMM D [at] HH:mm')}
           </span>
         </Typography>
         <Typography className={classes.content}>{content}</Typography>

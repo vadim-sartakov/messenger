@@ -21,6 +21,7 @@ export const HOME = `query {
         color
       }
       content
+      createdAt
     }
   }
 }

@@ -60,6 +60,7 @@ function Chat({ name, messages, participants, color, selected, onClick }) {
         primary={title}
         primaryTypographyProps={{ noWrap: true }}
         secondary={lastMessage && lastMessage.content}
+        secondaryTypographyProps={{ noWrap: true }}
       />
       <ListItemSecondaryAction className={classes.actions}>
         <Tooltip title="Settings" arrow placement="right">
