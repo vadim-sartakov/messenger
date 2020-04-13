@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import ExitToApp from '@material-ui/icons/ExitToApp';
+import Grow from '@material-ui/core/Grow';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -34,13 +41,35 @@ const useStyles = makeStyles(theme => {
   };
 });
 
+function LogoutDialog({ open, onClose, onSubmit }) {
+  return (
+    <Dialog open={open} onClose={onClose} TransitionComponent={Grow}>
+      <DialogTitle>Logging out</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Are you sure you want to logout?</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button
+          onClick={onSubmit}
+          variant="contained"
+          color="primary"
+        >
+          Logout
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
 function Home({ logout, me, chats }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openLogout, setOpenLogout] = useState(false);
   const toggleDrawer = () => setOpenDrawer(!openDrawer);
   const handleDrawerClose = () => setOpenDrawer(false);
   const { chatId } = useParams();
-  const curChat = chats.find(chat => chat._id);
+  const curChat = chats.find(chat => chat._id === chatId);
   return (
     <Grid container wrap="nowrap">
       <Drawer
@@ -64,7 +93,7 @@ function Home({ logout, me, chats }) {
               Messenger App
             </Typography>
             <Tooltip arrow title="Logout">
-              <IconButton color="inherit" onClick={logout}>
+              <IconButton color="inherit" onClick={() => setOpenLogout(true)}>
                 <ExitToApp />
               </IconButton>
             </Tooltip>
@@ -76,6 +105,7 @@ function Home({ logout, me, chats }) {
         </main>
       </Grid>
       <SessionExpiredDialog />
+      <LogoutDialog open={openLogout} onClose={() => setOpenLogout(false)} onSubmit={logout} />
     </Grid>
   );
 }
