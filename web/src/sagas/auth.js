@@ -29,21 +29,36 @@ function* logout({ history }) {
 }
 
 function* authorize({ credentials, location, history }) {
-  const response = yield call(fetch, `${API_URL}/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(credentials)
-  });
-  if (response.ok) {
+  let error, response;
+  try {
+    response = yield call(fetch, `${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(credentials)
+    });
+  } catch {
+    error = true;
+  }
+
+  if (response && response.ok) {
     const { token } = yield call([response, 'json']);
     yield put({ type: LOGIN_SUCCEEDED, token });
     const { from } = location.state || { from: { pathname: '/' } };
     yield call([history, 'replace'], from);
   } else {
+    error = true;
+  }
+
+  if (error) {
     yield put({ type: LOGIN_FAILED });
-    yield put({ type: SHOW_MESSAGE, severity: 'error', text: 'Failed to execute request. Please try again later' });
+    yield put({
+      type: SHOW_MESSAGE,
+      severity: 'error',
+      text: 'Failed to execute request. Please try again later',
+      autoHide: true
+    });
   }
 }
 

@@ -23,7 +23,7 @@ function graphqlFetch(query, options = {}) {
         },
         body: JSON.stringify({ query, variables })
       }
-    ).then(onFetch)
+    ).then(onFetch).catch(() => reject())
   });
 }
 
