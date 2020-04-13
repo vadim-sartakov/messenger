@@ -1,9 +1,9 @@
-const { v4: uuidv4 } = require('uuid');
 const { GraphQLError } = require('graphql');
 const { GraphQLDateTime } = require('graphql-iso-date');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
+const getRandomString = require('../utils/getRandomString');
 
 async function populateArray(array, populate) {
   return array.reduce(async (prev, cur) => {
@@ -53,7 +53,11 @@ const root = {
   Mutation: {
     createChat: async (parent, { value }, req) => {
       const currentUserId = req.user.subject;
-      const inviteLink = uuidv4();
+      let inviteLink;
+      while(true) {
+        inviteLink = getRandomString(7);
+        if (!await Chat.findOne({ inviteLink })) break;
+      }
       const newChat = new Chat({ name: value.name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },

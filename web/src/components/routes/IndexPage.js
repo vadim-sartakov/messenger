@@ -24,7 +24,7 @@ function IndexPage() {
           <Route path="/chats/:chatId">
             <Home />
           </Route>
-          <Route path="/invite/:id">
+          <Route path="/:id">
             <JoinChat />
           </Route>
           <NotFound />
