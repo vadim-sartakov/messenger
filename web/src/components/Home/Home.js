@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -23,8 +23,12 @@ import NoChats from './NoChats';
 
 const useStyles = makeStyles(theme => {
   return {
-    vertContainer: {
-      height: '100vh'
+    ...theme.palette.type !== 'dark' && {
+      '@global': {
+        'body': {
+          backgroundColor: '#fff'
+        },
+      }
     },
     menuButton: {
       [theme.breakpoints.up('sm')]: {
@@ -70,6 +74,14 @@ function Home({ logout, me, chats }) {
   const handleDrawerClose = () => setOpenDrawer(false);
   const { chatId } = useParams();
   const curChat = chats.find(chat => chat._id === chatId);
+
+  const [height, setHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setHeight(window.innerHeight);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <Grid container wrap="nowrap">
       <Drawer
@@ -78,7 +90,7 @@ function Home({ logout, me, chats }) {
         open={openDrawer}
         onClose={handleDrawerClose}
       />
-      <Grid container direction="column" wrap="nowrap" className={classes.vertContainer}>
+      <Grid container direction="column" wrap="nowrap" style={{ height }}>
         <AppBar position="sticky">
           <Toolbar>
             <IconButton

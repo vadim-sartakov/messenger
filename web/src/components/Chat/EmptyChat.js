@@ -11,8 +11,7 @@ import CopyIcon from '@material-ui/icons/Save';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 const useStyles = makeStyles(theme => ({
-  paper: {
-    height: '100%',
+  container: {
     padding: theme.spacing(4)
   },
   title: {
@@ -33,42 +32,40 @@ function EmptyChat({ chat, location }) {
     document.execCommand('copy');
   };
   return (
-    <Paper className={classes.paper}>
-      <Container maxWidth="xs" disableGutters>
-        <Grid container direction="column">
-          <Typography variant="h5" className={classes.title}>
-            No one invited yet...
-          </Typography>
-          <Typography variant="subtitle1" className={classes.subtitle}>
-            Share this link with others for invite:
-          </Typography>
-          <TextField
-            variant="outlined"
-            value={`${location}/${chat.inviteLink}`}
-            fullWidth
-            InputProps={{
-              inputRef,
-              readOnly: true,
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Tooltip
-                    title={copied ? 'Copied!' : 'Copy'}
-                    onTransitionEnd={() => setCopied(false)}
+    <Container maxWidth="xs" disableGutters className={classes.container}>
+      <Grid container direction="column">
+        <Typography variant="h5" className={classes.title}>
+          No one invited yet...
+        </Typography>
+        <Typography variant="subtitle1" className={classes.subtitle}>
+          Share this link with others for invite:
+        </Typography>
+        <TextField
+          variant="outlined"
+          value={`${location}/${chat.inviteLink}`}
+          fullWidth
+          InputProps={{
+            inputRef,
+            readOnly: true,
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip
+                  title={copied ? 'Copied!' : 'Copy'}
+                  onTransitionEnd={() => setCopied(false)}
+                >
+                  <IconButton
+                    color="primary"
+                    onClick={handleCopy}
                   >
-                    <IconButton
-                      color="primary"
-                      onClick={handleCopy}
-                    >
-                      <CopyIcon />
-                    </IconButton>
-                  </Tooltip>
-                </InputAdornment>
-              )
-            }}
-          />
-        </Grid>
-      </Container>
-    </Paper>
+                    <CopyIcon />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            )
+          }}
+        />
+      </Grid>
+    </Container>
   )
 }
 

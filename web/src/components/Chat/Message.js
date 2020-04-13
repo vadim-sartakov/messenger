@@ -21,10 +21,10 @@ const useStyles = makeStyles(theme => {
   }
 });
 
-function Message({ author, content, createdAt, notSent }) {
+function Message({ className, author, content, createdAt, notSent }) {
   const classes = useStyles();
   return (
-    <Grid container alignItems="flex-start" wrap="nowrap">
+    <Grid container alignItems="flex-start" wrap="nowrap" className={className}>
       <ColoredAvarar
         color={author.color}
         className={classNames(classes.avatar, { [classes.notSent]: notSent })}

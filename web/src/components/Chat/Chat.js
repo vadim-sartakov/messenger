@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -14,17 +13,17 @@ import { isRequired } from '../../utils/validators';
 
 const useStyles = makeStyles(theme => {
   return {
-    paper: {
-      height: '100%',
-      overflow: 'auto'
-    },
-    innerContainer: {
+    container: {
+      overflow: 'auto',
       height: '100%'
     },
     messagesContainer: {
       flexGrow: 1,
       padding: `0 ${theme.spacing(3)}px`,
       width: '100%'
+    },
+    message: {
+      marginBottom: theme.spacing(2)
     },
     inputMessageContainer: {
       position: 'sticky',
@@ -115,29 +114,24 @@ function InputMessage({ onSubmit }) {
 function Chat({ chat, location, postMessage }) {
   const classes = useStyles();
   return chat.participants.length === 1 ? <EmptyChat chat={chat} location={location} /> : (
-    <Paper className={classes.paper}>
-      <Grid container direction="column" alignItems="center" wrap="nowrap" className={classes.innerContainer}>
-        <Grid
-          container
-          direction="column"
-          justify="flex-end"
-          alignItems="flex-start"
-          className={classes.messagesContainer}
-          spacing={2}
-        >
-          {chat.messages.map((message, index) => {
-            return (
-              <Grid key={index} item>
-                <Message {...message} />
-              </Grid>
-            )
-          })}
-        </Grid>
-        <div className={classes.inputMessageContainer}>
-          <InputMessage onSubmit={postMessage} />
-        </div>
+    <Grid container direction="column" alignItems="center" wrap="nowrap" className={classes.container}>
+      <Grid
+        container
+        direction="column"
+        justify="flex-end"
+        alignItems="flex-start"
+        className={classes.messagesContainer}
+      >
+        {chat.messages.map((message, index) => {
+          return (
+            <Message key={index} {...message} className={classes.message} />
+          )
+        })}
       </Grid>
-    </Paper>
+      <div className={classes.inputMessageContainer}>
+        <InputMessage onSubmit={postMessage} />
+      </div>
+    </Grid>
   );
 }
 
