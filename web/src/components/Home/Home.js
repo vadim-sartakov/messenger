@@ -113,7 +113,7 @@ function Home({ logout, me, chats }) {
         </AppBar>
         
         <main className={classes.main}>
-          {chats.length === 0 ? <NoChats /> : !chatId ? null : <Chat id={chatId} chat={curChat} />}
+          {chats.length === 0 ? <NoChats /> : !chatId || !curChat ? null : <Chat id={chatId} chat={curChat} />}
         </main>
       </Grid>
       <SessionExpiredDialog />

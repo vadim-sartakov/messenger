@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -62,13 +63,15 @@ function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSub
 }
 
 function ChatDialogContainer({ token, id, addChat, onClose, ...props }) {
+  const history = useHistory();
   const handleSubmit = useCallback(async chat => {
     if (!id) {
       const response = await graphqlFetch(CREATE_CHAT, { url: GRAPHQL_URL, variables: { value: chat }, token });
       addChat(response.data.createChat);
+      history.replace({ pathname: `/chats/${response.data.createChat._id}` });
     }
     onClose();
-  }, [id, addChat, token, onClose]);
+  }, [id, history, addChat, token, onClose]);
   return <ChatDialog {...props} onClose={onClose} onSubmit={handleSubmit} />;
 }
 

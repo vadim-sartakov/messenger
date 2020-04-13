@@ -6,7 +6,11 @@ const { createServer } = require('http');
 const { Server } = require('ws');
 const jwt = require('jsonwebtoken');
 
-const publicKey = fs.readFileSync(path.resolve(__dirname, '..', 'public.key'));
+let publicKey;
+try {
+  publicKey = fs.readFileSync(path.resolve(__dirname, '..', 'public.key'));
+} catch(err) {}
+const jwtSecret = process.env.JWT_SECRET;
 
 const messageTypes = {
   POST_MESSAGE: 'POST_MESSAGE'
@@ -42,7 +46,7 @@ function createWsServer(app) {
     }
     let decodedToken;
     try {
-      decodedToken = jwt.verify(token, publicKey);
+      decodedToken = jwt.verify(token, publicKey || jwtSecret);
     } catch(err) {
       socket.destroy();
       return;

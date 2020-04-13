@@ -60,6 +60,9 @@ export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
       name
     }
     color
+    messages {
+      _id
+    }
   }
 }
 `;
