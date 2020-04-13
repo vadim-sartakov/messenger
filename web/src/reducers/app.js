@@ -7,6 +7,7 @@ import {
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   ADD_CHAT,
+  JOIN_CHAT_SUCCEEDED,
   DESTROY_SUCCEEDED,
   ADD_MESSAGE
 } from '../actions';
@@ -27,6 +28,13 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, message: { ...state.message, open: false } };
     case ADD_CHAT:
       return { ...state, chats: [...state.chats, action.chat] };
+    case JOIN_CHAT_SUCCEEDED:
+      return {
+        ...state,
+        chats: state.chats.map(chat => {
+          return chat._id === action.chatId ? { ...chat, participants: [...chat.participants, action.participant] } : chat
+        })
+      };
     case ADD_MESSAGE:
       return {
         ...state,

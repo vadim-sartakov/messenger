@@ -8,6 +8,7 @@ import { GRAPHQL_URL, WS_URL } from '../constants';
 const messageTypes = {
   OPEN: 'OPEN',
   CLOSE: 'CLOSE',
+  JOIN_CHAT: 'JOIN_CHAT',
   POST_MESSAGE: 'POST_MESSAGE'
 };
 
@@ -54,21 +55,48 @@ function* watchSocket(socket, reconnect) {
   }
 }
 
+function* handleSendMessage(socket, token, action) {
+  const { chatId, message } = action;
+  const { app: { chats, me } } = yield select();
+  const curChat = chats.find(chat => chat._id === chatId);
+  const newMessage = { content: message.content, author: me, createdAt: new Date() };
+  yield put({ type: actions.ADD_MESSAGE, chatId, message: newMessage });
+  yield fork([socket, 'send'], JSON.stringify({
+    type: messageTypes.POST_MESSAGE,
+    chatId,
+    participants: curChat.participants,
+    message: newMessage
+  }));
+  yield fork(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } });
+}
+
+function* handleJoinChat(socket, action) {
+  const { app: { me } } = yield select();
+  const { chatId } = action;
+  yield fork([socket, 'send'], JSON.stringify({
+    type: messageTypes.JOIN_CHAT,
+    chatId,
+    participant: me
+  }));
+}
+
 function* watchRequests(socket, token) {
-  const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED])
+  const requestChannel = yield actionChannel([
+    actions.JOIN_CHAT_REQUESTED,
+    actions.POST_MESSAGE_REQUESTED
+  ]);
   while(true) {
-    const { chatId, message } = yield take(requestChannel);
-    const { app: { chats, me } } = yield select();
-    const curChat = chats.find(chat => chat._id === chatId);
-    const newMessage = { content: message.content, author: me, createdAt: new Date() };
-    yield put({ type: actions.ADD_MESSAGE, chatId, message: newMessage });
-    yield fork([socket, 'send'], JSON.stringify({
-      type: messageTypes.POST_MESSAGE,
-      chatId,
-      participants: curChat.participants,
-      message: newMessage
-    }));
-    yield fork(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } });
+    const { type, ...action } = yield take(requestChannel);
+    switch (type) {
+      case actions.POST_MESSAGE_REQUESTED:
+        yield handleSendMessage(socket, token, action);
+        break;
+      case actions.JOIN_CHAT_REQUESTED:
+        yield handleJoinChat(socket, action);
+        break;
+      default:
+    }
+    
   }
 }
 
