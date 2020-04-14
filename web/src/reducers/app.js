@@ -8,7 +8,6 @@ import {
   HIDE_MESSAGE,
   CREATE_CHAT_SUCCEEDED,
   RENAME_CHAT_SUCCEEDED,
-  JOIN_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
   DESTROY_SUCCEEDED,
   POST_MESSAGE_SUCCEEDED
@@ -44,11 +43,6 @@ function app(state = initialState, { type, ...action }) {
       return {
         ...state,
         chats: state.chats.map(chat => chat._id === action.chatId ? { ...chat, name: action.name } : chat)
-      };
-    case JOIN_CHAT_SUCCEEDED:
-      return {
-        ...state,
-        chats: [...state.chats, action.chat]
       };
     case POST_MESSAGE_SUCCEEDED:
       return {

@@ -24,7 +24,7 @@ function sendToChatParticipants(req, chat, callback) {
   const { wss } = req.app;
   (chat.participants || []).forEach(participant => {
     const client = findWsClient(wss.clients, participant.toString());
-    if (client.id === currentUserId) return;
+    if (!client || client.id === currentUserId) return;
     client.send(JSON.stringify(callback()));
   });
 }
@@ -93,11 +93,10 @@ const root = {
 
       const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid id');
-
-      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
-
       chat.participants = [...(chat.participants || []), currentUserId];
-      return await chat.save();
+      await chat.save()
+      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
+      return chat;
     },
     postMessage: async (parent, { chatId, text }, req) => {
       const currentUserId = req.user.subject;

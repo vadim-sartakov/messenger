@@ -17,6 +17,10 @@ function createWsServer(app) {
   const wss = new Server({ noServer: true, path: '/ws' });
   app.wss = wss;
 
+  wss.on('connection', function(socket, req, user) {
+    socket.id = user;
+  });
+
   server.on('upgrade', function upgrade(req, socket, head) {
     const { search } = url.parse(req.url);
     const { token } = search ? querystring.parse(search.replace('?', '')) : {};

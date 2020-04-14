@@ -117,7 +117,7 @@ function* joinChat({ inviteLink, history }) {
   try {
     const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
     const chat = response.data.joinChat;
-    yield put({ type: actions.JOIN_CHAT_SUCCEEDED, chat });
+    yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat });
     yield call([history, 'replace'], { pathname: `/chats/${chat._id}` });
   } catch(err) {
     yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to join chat' });
