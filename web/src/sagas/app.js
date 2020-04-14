@@ -1,15 +1,15 @@
 import { eventChannel } from 'redux-saga';
-import { takeLatest, select, take, call, put, fork, actionChannel, delay, race, cancel } from 'redux-saga/effects';
+import { takeLatest, select, take, call, put, fork, actionChannel, delay, race, cancel, all } from 'redux-saga/effects';
 import * as actions from '../actions';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
 import { GRAPHQL_URL, WS_URL } from '../constants';
 
 const messageTypes = {
-  OPEN: 'OPEN',
-  CLOSE: 'CLOSE',
-  JOIN_CHAT: 'JOIN_CHAT',
-  POST_MESSAGE: 'POST_MESSAGE'
+  OPEN: 'open',
+  CLOSE: 'close',
+  JOINED_CHAT: 'joined_chat',
+  POST_MESSAGE: 'post_message'
 };
 
 function createSocket(token) {
@@ -38,7 +38,7 @@ function createSocketChannel(socket) {
 function* watchSocket(socket, reconnect) {
   let socketChannel = createSocketChannel(socket);
   while(true) {
-    const { type, chatId, message } = yield take(socketChannel);
+    const { type, ...action } = yield take(socketChannel);
     switch (type) {
       case messageTypes.OPEN:
         if (reconnect) {
@@ -47,8 +47,11 @@ function* watchSocket(socket, reconnect) {
         break;
       case messageTypes.CLOSE:
         return true;
+      case messageTypes.JOINED_CHAT:
+        yield put({ type: actions.ADD_CHAT_PARTICIPANT, chatId: action.chatId, participant: action.participant });
+        break;
       case messageTypes.POST_MESSAGE:
-        yield put({ type: actions.ADD_MESSAGE, chatId, message });
+        yield put({ type: actions.ADD_MESSAGE, chatId: action.chatId, message: action.message });
         break;
       default:
     }
@@ -70,29 +73,13 @@ function* handleSendMessage(socket, token, action) {
   yield fork(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } });
 }
 
-function* handleJoinChat(socket, action) {
-  const { app: { me } } = yield select();
-  const { chatId } = action;
-  yield fork([socket, 'send'], JSON.stringify({
-    type: messageTypes.JOIN_CHAT,
-    chatId,
-    participant: me
-  }));
-}
-
 function* watchRequests(socket, token) {
-  const requestChannel = yield actionChannel([
-    actions.JOIN_CHAT_REQUESTED,
-    actions.POST_MESSAGE_REQUESTED
-  ]);
+  const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED]);
   while(true) {
     const { type, ...action } = yield take(requestChannel);
     switch (type) {
       case actions.POST_MESSAGE_REQUESTED:
         yield handleSendMessage(socket, token, action);
-        break;
-      case actions.JOIN_CHAT_REQUESTED:
-        yield handleJoinChat(socket, action);
         break;
       default:
     }
@@ -138,6 +125,17 @@ function* initialize({ reconnect }) {
   }
 }
 
+function* joinChat({ inviteLink, history }) {
+  const { auth: { token } } = yield select();
+  const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
+  const chat = response.data.joinChat;
+  yield put({ type: actions.JOIN_CHAT_SUCCEEDED, chat });
+  yield call([history, 'replace'], { pathname: `/chats/${chat._id}` });
+}
+
 export default function* appSaga() {
-  yield takeLatest(actions.INITIALIZE_REQUESTED, initialize);
+  yield all([
+    takeLatest(actions.INITIALIZE_REQUESTED, initialize),
+    takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat)
+  ]);
 }

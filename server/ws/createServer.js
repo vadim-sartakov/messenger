@@ -13,12 +13,13 @@ try {
 const jwtSecret = process.env.JWT_SECRET;
 
 const messageTypes = {
-  POST_MESSAGE: 'POST_MESSAGE'
+  POST_MESSAGE: 'post_message'
 };
 
 function createWsServer(app) {
   const server = createServer(app);
   const wss = new Server({ noServer: true, path: '/ws' });
+  app.wss = wss;
 
   wss.on('connection', function(socket, req, user) {
     socket.id = user;

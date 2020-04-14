@@ -3,14 +3,11 @@ import { connect } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
 import {
   initialize,
-  joinChatNotify,
+  joinChat,
   destroy,
   logOut
 } from '../../actions';
 import Home from './Home';
-import { GRAPHQL_URL } from '../../constants';
-import { JOIN_CHAT } from '../../queries';
-import graphqlFetch from '../../utils/graphqlFetch';
 
 function HomeContainer({
   token,
@@ -20,7 +17,7 @@ function HomeContainer({
   isLoading,
   me,
   chats,
-  joinChatNotify,
+  joinChat,
   ...props
 }) {
   const history = useHistory();
@@ -32,19 +29,8 @@ function HomeContainer({
   }, [initialize, destroy]);
 
   useEffect(() => {
-    if (!inviteLink) return;
-    const join = async () => {
-      try {
-        const response = await graphqlFetch(JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
-        const chatId = response.data.joinChat._id;
-        joinChatNotify(chatId);
-        history.replace({ pathname: `/chats/${chatId}` });
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    join();
-  }, [joinChatNotify, inviteLink, token, history]);
+    if (inviteLink) joinChat(inviteLink, history);
+  }, [joinChat, inviteLink, token, history]);
 
   const handleLogout = useCallback(() => logOut(history), [history, logOut]);
 
@@ -68,7 +54,7 @@ const mapDispatchToProps = dispatch => ({
   initialize: () => dispatch(initialize()),
   destroy: () => dispatch(destroy()),
   logOut: history => dispatch(logOut(history)),
-  joinChatNotify: chatId => dispatch(joinChatNotify(chatId))
+  joinChat: (inviteLink, history) => dispatch(joinChat(inviteLink, history))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);

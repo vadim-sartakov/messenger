@@ -13,6 +13,12 @@ async function populateArray(array, populate) {
   }, Promise.resolve([]));
 }
 
+function findWsClient(wssClients, id) {
+  return Array.from(wssClients).find(client => {
+    return client.id === id;
+  });
+}
+
 const root = {
   Date: GraphQLDateTime,
   Chat: {
@@ -64,8 +70,17 @@ const root = {
     joinChat: async (parent, { inviteLink }, req) => {
       // TODO: protect from bruteforce
       const currentUserId = req.user.subject;
+      const currentUser = await User.findById(currentUserId, 'name color');
+
       const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid id');
+
+      const { wss } = req.app;
+      (chat.participants || []).forEach(participant => {
+        const client = findWsClient(wss.clients, participant.toString());
+        client.send(JSON.stringify({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
+      });
+
       chat.participants = [...(chat.participants || []), currentUserId];
       return await chat.save();
     },

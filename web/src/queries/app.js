@@ -71,6 +71,15 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
   joinChat(inviteLink: $inviteLink) {
     _id
     name
+    inviteLink
+    participants {
+      _id
+      name
+    }
+    color
+    messages(limit: 30) {
+      _id
+    }
   }
 }
 `;

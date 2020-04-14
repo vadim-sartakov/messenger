@@ -11,6 +11,8 @@ export const ADD_CHAT = 'ADD_CHAT';
 export const JOIN_CHAT_REQUESTED = 'JOIN_CHAT_REQUESTED';
 export const JOIN_CHAT_SUCCEEDED = 'JOIN_CHAT_SUCCEEDED';
 
+export const ADD_CHAT_PARTICIPANT = 'ADD_CHAT_PARTICIPANT';
+
 export const POST_MESSAGE_REQUESTED = 'POST_MESSAGE_REQUESTED';
 export const POST_MESSAGE_SUCCEEDED = 'POST_MESSAGE_SUCCEEDED';
 export const POST_MESSAGE_FAILED = 'POST_MESSAGE_FAILED';
@@ -34,8 +36,8 @@ export function addChat(chat) {
   return { type: ADD_CHAT, chat };
 }
 
-export function joinChatNotify(chatId) {
-  return { type: JOIN_CHAT_REQUESTED, chatId };
+export function joinChat(inviteLink, history) {
+  return { type: JOIN_CHAT_REQUESTED, inviteLink, history };
 }
 
 export function postMessage(chatId, message) {
