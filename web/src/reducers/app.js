@@ -13,7 +13,7 @@ import {
   POST_MESSAGE_SUCCEEDED
 } from '../actions';
 
-const initialState = { isLoading: true, chat: { isLoading: true } };
+const initialState = { isLoading: true };
 
 function app(state = initialState, { type, ...action }) {
   switch (type) {

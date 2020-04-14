@@ -6,7 +6,9 @@ import {
   HIDE_MESSAGE,
   CREATE_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
-  RENAME_CHAT_SUCCEEDED
+  RENAME_CHAT_SUCCEEDED,
+  POST_MESSAGE_SUCCEEDED,
+  DESTROY_SUCCEEDED
 } from '../actions';
 import reducer from './app';
 
@@ -70,5 +72,33 @@ describe('app reducer', () => {
         name: 'renamed chat'
       }]
     });
+  });
+
+  it('should post message', () => {
+    const prevState = {
+      prev: true,
+      chats: [
+        { _id: 0, messages: [{ content: 'Test' }] }
+      ]
+    };
+    const action = { type: POST_MESSAGE_SUCCEEDED, chatId: 0, message: { content: 'Test2' } };
+    expect(reducer(prevState, action)).toEqual({
+      prev: true,
+      chats: [
+        {
+          _id: 0,
+          messages: [
+            { content: 'Test' },
+            { content: 'Test2' }
+          ]
+        }
+      ]
+    });
+  });
+
+  it('should destroy app', () => {
+    const prevState = { prev: true };
+    const action = { type: DESTROY_SUCCEEDED };
+    expect(reducer(prevState, action)).toEqual({ isLoading: true });
   });
 });
