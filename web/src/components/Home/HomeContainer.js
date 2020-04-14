@@ -34,9 +34,10 @@ function HomeContainer({
 
   const handleLogout = useCallback(() => logOut(history), [history, logOut]);
 
-  return isLoading ? null : (
+  return (
     <Home
       {...props}
+      isLoading={isLoading}
       logout={handleLogout}
       me={me}
       chats={chats}

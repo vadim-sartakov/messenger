@@ -46,6 +46,10 @@ const useStyles = makeStyles(theme => {
 });
 
 function LogoutDialog({ open, onClose, onSubmit }) {
+  const handleSubmit = () => {
+    onClose();
+    onSubmit();
+  }
   return (
     <Dialog open={open} onClose={onClose} TransitionComponent={Grow}>
       <DialogTitle>Logging out</DialogTitle>
@@ -55,7 +59,7 @@ function LogoutDialog({ open, onClose, onSubmit }) {
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button
-          onClick={onSubmit}
+          onClick={handleSubmit}
           variant="contained"
           color="primary"
         >
@@ -66,7 +70,7 @@ function LogoutDialog({ open, onClose, onSubmit }) {
   )
 }
 
-function Home({ logout, me, chats }) {
+function Home({ isLoading, logout, me, chats = [] }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
@@ -85,6 +89,7 @@ function Home({ logout, me, chats }) {
   return (
     <Grid container wrap="nowrap">
       <Drawer
+        isLoading={isLoading}
         me={me}
         chats={chats}
         open={openDrawer}

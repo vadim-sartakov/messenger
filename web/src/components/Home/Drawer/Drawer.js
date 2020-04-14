@@ -60,6 +60,7 @@ function ResponsiveDrawer({ open, onClose, children }) {
 }
 
 function Drawer({
+  isLoading,
   me,
   chats,
   open,
@@ -78,15 +79,16 @@ function Drawer({
         wrap="nowrap"
         className={classes.user}
       >
-        <ColoredAvatar className={classes.avatar} color={me.color}>
-          {getShortName(me.name)}
+        <ColoredAvatar className={classes.avatar} color={!isLoading && me.color}>
+          {!isLoading && getShortName(me.name)}
         </ColoredAvatar>
         <Typography variant="h6" noWrap>
-          {me.name}
+          {!isLoading && me.name}
         </Typography>
       </Grid>
       <Divider />
       <ChatList
+        isLoading={isLoading}
         me={me}
         chats={chats}
         onCreateChat={onCreateChat}

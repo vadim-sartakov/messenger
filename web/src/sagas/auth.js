@@ -24,8 +24,9 @@ function* watchTokenExpiration() {
 }
 
 function* logout({ history }) {
+  yield call([history, 'replace'], '/login');
+  yield delay(400);
   yield put({ type: LOGOUT_SUCCEEDED });
-  yield call([history, 'replace'], { pathname: '/' });
 }
 
 function* authorize({ credentials, location, history }) {
@@ -46,7 +47,7 @@ function* authorize({ credentials, location, history }) {
     const { token } = yield call([response, 'json']);
     yield put({ type: LOGIN_SUCCEEDED, token });
     const { from } = location.state || { from: { pathname: '/' } };
-    yield call([history, 'replace'], from);
+    yield call([history, 'replace'], from.pathname);
   } else {
     error = true;
   }
