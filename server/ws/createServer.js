@@ -12,31 +12,10 @@ try {
 } catch(err) {}
 const jwtSecret = process.env.JWT_SECRET;
 
-const messageTypes = {
-  POST_MESSAGE: 'post_message'
-};
-
 function createWsServer(app) {
   const server = createServer(app);
   const wss = new Server({ noServer: true, path: '/ws' });
   app.wss = wss;
-
-  wss.on('connection', function(socket, req, user) {
-    socket.id = user;
-    socket.on('message', data => {
-      const message = JSON.parse(data);
-      switch (message.type) {
-        case messageTypes.POST_MESSAGE:
-          message.participants.forEach(participant => {
-            if (participant._id !== user) {
-              const curClient = Array.from(wss.clients).find(client => client.id === participant._id);
-              if (curClient) curClient.send(JSON.stringify(message));
-            }
-          });
-        default:
-      }
-    });
-  });
 
   server.on('upgrade', function upgrade(req, socket, head) {
     const { search } = url.parse(req.url);
