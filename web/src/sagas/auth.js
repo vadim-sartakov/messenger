@@ -1,5 +1,5 @@
 import { takeLatest, call, put, all, delay, select } from 'redux-saga/effects';
-import { REHYDRATE } from 'redux-persist/es/constants'
+import { REHYDRATE } from 'redux-persist/lib/constants'
 import {
   LOGIN_REQUESTED,
   LOGIN_SUCCEEDED,
@@ -11,10 +11,12 @@ import {
 } from '../actions';
 import { API_URL } from '../constants';
 
-function* watchTokenExpiration() {
+export function* watchTokenExpiration() {
   const token = yield select(state => state.auth.token);
   if (!token) return;
   const payload = JSON.parse(atob(token.split('.')[1]));
+  // By default jwt stores expiration in seconds,
+  // so converting it to milliseconds
   const expMs = payload.exp * 1000;
   const curMs = new Date().getTime();
   const validFor = expMs - curMs;
@@ -22,13 +24,13 @@ function* watchTokenExpiration() {
   yield put({ type: TOKEN_EXPIRED });
 }
 
-function* logout({ history }) {
+export function* logout({ history }) {
   yield call([history, 'replace'], '/login');
   yield delay(400);
   yield put({ type: LOGOUT_SUCCEEDED });
 }
 
-function* authorize({ credentials, location, history }) {
+export function* authorize({ credentials, location, history }) {
   let error, response;
   try {
     response = yield call(fetch, `${API_URL}/login`, {
