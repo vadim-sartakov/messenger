@@ -7,6 +7,7 @@ export const HOME = `query {
   chats: getChats {
     _id
     name
+    owner
     inviteLink
     participants {
       _id
@@ -24,13 +25,13 @@ export const HOME = `query {
       createdAt
     }
   }
-}
-`;
+}`;
 
 export const CHAT_DETAILS = `query GetChat($id: ID!){
   chat: getChat(id: $id) {
     _id
     name
+    owner
     inviteLink
     participants {
       _id
@@ -47,13 +48,13 @@ export const CHAT_DETAILS = `query GetChat($id: ID!){
       createdAt
     }
   }
-}
-`;
+}`;
 
 export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
   createChat(value: $value) {
     _id
     name
+    owner
     inviteLink
     participants {
       _id
@@ -64,13 +65,37 @@ export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
       _id
     }
   }
-}
-`;
+}`;
+
+export const UPDATE_CHAT = `mutation UpadateChat($id: ID!, $value: ChatInput!) {
+  updateChat(id: $id, value: $value) {
+    _id
+    name
+    owner
+    inviteLink
+    participants {
+      _id
+      name
+    }
+    color
+    messages {
+      _id
+      author {
+        _id
+        name
+        color
+      }
+      content
+      createdAt
+    }
+  }
+}`;
 
 export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
   joinChat(inviteLink: $inviteLink) {
     _id
     name
+    owner
     inviteLink
     participants {
       _id
@@ -81,8 +106,7 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
       _id
     }
   }
-}
-`;
+}`;
 
 export const POST_MESSAGE = `mutation PostMessage($chatId: ID!, $content: String!) {
   message: postMessage(chatId: $chatId, content: $content) {
@@ -94,5 +118,4 @@ export const POST_MESSAGE = `mutation PostMessage($chatId: ID!, $content: String
     content
     createdAt
   }
-}
-`;
+}`;

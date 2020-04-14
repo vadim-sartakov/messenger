@@ -87,6 +87,7 @@ function Drawer({
       </Grid>
       <Divider />
       <ChatList
+        me={me}
         chats={chats}
         onCreateChat={onCreateChat}
       />

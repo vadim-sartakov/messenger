@@ -8,6 +8,8 @@ export const HIDE_MESSAGE = 'HIDE_MESSAGE';
 
 export const CREATE_CHAT_REQUESTED = 'CREATE_CHAT_REQUESTED';
 export const CREATE_CHAT_SUCCEEDED = 'CREATE_CHAT_SUCCEEDED';
+export const UPDATE_CHAT_REQUESTED = 'UPDATE_CHAT_REQUESTED';
+export const UPDATE_CHAT_SUCCEEDED = 'UPDATE_CHAT_SUCCEEDED';
 
 export const JOIN_CHAT_REQUESTED = 'JOIN_CHAT_REQUESTED';
 export const JOIN_CHAT_SUCCEEDED = 'JOIN_CHAT_SUCCEEDED';
@@ -35,6 +37,10 @@ export function hideMessage(message) {
 
 export function createChat(chat, history) {
   return { type: CREATE_CHAT_REQUESTED, chat, history };
+}
+
+export function updateChat(chatId, chat) {
+  return { type: UPDATE_CHAT_REQUESTED, chatId, chat };
 }
 
 export function joinChat(inviteLink, history) {

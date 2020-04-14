@@ -16,6 +16,7 @@ type Message {
 type Chat {
   _id: ID!
   name: String
+  owner: ID!
   inviteLink: String!
   participants: [User!]!
   color: String!
@@ -34,6 +35,7 @@ input ChatInput {
 
 type Mutation {
   createChat(value: ChatInput!): Chat!
+  updateChat(id: ID!, value: ChatInput!): Chat!
   joinChat(inviteLink: String!): Chat!
   postMessage(chatId: ID!, content: String!): Message!
 }

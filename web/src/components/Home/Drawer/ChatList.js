@@ -20,6 +20,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import SettingsIcon from '@material-ui/icons/Settings';
+import EditIcon from '@material-ui/icons/Edit';
 import LinkIcon from '@material-ui/icons/Link';
 import PersonIcon from '@material-ui/icons/Person';
 import { makeStyles } from '@material-ui/core/styles';
@@ -27,6 +28,7 @@ import ColoredAvatar from '../../ui/ColoredAvatar';
 import CreateNewChat from '../ChatDialog';
 import getShortName from '../../../utils/getShortName';
 import InviteLink from '../../ui/InviteLink';
+import ChatDialog from '../ChatDialog';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -57,7 +59,22 @@ const useStyles = makeStyles(theme => {
   }
 });
 
-const LinkOption = forwardRef(function LinkOption({ name, inviteLink }, ref) {
+const EditOption = forwardRef(function LinkOption({ chat }, ref) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <MenuItem ref={ref} onClick={() => setOpen(true)}>
+        <ListItemIcon>
+          <EditIcon />
+        </ListItemIcon>
+        <ListItemText primary="Rename" />
+      </MenuItem>
+      <ChatDialog open={open} onClose={() => setOpen(false)} chat={chat} />
+    </>
+  )
+});
+
+const LinkOption = forwardRef(function LinkOption({ chat }, ref) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -76,7 +93,7 @@ const LinkOption = forwardRef(function LinkOption({ name, inviteLink }, ref) {
         <DialogTitle>{name}</DialogTitle>
         <DialogContent>
           <DialogContentText>Share this link with others for invite:</DialogContentText>
-          <InviteLink chat={{ inviteLink }} />
+          <InviteLink chat={chat} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)} color="primary">Close</Button>
@@ -86,7 +103,8 @@ const LinkOption = forwardRef(function LinkOption({ name, inviteLink }, ref) {
   )
 });
 
-function Chat({ name, messages, inviteLink, participants, color, selected, onClick }) {
+function Chat({ me, chat, selected, onClick }) {
+  const { name, messages, participants, color } = chat;
   const classes = useStyles();
   const title = name || participants[participants.length - 1].name;
   const lastMessage = messages && messages[messages.length - 1];
@@ -121,7 +139,8 @@ function Chat({ name, messages, inviteLink, participants, color, selected, onCli
         onClick={() => setOpenMenu(false)}
         keepMounted
       >
-        <LinkOption name={name} inviteLink={inviteLink} />
+        {me._id === chat.owner && <EditOption chat={chat} />}
+        <LinkOption chat={chat} />
         <MenuItem>
           <ListItemIcon>
             <PersonIcon />
@@ -133,7 +152,7 @@ function Chat({ name, messages, inviteLink, participants, color, selected, onCli
   )
 }
 
-function ChatList({ chats = [], onCreateChat }) {
+function ChatList({ me, chats = [], onCreateChat }) {
   const classes = useStyles();
   const history = useHistory();
   const { chatId: selected } = useParams();
@@ -170,7 +189,8 @@ function ChatList({ chats = [], onCreateChat }) {
         return (
           <Chat
             key={chat._id}
-            {...chat}
+            me={me}
+            chat={chat}
             selected={selected === chat._id}
             onClick={() => history.replace({ pathname: `/chats/${chat._id}` })}
           />

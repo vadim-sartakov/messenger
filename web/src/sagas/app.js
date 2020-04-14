@@ -136,6 +136,16 @@ function* createChat({ chat, history }) {
   }
 }
 
+function* updateChat({ chatId, chat }) {
+  const { auth: { token } } = yield select();
+  try {
+    const response = yield call(graphqlFetchUtil, queries.UPDATE_CHAT, { url: GRAPHQL_URL, variables: { id: chatId, value: chat }, token });
+    yield put({ type: actions.UPDATE_CHAT_SUCCEEDED, chatId, chat: response.data.updateChat });
+  } catch(err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to update chat. Please try again later' });
+  }
+}
+
 function* joinChat({ inviteLink, history }) {
   const { auth: { token } } = yield select();
   try {
@@ -152,6 +162,7 @@ export default function* appSaga() {
   yield all([
     takeLatest(actions.INITIALIZE_REQUESTED, initialize),
     takeLatest(actions.CREATE_CHAT_REQUESTED, createChat),
-    takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat)
+    takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat),
+    takeLatest(actions.UPDATE_CHAT_REQUESTED, updateChat)
   ]);
 }

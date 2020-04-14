@@ -67,6 +67,13 @@ const root = {
       const newChat = new Chat({ name: value.name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },
+    updateChat: async (parent, { id, value }, req) => {
+      const currentUserId = req.user.subject;
+      const chat = await Chat.findById({ _id: id });
+      if (chat.owner.toString() !== currentUserId) throw new GraphQLError('Only owner can change chat');
+      chat.name = value.name;
+      return await chat.save();
+    },
     joinChat: async (parent, { inviteLink }, req) => {
       // TODO: protect from bruteforce
       const currentUserId = req.user.subject;

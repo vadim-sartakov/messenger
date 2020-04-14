@@ -9,13 +9,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { Formik, Form } from 'formik';
 import InputTextField from '../ui/InputTextField';
-import { createChat } from '../../actions';
-import { CREATE_CHAT } from '../../queries';
-import graphqlFetch from '../../utils/graphqlFetch';
+import { createChat, updateChat } from '../../actions';
 import { isRequired } from '../../utils/validators';
-import { GRAPHQL_URL } from '../../constants';
 
-const defaultInitialValues = {
+const newChat = {
   name: ''
 };
 
@@ -25,16 +22,16 @@ function validate(value) {
   return errors;
 }
 
-function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSubmit }) {
+function ChatDialog({ open, onClose, chat, onSubmit }) {
   return (
     <Dialog maxWidth="xs" fullWidth open={open} onClose={onClose} TransitionComponent={Grow}>
       <Formik
-        initialValues={initialValues}
+        initialValues={chat}
         validate={validate}
         onSubmit={onSubmit}
       >
         <Form noValidate>
-          <DialogTitle>Create New Chat</DialogTitle>
+          <DialogTitle>{chat._id ? 'Update Chat' : 'Create New Chat'}</DialogTitle>
           <DialogContent>
             <InputTextField
               id="name"
@@ -53,7 +50,7 @@ function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSub
               variant="contained"
               color="primary"
             >
-              Create
+              {chat._id ? 'Update' : 'Create'}
             </Button>
           </DialogActions>
         </Form>
@@ -62,18 +59,20 @@ function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSub
   )
 }
 
-function ChatDialogContainer({ id, createChat, onClose, ...props }) {
+function ChatDialogContainer({ chat = newChat, createChat, updateChat, onClose, ...props }) {
   const history = useHistory();
-  const handleSubmit = useCallback(async chat => {
-    if (!id) createChat(chat, history);
+  const handleSubmit = useCallback(async ({ name }) => {
+    if (chat._id) updateChat(chat._id, { name });
+    else createChat({ name }, history);
     onClose();
-  }, [id, history, createChat, onClose]);
-  return <ChatDialog {...props} onClose={onClose} onSubmit={handleSubmit} />;
+  }, [chat, history, createChat, updateChat, onClose]);
+  return <ChatDialog {...props} chat={chat} onClose={onClose} onSubmit={handleSubmit} />;
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    createChat: (chat, history) => dispatch(createChat(chat, history))
+    createChat: (chat, history) => dispatch(createChat(chat, history)),
+    updateChat: (id, chat) => dispatch(updateChat(id, chat))
   }
 }
 

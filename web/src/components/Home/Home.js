@@ -102,7 +102,7 @@ function Home({ logout, me, chats }) {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap className={classes.title}>
-              Messenger App
+              {curChat ? curChat.name : 'Messenger App'}
             </Typography>
             <Tooltip arrow title="Logout">
               <IconButton color="inherit" onClick={() => setOpenLogout(true)}>
