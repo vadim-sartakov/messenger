@@ -6,7 +6,8 @@ export const DESTROY_SUCCEEDED = 'DESTROY_SUCCEEDED';
 export const SHOW_MESSAGE = 'SHOW_MESSAGE';
 export const HIDE_MESSAGE = 'HIDE_MESSAGE';
 
-export const ADD_CHAT = 'ADD_CHAT';
+export const CREATE_CHAT_REQUESTED = 'CREATE_CHAT_REQUESTED';
+export const CREATE_CHAT_SUCCEEDED = 'CREATE_CHAT_SUCCEEDED';
 
 export const JOIN_CHAT_REQUESTED = 'JOIN_CHAT_REQUESTED';
 export const JOIN_CHAT_SUCCEEDED = 'JOIN_CHAT_SUCCEEDED';
@@ -32,8 +33,8 @@ export function hideMessage(message) {
   return { type: HIDE_MESSAGE, message };
 }
 
-export function addChat(chat) {
-  return { type: ADD_CHAT, chat };
+export function createChat(chat, history) {
+  return { type: CREATE_CHAT_REQUESTED, chat, history };
 }
 
 export function joinChat(inviteLink, history) {

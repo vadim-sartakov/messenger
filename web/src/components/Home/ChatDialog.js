@@ -9,7 +9,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { Formik, Form } from 'formik';
 import InputTextField from '../ui/InputTextField';
-import { addChat } from '../../actions';
+import { createChat } from '../../actions';
 import { CREATE_CHAT } from '../../queries';
 import graphqlFetch from '../../utils/graphqlFetch';
 import { isRequired } from '../../utils/validators';
@@ -62,29 +62,19 @@ function ChatDialog({ open, onClose, initialValues = defaultInitialValues, onSub
   )
 }
 
-function ChatDialogContainer({ token, id, addChat, onClose, ...props }) {
+function ChatDialogContainer({ id, createChat, onClose, ...props }) {
   const history = useHistory();
   const handleSubmit = useCallback(async chat => {
-    if (!id) {
-      const response = await graphqlFetch(CREATE_CHAT, { url: GRAPHQL_URL, variables: { value: chat }, token });
-      addChat(response.data.createChat);
-      history.replace({ pathname: `/chats/${response.data.createChat._id}` });
-    }
+    if (!id) createChat(chat, history);
     onClose();
-  }, [id, history, addChat, token, onClose]);
+  }, [id, history, createChat, onClose]);
   return <ChatDialog {...props} onClose={onClose} onSubmit={handleSubmit} />;
-}
-
-function mapStateToProps(state) {
-  return {
-    token: state.auth.token
-  }
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    addChat: chat => dispatch(addChat(chat))
+    createChat: (chat, history) => dispatch(createChat(chat, history))
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChatDialogContainer);
+export default connect(undefined, mapDispatchToProps)(ChatDialogContainer);

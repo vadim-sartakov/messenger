@@ -125,17 +125,33 @@ function* initialize({ reconnect }) {
   }
 }
 
+function* createChat({ chat, history }) {
+  const { auth: { token } } = yield select();
+  try {
+    const response = yield call(graphqlFetchUtil, queries.CREATE_CHAT, { url: GRAPHQL_URL, variables: { value: chat }, token });
+    yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat: response.data.createChat });
+    yield call ([history, 'replace'], { pathname: `/chats/${response.data.createChat._id}` });
+  } catch(err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to create chat. Please try again later' });
+  }
+}
+
 function* joinChat({ inviteLink, history }) {
   const { auth: { token } } = yield select();
-  const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
-  const chat = response.data.joinChat;
-  yield put({ type: actions.JOIN_CHAT_SUCCEEDED, chat });
-  yield call([history, 'replace'], { pathname: `/chats/${chat._id}` });
+  try {
+    const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
+    const chat = response.data.joinChat;
+    yield put({ type: actions.JOIN_CHAT_SUCCEEDED, chat });
+    yield call([history, 'replace'], { pathname: `/chats/${chat._id}` });
+  } catch(err) {
+    yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to join chat' });
+  }
 }
 
 export default function* appSaga() {
   yield all([
     takeLatest(actions.INITIALIZE_REQUESTED, initialize),
+    takeLatest(actions.CREATE_CHAT_REQUESTED, createChat),
     takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat)
   ]);
 }

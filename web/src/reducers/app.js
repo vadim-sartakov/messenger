@@ -6,7 +6,7 @@ import {
   INITIALIZE_FAILED,
   SHOW_MESSAGE,
   HIDE_MESSAGE,
-  ADD_CHAT,
+  CREATE_CHAT_SUCCEEDED,
   JOIN_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
   DESTROY_SUCCEEDED,
@@ -27,7 +27,7 @@ function app(state = initialState, { type, ...action }) {
       return { ...state, message: { ...action, open: true } };
     case HIDE_MESSAGE:
       return { ...state, message: { ...state.message, open: false } };
-    case ADD_CHAT:
+    case CREATE_CHAT_SUCCEEDED:
       return { ...state, chats: [...state.chats, action.chat] };
     case ADD_CHAT_PARTICIPANT:
       return {
