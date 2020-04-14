@@ -110,7 +110,6 @@ function InputMessage({ onSubmit }) {
 }
 
 // TODO:
-// Add messages transition group
 // Add messages pagination
 function Chat({ chat, postMessage }) {
   const classes = useStyles();

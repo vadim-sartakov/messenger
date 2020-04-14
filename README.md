@@ -22,6 +22,4 @@ Messenger application
 - GraphQL
 
 ### TODO
-- Route transition
-- Fetch error handling
 - Skeleton loading
