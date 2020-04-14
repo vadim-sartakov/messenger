@@ -50,8 +50,8 @@ export const CHAT_DETAILS = `query GetChat($id: ID!){
   }
 }`;
 
-export const CREATE_CHAT = `mutation CreateChat($value: ChatInput!) {
-  createChat(value: $value) {
+export const CREATE_CHAT = `mutation CreateChat($name: String!) {
+  createChat(name: $name) {
     _id
     name
     owner

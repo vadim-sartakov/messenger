@@ -63,7 +63,7 @@ function ChatDialogContainer({ chat = newChat, createChat, renameChat, onClose, 
   const history = useHistory();
   const handleSubmit = useCallback(async ({ name }) => {
     if (chat._id) renameChat(chat._id, name);
-    else createChat({ name }, history);
+    else createChat(name, history);
     onClose();
   }, [chat, history, createChat, renameChat, onClose]);
   return <ChatDialog {...props} chat={chat} onClose={onClose} onSubmit={handleSubmit} />;
@@ -71,7 +71,7 @@ function ChatDialogContainer({ chat = newChat, createChat, renameChat, onClose, 
 
 function mapDispatchToProps(dispatch) {
   return {
-    createChat: (chat, history) => dispatch(createChat(chat, history)),
+    createChat: (name, history) => dispatch(createChat(name, history)),
     renameChat: (id, name) => dispatch(renameChat(id, name))
   }
 }

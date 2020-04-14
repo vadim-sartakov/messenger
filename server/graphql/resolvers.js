@@ -67,14 +67,14 @@ const root = {
     }
   },
   Mutation: {
-    createChat: async (parent, { value }, req) => {
+    createChat: async (parent, { name }, req) => {
       const currentUserId = req.user.subject;
       let inviteLink;
       while(true) {
         inviteLink = getRandomString(7);
         if (!await Chat.findOne({ inviteLink })) break;
       }
-      const newChat = new Chat({ name: value.name, inviteLink, owner: currentUserId, participants: [currentUserId] });
+      const newChat = new Chat({ name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },
     renameChat: async (parent, { id, name }, req) => {

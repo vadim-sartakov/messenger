@@ -129,10 +129,10 @@ function* initialize({ reconnect }) {
   }
 }
 
-function* createChat({ chat, history }) {
+function* createChat({ name, history }) {
   const { auth: { token } } = yield select();
   try {
-    const response = yield call(graphqlFetchUtil, queries.CREATE_CHAT, { url: GRAPHQL_URL, variables: { value: chat }, token });
+    const response = yield call(graphqlFetchUtil, queries.CREATE_CHAT, { url: GRAPHQL_URL, variables: { name }, token });
     yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat: response.data.createChat });
     yield call ([history, 'replace'], { pathname: `/chats/${response.data.createChat._id}` });
   } catch(err) {

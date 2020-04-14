@@ -29,12 +29,8 @@ type Query {
   getChat(id: ID!): Chat!
 }
 
-input ChatInput {
-  name: String!
-}
-
 type Mutation {
-  createChat(value: ChatInput!): Chat!
+  createChat(name: String!): Chat!
   renameChat(id: ID!, name: String!): Boolean
   joinChat(inviteLink: String!): Chat!
   postMessage(chatId: ID!, content: String!): Message!

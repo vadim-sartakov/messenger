@@ -35,8 +35,8 @@ export function hideMessage(message) {
   return { type: HIDE_MESSAGE, message };
 }
 
-export function createChat(chat, history) {
-  return { type: CREATE_CHAT_REQUESTED, chat, history };
+export function createChat(name, history) {
+  return { type: CREATE_CHAT_REQUESTED, name, history };
 }
 
 export function renameChat(chatId, name) {
