@@ -1,5 +1,5 @@
 import { eventChannel } from 'redux-saga';
-import { takeLatest, select, take, call, put, fork, actionChannel, delay, race, cancel, all } from 'redux-saga/effects';
+import { takeLatest, select, take, call, put, fork, delay, race, all, takeEvery } from 'redux-saga/effects';
 import * as actions from '../actions';
 import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
@@ -10,7 +10,7 @@ const messageTypes = {
   CLOSE: 'close',
   CHAT_RENAMED: 'chat_renamed',
   JOINED_CHAT: 'joined_chat',
-  POST_MESSAGE: 'post_message'
+  MESSAGE_POSTED: 'message_posted'
 };
 
 function createSocket(token) {
@@ -54,49 +54,11 @@ function* watchSocket(socket, reconnect) {
       case messageTypes.JOINED_CHAT:
         yield put({ type: actions.ADD_CHAT_PARTICIPANT, chatId: action.chatId, participant: action.participant });
         break;
-      case messageTypes.POST_MESSAGE:
-        yield put({ type: actions.ADD_MESSAGE, chatId: action.chatId, message: action.message });
+      case messageTypes.MESSAGE_POSTED:
+        yield put({ type: actions.POST_MESSAGE_SUCCEEDED, chatId: action.chatId, message: action.message });
         break;
       default:
     }
-  }
-}
-
-function* handleSendMessage(socket, token, action) {
-  const { chatId, message } = action;
-  const { app: { chats, me } } = yield select();
-  const curChat = chats.find(chat => chat._id === chatId);
-  const newMessage = { content: message.content, author: me, createdAt: new Date() };
-  yield put({ type: actions.ADD_MESSAGE, chatId, message: newMessage });
-  yield fork([socket, 'send'], JSON.stringify({
-    type: messageTypes.POST_MESSAGE,
-    chatId,
-    participants: curChat.participants,
-    message: newMessage
-  }));
-  yield fork(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, content: message.content } });
-}
-
-function* watchRequests(socket, token) {
-  const requestChannel = yield actionChannel([actions.POST_MESSAGE_REQUESTED]);
-  while(true) {
-    const { type, ...action } = yield take(requestChannel);
-    switch (type) {
-      case actions.POST_MESSAGE_REQUESTED:
-        yield handleSendMessage(socket, token, action);
-        break;
-      default:
-    }
-    
-  }
-}
-
-function* initializeSocket(socket, token, reconnect) {
-  while(true) {
-    const watchRequestsTask = yield fork(watchRequests, socket, token);
-    const disconnected = yield call(watchSocket, socket, reconnect);
-    yield cancel(watchRequestsTask);
-    return disconnected;
   }
 }
 
@@ -116,7 +78,7 @@ function* initialize({ reconnect }) {
   const socket = yield call(createSocket, token);
   yield fork(fetchData, token, queries.HOME, { successAction: actions.INITIALIZE_SUCCEEDED, failAction: actions.INITIALIZE_FAILED });
   const { disconnected, destroy } = yield race({
-    disconnected: call(initializeSocket, socket, token, reconnect),
+    disconnected: call(watchSocket, socket, reconnect),
     destroy: take(actions.DESTROY_REQUESTED)
   });
   if (destroy) {
@@ -162,11 +124,19 @@ function* joinChat({ inviteLink, history }) {
   }
 }
 
+function* postMessage({ chatId, text }) {
+  const { auth: { token }, app: { me } } = yield select();
+  const newMessage = { content: text, author: me, createdAt: new Date() };
+  yield put({ type: actions.POST_MESSAGE_SUCCEEDED, chatId, message: newMessage });
+  yield call(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, text } });
+}
+
 export default function* appSaga() {
   yield all([
     takeLatest(actions.INITIALIZE_REQUESTED, initialize),
     takeLatest(actions.CREATE_CHAT_REQUESTED, createChat),
     takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat),
-    takeLatest(actions.RENAME_CHAT_REQUESTED, renameChat)
+    takeLatest(actions.RENAME_CHAT_REQUESTED, renameChat),
+    takeEvery(actions.POST_MESSAGE_REQUESTED, postMessage)
   ]);
 }

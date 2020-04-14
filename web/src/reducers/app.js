@@ -11,7 +11,7 @@ import {
   JOIN_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
   DESTROY_SUCCEEDED,
-  ADD_MESSAGE
+  POST_MESSAGE_SUCCEEDED
 } from '../actions';
 
 const initialState = { isLoading: true, chat: { isLoading: true } };
@@ -50,7 +50,7 @@ function app(state = initialState, { type, ...action }) {
         ...state,
         chats: [...state.chats, action.chat]
       };
-    case ADD_MESSAGE:
+    case POST_MESSAGE_SUCCEEDED:
       return {
         ...state,
         chats: state.chats.map(chat => {

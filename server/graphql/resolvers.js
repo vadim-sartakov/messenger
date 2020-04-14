@@ -99,10 +99,15 @@ const root = {
       chat.participants = [...(chat.participants || []), currentUserId];
       return await chat.save();
     },
-    postMessage: async (parent, { chatId, content }, req) => {
+    postMessage: async (parent, { chatId, text }, req) => {
       const currentUserId = req.user.subject;
-      const message = new Message({ author: currentUserId, content, chat: chatId });
-      return await message.save();
+      const chat = await Chat.findOne({ _id: chatId, participants: { $in: currentUserId } });
+      if (!chat) throw new GraphQLError('Invalid chat id');
+      const message = new Message({ author: currentUserId, content: text, chat: chatId });
+      await message.save();
+      await message.populate('author').execPopulate();
+      sendToChatParticipants(req, chat, () => ({ type: 'message_posted', chatId: chat._id, message }));
+      return message;
     }
   }
 };

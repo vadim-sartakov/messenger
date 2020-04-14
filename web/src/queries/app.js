@@ -88,8 +88,8 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
   }
 }`;
 
-export const POST_MESSAGE = `mutation PostMessage($chatId: ID!, $content: String!) {
-  message: postMessage(chatId: $chatId, content: $content) {
+export const POST_MESSAGE = `mutation PostMessage($chatId: ID!, $text: String!) {
+  message: postMessage(chatId: $chatId, text: $text) {
     _id
     author {
       _id

@@ -4,8 +4,8 @@ import { postMessage } from '../../actions';
 import Chat from './Chat';
 
 function ChatContainer({ id, chat, postMessage, ...props }) {
-  const handlePostMessage = useCallback(message => {
-    postMessage(id, message);
+  const handlePostMessage = useCallback(({ content }) => {
+    postMessage(id, content);
   }, [id, postMessage]);
 
   return (
@@ -20,7 +20,7 @@ function ChatContainer({ id, chat, postMessage, ...props }) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    postMessage: (chatId, message) => dispatch(postMessage(chatId, message))
+    postMessage: (chatId, text) => dispatch(postMessage(chatId, text))
   }
 }
 

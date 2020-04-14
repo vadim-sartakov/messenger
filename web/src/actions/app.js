@@ -20,9 +20,6 @@ export const POST_MESSAGE_REQUESTED = 'POST_MESSAGE_REQUESTED';
 export const POST_MESSAGE_SUCCEEDED = 'POST_MESSAGE_SUCCEEDED';
 export const POST_MESSAGE_FAILED = 'POST_MESSAGE_FAILED';
 
-export const ADD_MESSAGE = 'ADD_MESSAGE';
-export const UPDATE_MESSAGE = 'UPDATE_MESSAGE';
-
 export function initialize() {
   return { type: INITIALIZE_REQUESTED };
 }
@@ -47,8 +44,8 @@ export function joinChat(inviteLink, history) {
   return { type: JOIN_CHAT_REQUESTED, inviteLink, history };
 }
 
-export function postMessage(chatId, message) {
-  return { type: POST_MESSAGE_REQUESTED, chatId, message };
+export function postMessage(chatId, text) {
+  return { type: POST_MESSAGE_REQUESTED, chatId, text };
 }
 
 export function destroy() {
