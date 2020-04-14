@@ -35,7 +35,7 @@ input ChatInput {
 
 type Mutation {
   createChat(value: ChatInput!): Chat!
-  updateChat(id: ID!, value: ChatInput!): Chat!
+  renameChat(id: ID!, name: String!): Boolean
   joinChat(inviteLink: String!): Chat!
   postMessage(chatId: ID!, content: String!): Message!
 }

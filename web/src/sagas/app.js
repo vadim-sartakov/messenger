@@ -8,6 +8,7 @@ import { GRAPHQL_URL, WS_URL } from '../constants';
 const messageTypes = {
   OPEN: 'open',
   CLOSE: 'close',
+  CHAT_RENAMED: 'chat_renamed',
   JOINED_CHAT: 'joined_chat',
   POST_MESSAGE: 'post_message'
 };
@@ -47,6 +48,9 @@ function* watchSocket(socket, reconnect) {
         break;
       case messageTypes.CLOSE:
         return true;
+      case messageTypes.CHAT_RENAMED:
+        yield put({ type: actions.RENAME_CHAT_SUCCEEDED, chatId: action.chatId, name: action.name });
+        break;
       case messageTypes.JOINED_CHAT:
         yield put({ type: actions.ADD_CHAT_PARTICIPANT, chatId: action.chatId, participant: action.participant });
         break;
@@ -136,11 +140,11 @@ function* createChat({ chat, history }) {
   }
 }
 
-function* updateChat({ chatId, chat }) {
+function* renameChat({ chatId, name }) {
   const { auth: { token } } = yield select();
   try {
-    const response = yield call(graphqlFetchUtil, queries.UPDATE_CHAT, { url: GRAPHQL_URL, variables: { id: chatId, value: chat }, token });
-    yield put({ type: actions.UPDATE_CHAT_SUCCEEDED, chatId, chat: response.data.updateChat });
+    yield call(graphqlFetchUtil, queries.RENAME_CHAT, { url: GRAPHQL_URL, variables: { id: chatId, name }, token });
+    yield put({ type: actions.RENAME_CHAT_SUCCEEDED, chatId, name });
   } catch(err) {
     yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to update chat. Please try again later' });
   }
@@ -163,6 +167,6 @@ export default function* appSaga() {
     takeLatest(actions.INITIALIZE_REQUESTED, initialize),
     takeLatest(actions.CREATE_CHAT_REQUESTED, createChat),
     takeLatest(actions.JOIN_CHAT_REQUESTED, joinChat),
-    takeLatest(actions.UPDATE_CHAT_REQUESTED, updateChat)
+    takeLatest(actions.RENAME_CHAT_REQUESTED, renameChat)
   ]);
 }

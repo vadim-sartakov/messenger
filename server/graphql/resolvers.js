@@ -19,6 +19,16 @@ function findWsClient(wssClients, id) {
   });
 }
 
+function sendToChatParticipants(req, chat, callback) {
+  const currentUserId = req.user.subject;
+  const { wss } = req.app;
+  (chat.participants || []).forEach(participant => {
+    const client = findWsClient(wss.clients, participant.toString());
+    if (client.id === currentUserId) return;
+    client.send(JSON.stringify(callback()));
+  });
+}
+
 const root = {
   Date: GraphQLDateTime,
   Chat: {
@@ -67,12 +77,14 @@ const root = {
       const newChat = new Chat({ name: value.name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },
-    updateChat: async (parent, { id, value }, req) => {
+    renameChat: async (parent, { id, name }, req) => {
       const currentUserId = req.user.subject;
       const chat = await Chat.findById({ _id: id });
       if (chat.owner.toString() !== currentUserId) throw new GraphQLError('Only owner can change chat');
-      chat.name = value.name;
-      return await chat.save();
+      chat.name = name;
+      await chat.save();
+      sendToChatParticipants(req, chat, () => ({ type: 'chat_renamed', chatId: chat._id, name }));
+      return;
     },
     joinChat: async (parent, { inviteLink }, req) => {
       // TODO: protect from bruteforce
@@ -82,11 +94,7 @@ const root = {
       const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid id');
 
-      const { wss } = req.app;
-      (chat.participants || []).forEach(participant => {
-        const client = findWsClient(wss.clients, participant.toString());
-        client.send(JSON.stringify({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
-      });
+      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
 
       chat.participants = [...(chat.participants || []), currentUserId];
       return await chat.save();

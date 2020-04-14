@@ -9,7 +9,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Grow from '@material-ui/core/Grow';
 import { Formik, Form } from 'formik';
 import InputTextField from '../ui/InputTextField';
-import { createChat, updateChat } from '../../actions';
+import { createChat, renameChat } from '../../actions';
 import { isRequired } from '../../utils/validators';
 
 const newChat = {
@@ -59,20 +59,20 @@ function ChatDialog({ open, onClose, chat, onSubmit }) {
   )
 }
 
-function ChatDialogContainer({ chat = newChat, createChat, updateChat, onClose, ...props }) {
+function ChatDialogContainer({ chat = newChat, createChat, renameChat, onClose, ...props }) {
   const history = useHistory();
   const handleSubmit = useCallback(async ({ name }) => {
-    if (chat._id) updateChat(chat._id, { name });
+    if (chat._id) renameChat(chat._id, name);
     else createChat({ name }, history);
     onClose();
-  }, [chat, history, createChat, updateChat, onClose]);
+  }, [chat, history, createChat, renameChat, onClose]);
   return <ChatDialog {...props} chat={chat} onClose={onClose} onSubmit={handleSubmit} />;
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     createChat: (chat, history) => dispatch(createChat(chat, history)),
-    updateChat: (id, chat) => dispatch(updateChat(id, chat))
+    renameChat: (id, name) => dispatch(renameChat(id, name))
   }
 }
 
