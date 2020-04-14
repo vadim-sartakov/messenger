@@ -12,8 +12,7 @@ import {
 import { API_URL } from '../constants';
 
 function* watchTokenExpiration() {
-  const state = yield select();
-  const { token } = state.auth;
+  const token = yield select(state => state.auth.token);
   if (!token) return;
   const payload = JSON.parse(atob(token.split('.')[1]));
   const expMs = payload.exp * 1000;

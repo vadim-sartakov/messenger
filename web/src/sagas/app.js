@@ -73,8 +73,7 @@ function* fetchData(token, query, { variables, successAction, failAction }) {
 }
 
 function* initialize({ reconnect }) {
-  const state = yield select();
-  const { token } = state.auth;
+  const token = yield select(state => state.auth.token);
   const socket = yield call(createSocket, token);
   yield fork(fetchData, token, queries.HOME, { successAction: actions.INITIALIZE_SUCCEEDED, failAction: actions.INITIALIZE_FAILED });
   const { disconnected, destroy } = yield race({
@@ -92,7 +91,7 @@ function* initialize({ reconnect }) {
 }
 
 function* createChat({ name, history }) {
-  const { auth: { token } } = yield select();
+  const token = yield select(state => state.auth.token);
   try {
     const response = yield call(graphqlFetchUtil, queries.CREATE_CHAT, { url: GRAPHQL_URL, variables: { name }, token });
     yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat: response.data.createChat });
@@ -103,7 +102,7 @@ function* createChat({ name, history }) {
 }
 
 function* renameChat({ chatId, name }) {
-  const { auth: { token } } = yield select();
+  const token = yield select(state => state.auth.token);
   try {
     yield call(graphqlFetchUtil, queries.RENAME_CHAT, { url: GRAPHQL_URL, variables: { id: chatId, name }, token });
     yield put({ type: actions.RENAME_CHAT_SUCCEEDED, chatId, name });
@@ -113,7 +112,7 @@ function* renameChat({ chatId, name }) {
 }
 
 function* joinChat({ inviteLink, history }) {
-  const { auth: { token } } = yield select();
+  const token = yield select(state => state.auth.token);
   try {
     const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
     const chat = response.data.joinChat;
@@ -125,7 +124,8 @@ function* joinChat({ inviteLink, history }) {
 }
 
 function* postMessage({ chatId, text }) {
-  const { auth: { token }, app: { me } } = yield select();
+  const token = yield select(state => state.auth.token);
+  const me = yield select(state => state.app.me);
   const newMessage = { content: text, author: me, createdAt: new Date() };
   yield put({ type: actions.POST_MESSAGE_SUCCEEDED, chatId, message: newMessage });
   yield call(graphqlFetchUtil, queries.POST_MESSAGE, { token, url: GRAPHQL_URL, variables: { chatId, text } });
