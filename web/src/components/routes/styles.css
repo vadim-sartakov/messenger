@@ -1,14 +1,30 @@
-.fade-enter {
+.fast-fade-enter {
   opacity: 0;
 }
-.fade-enter-active {
+.fast-fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in-out;
+}
+.fast-fade-exit {
+  opacity: 1;
+}
+.fast-fade-exit-active {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+}
+
+
+.mid-fade-enter {
+  opacity: 0;
+}
+.mid-fade-enter-active {
   opacity: 1;
   transition: opacity 400ms ease-in-out;
 }
-.fade-exit {
+.mid-fade-exit {
   opacity: 1;
 }
-.fade-exit-active {
+.mid-fade-exit-active {
   opacity: 0;
   transition: opacity 400ms ease-in-out;
 }

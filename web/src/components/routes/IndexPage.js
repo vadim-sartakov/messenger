@@ -19,7 +19,7 @@ function IndexPage() {
         // To prevent transitions between home pages
         // assigning the same key for all non login pages
         key={location.pathname === '/login' ? location.key : 'home'}
-        classNames="fade"
+        classNames="mid-fade"
         timeout={400}
       >
         <Switch location={location}>

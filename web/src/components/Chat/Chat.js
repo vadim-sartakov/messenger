@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -128,11 +129,15 @@ function Chat({ chat, postMessage }) {
         alignItems="flex-start"
         className={classes.messagesContainer}
       >
-        {chat.messages.map((message, index) => {
-          return (
-            <Message id={`message-${index}`} key={index} {...message} className={classes.message} />
-          )
-        })}
+        <TransitionGroup>
+          {chat.messages.map((message, index) => {
+            return (
+              <CSSTransition key={index} classNames="mid-fade" timeout={200}>
+                <Message id={`message-${index}`} key={index} {...message} className={classes.message} />
+              </CSSTransition>
+            )
+          })}
+        </TransitionGroup>
       </Grid>
       <div className={classes.inputMessageContainer}>
         <InputMessage onSubmit={postMessage} />
