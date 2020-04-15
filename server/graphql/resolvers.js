@@ -70,9 +70,8 @@ const root = {
     createChat: async (parent, { name }, req) => {
       const currentUserId = req.user.subject;
       let inviteLink;
-      while(true) {
+      while(!inviteLink || await Chat.findOne({ inviteLink })) {
         inviteLink = getRandomString(7);
-        if (!await Chat.findOne({ inviteLink })) break;
       }
       const newChat = new Chat({ name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
