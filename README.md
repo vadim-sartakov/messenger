@@ -23,3 +23,4 @@ Messenger application
 
 ### TODO
 - Skeleton loading
+- Data cleanup

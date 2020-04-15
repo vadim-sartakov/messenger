@@ -11,8 +11,10 @@ import {
 } from '../actions';
 import { API_URL } from '../constants';
 
+export const tokenSelector = state => state.auth.token;
+
 export function* watchTokenExpiration() {
-  const token = yield select(state => state.auth.token);
+  const token = yield select(tokenSelector);
   if (!token) return;
   const payload = JSON.parse(atob(token.split('.')[1]));
   // By default jwt stores expiration in seconds,

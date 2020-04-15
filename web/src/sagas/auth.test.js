@@ -1,4 +1,6 @@
-import { runSaga } from 'redux-saga';
+import { select } from 'redux-saga/effects';
+import { tokenSelector } from './auth';
+import { expectSaga } from 'redux-saga-test-plan';
 import { TOKEN_EXPIRED, LOGIN_SUCCEEDED, LOGIN_FAILED, SHOW_MESSAGE } from '../actions';
 import { watchTokenExpiration, authorize } from './auth';
 
@@ -10,13 +12,23 @@ describe('auth saga', () => {
     };
 
     it('should trigger token expiration when expired', async () => {
-      const dispatched = [];
       const token = createToken((new Date().getTime() - 1000) / 1000);
-      await runSaga({
-        dispatch: action => dispatched.push(action),
-        getState: () => ({ auth: { token } })
-      }, watchTokenExpiration, ).toPromise();
-      expect(dispatched[0].type).toBe(TOKEN_EXPIRED);
+      await expectSaga(watchTokenExpiration)
+        .provide([
+          [select(tokenSelector), token]
+        ])
+        .put({ type: TOKEN_EXPIRED })
+        .run();
+    });
+
+    it('should not trigger token expiration when not expired', async () => {
+      const token = createToken((new Date().getTime() + 1000) / 1000);
+      await expectSaga(watchTokenExpiration)
+        .provide([
+          [select(tokenSelector), token]
+        ])
+        .not.put({ type: TOKEN_EXPIRED })
+        .silentRun();
     });
   });
 
@@ -34,31 +46,28 @@ describe('auth saga', () => {
       const history = {
         replace: jest.fn()
       };
-      const dispatched = [];
-      await runSaga({
-        dispatch: action => dispatched.push(action),
-        getState: () => ({})
-      }, authorize, { credentials, location, history }).toPromise();
+      await expectSaga(authorize, { credentials, location, history })
+        .put({ type: LOGIN_SUCCEEDED, token: true })
+        .run();
 
       expect(fetch.mock.calls[0][0]).toBe('/login');
       expect(fetch.mock.calls[0][1].body).toBe(JSON.stringify(credentials));
 
       expect(history.replace.mock.calls[0][0]).toEqual('/prev');
-
-      expect(dispatched[0].type).toBe(LOGIN_SUCCEEDED);
-      expect(dispatched[0].token).toBe(true);
     });
 
     it('should fail to authorize on error', async () => {
       fetch.mockReturnValue(Promise.reject());
       const credentials = { name: 'Test' };
-      const dispatched = [];
-      await runSaga({
-        dispatch: action => dispatched.push(action),
-        getState: () => ({})
-      }, authorize, { credentials, location, history }).toPromise();
-      expect(dispatched[0].type).toBe(LOGIN_FAILED);
-      expect(dispatched[1].type).toBe(SHOW_MESSAGE);
+      await expectSaga(authorize, { credentials })
+        .put({ type: LOGIN_FAILED })
+        .put({
+          type: SHOW_MESSAGE,
+          severity: 'error',
+          text: 'Failed to execute request. Please try again later',
+          autoHide: true
+        })
+        .run();
     });
   });
 });
