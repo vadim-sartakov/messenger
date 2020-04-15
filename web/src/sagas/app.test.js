@@ -25,17 +25,26 @@ import {
   POST_MESSAGE_SUCCEEDED,
   CREATE_CHAT_SUCCEEDED
 } from '../actions';
+import { JOIN_CHAT, CREATE_CHAT, HOME } from '../queries';
+import { GRAPHQL_URL } from '../constants';
+
+jest.mock('../utils/graphqlFetch');
 
 describe('app saga', () => {
+  afterEach(() => graphqlFetch.mockReset());
+
   describe('loadApp', () => {
     it('should load app', async () => {
+      const response = { data: { me: 'me', chats: 'chats' } };
+      graphqlFetch.mockImplementation(() => response);
       await expectSaga(loadApp)
         .provide([
-          [select(tokenSelector), 'token'],
-          [matchers.call.fn(graphqlFetch), { data: { me: 'me', chats: 'chats' } }]
+          [select(tokenSelector), 'token']
         ])
-        .put({ type: INITIALIZE_SUCCEEDED, data: { me: 'me', chats: 'chats' } })
+        .put({ type: INITIALIZE_SUCCEEDED, data: response.data })
         .run();
+      expect(graphqlFetch.mock.calls[0][0]).toEqual(HOME);
+      expect(graphqlFetch.mock.calls[0][1]).toEqual({ url: GRAPHQL_URL, token: 'token' });
     });
 
     it('should fail to load app on error', async () => {
@@ -169,30 +178,34 @@ describe('app saga', () => {
         replace: jest.fn()
       };
       const response =  { data: { createChat: { _id: 0 } } };
+      graphqlFetch.mockImplementation(() => response);
       await expectSaga(createChat, { name: 'Test', history })
         .provide([
-          [select(tokenSelector), 'token'],
-          [matchers.call.fn(graphqlFetch), response]
+          [select(tokenSelector), 'token']
         ])
         .put({ type: CREATE_CHAT_SUCCEEDED, chat: response.data.createChat })
         .run();
+      expect(graphqlFetch.mock.calls[0][0]).toEqual(CREATE_CHAT);
+      expect(graphqlFetch.mock.calls[0][1]).toEqual({ url: GRAPHQL_URL, token: 'token', variables: { name: 'Test' } });
       expect(history.replace.mock.calls[0][0]).toEqual({ pathname: '/chats/0' });
     });
   });
 
   describe('joinChat', () => {
     it('should dispatch join chat and redirect on success', async () => {
+      const response =  { data: { joinChat: { _id: 0 } } };
+      graphqlFetch.mockImplementation(() => response);
       const history = {
         replace: jest.fn()
       };
-      const response =  { data: { joinChat: { _id: 0 } } };
-      await expectSaga(joinChat, { name: 'Test', history })
+      await expectSaga(joinChat, { inviteLink: 'Link', history })
         .provide([
-          [select(tokenSelector), 'token'],
-          [matchers.call.fn(graphqlFetch), response]
+          [select(tokenSelector), 'token']
         ])
         .put({ type: CREATE_CHAT_SUCCEEDED, chat: response.data.joinChat })
         .run();
+      expect(graphqlFetch.mock.calls[0][0]).toEqual(JOIN_CHAT);
+      expect(graphqlFetch.mock.calls[0][1]).toEqual({ url: GRAPHQL_URL, token: 'token', variables: { inviteLink: 'Link' } });
       expect(history.replace.mock.calls[0][0]).toEqual({ pathname: '/chats/0' });
     });
   });
