@@ -1,18 +1,15 @@
 const { Query, Mutation } = require('./resolvers');
 const User = require('../models/User');
 const Chat = require('../models/Chat');
+const Message = require('../models/Message');
 const getRandomString = require('../utils/getRandomString');
 
 jest.mock('../utils/getRandomString');
 jest.mock('../models/User');
 jest.mock('../models/Chat');
+jest.mock('../models/Message');
 
 describe('graphql resolvers', () => {
-  beforeEach(() => {
-    getRandomString.mockReset();
-    User.mockReset();
-    Chat.mockReset();
-  });
   const req = {
     app: {
       wss: {
@@ -28,16 +25,24 @@ describe('graphql resolvers', () => {
     user: { subject: '0' }
   };
 
+  beforeEach(() => {
+    getRandomString.mockReset();
+    User.mockReset();
+    Chat.mockReset();
+    req.app.wss.clients[0].send.mockReset();
+    req.app.wss.clients[1].send.mockReset();
+  });
+
   it('me', async () => {
     const userInstance = { _id: 0, name: 'User' };
-    User.findById.mockImplementation(() => userInstance);
+    User.findById.mockReturnValueOnce(userInstance);
     const result = await Query.me(undefined, undefined, req);
     expect(result).toEqual(userInstance);
   });
 
   it('getChats', async () => {
     const chatInstances = [{ _id: 0, name: 'Chat' }];
-    Chat.find.mockImplementation(() => chatInstances);
+    Chat.find.mockReturnValueOnce(chatInstances);
     const result = await Query.getChats(undefined, undefined, req);
     expect(result).toEqual(chatInstances);
     expect(Chat.find).toHaveBeenCalledWith({
@@ -46,7 +51,7 @@ describe('graphql resolvers', () => {
   });
 
   describe('createChat', () => {
-    it('should create chat and generate random string only once when it\'s unique', async () => {
+    it('should create chat, include owner as participant and generate random string only once when it\'s unique', async () => {
       getRandomString.mockReturnValue('random-string');
       const result = await Mutation.createChat(undefined, { name: 'Chat' }, req);
       expect(result).toEqual({
@@ -76,6 +81,11 @@ describe('graphql resolvers', () => {
   });
 
   describe('renameChat', () => {
+    it('should throw error if user is not owner', async () => {
+      await expect(Mutation.renameChat(undefined, { id: 0, name: 'Renamed chat' }, req)).rejects.toThrow('Only owner can change chat');
+      expect(Chat.findOne).toHaveBeenCalledWith({ _id: 0, owner: '0' });
+    });
+
     it('should rename chat if user is owner', async () => {
       const instance = new Chat({ owner: 0 });
       Chat.findOne.mockReturnValueOnce(instance);
@@ -85,16 +95,45 @@ describe('graphql resolvers', () => {
       expect(instance.save).toHaveBeenCalledTimes(1);
     });
 
-    it('should send notification to participants when chat renamed', async () => {
+    it('should send notification to all participants except current user when chat renamed', async () => {
       const instance = new Chat({ owner: 0, participants: ['0', '1'] });
       Chat.findOne.mockReturnValueOnce(instance);
       await Mutation.renameChat(undefined, { id: 0, name: 'Renamed chat' }, req);
+      expect(req.app.wss.clients[0].send).not.toHaveBeenCalled();
       expect(req.app.wss.clients[1].send).toHaveBeenCalledWith(JSON.stringify({ type: 'chat_renamed', name: 'Renamed chat' }));
     });
+  });
 
-    it('should throw error if user is not owner', async () => {
-      await expect(Mutation.renameChat(undefined, { id: 0, name: 'Renamed chat' }, req)).rejects.toThrow('Only owner can change chat');
-      expect(Chat.findOne).toHaveBeenCalledWith({ _id: 0, owner: '0' });
+  describe('postMessage', () => {
+    it('should throw error if user is not chat\'s participant', async () => {
+      await expect(Mutation.postMessage(undefined, { chatId: '0', text: 'Test' }, req))
+        .rejects
+        .toThrow('Invalid chat id');
+    });
+
+    it('should save message if user is a chat\'s participant', async () => {
+      Chat.findOne.mockReturnValue({ name: 'Chat' });
+      const result = await Mutation.postMessage(undefined, { chatId: '0', text: 'Test' }, req);
+      expect(result).toEqual({
+        author: '0',
+        chat: '0',
+        content: 'Test'
+      });
+      expect(Message.prototype.save).toHaveBeenCalled();
+    });
+
+    it('should send notification to all participants except current user when message posted', async () => {
+      Chat.findOne.mockReturnValueOnce({ owner: 0, participants: ['0', '1'] });
+      await Mutation.postMessage(undefined, { chatId: '0', text: 'Test' }, req);
+      expect(req.app.wss.clients[0].send).not.toHaveBeenCalled();
+      expect(req.app.wss.clients[1].send).toHaveBeenCalledWith(JSON.stringify({
+        type: 'message_posted',
+        message: {
+          author: '0',
+          content: 'Test',
+          chat: '0'
+        }
+      }));
     });
   });
 });
