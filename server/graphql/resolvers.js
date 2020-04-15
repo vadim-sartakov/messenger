@@ -53,15 +53,7 @@ const root = {
     getChats: async (parent, args, req) => {
       const currentUserId = req.user.subject;
       const chats = await Chat.find({
-        $or: [{ owner: currentUserId }, { 'participants': currentUserId }]
-      });
-      return chats;
-    },
-    getChat: async (parent, { id }, req) => {
-      const currentUserId = req.user.subject;
-      const chats = await Chat.findOne({
-        _id: id,
-        $or: [{ owner: currentUserId }, { 'participants': currentUserId }]
+        $or: [{ owner: currentUserId }, { participants: currentUserId }]
       });
       return chats;
     }
@@ -70,16 +62,17 @@ const root = {
     createChat: async (parent, { name }, req) => {
       const currentUserId = req.user.subject;
       let inviteLink;
-      while(!inviteLink || await Chat.findOne({ inviteLink })) {
+      while(true) {
         inviteLink = getRandomString(7);
+        if (!await Chat.findOne({ inviteLink })) break;
       }
       const newChat = new Chat({ name, inviteLink, owner: currentUserId, participants: [currentUserId] });
       return await newChat.save();
     },
     renameChat: async (parent, { id, name }, req) => {
       const currentUserId = req.user.subject;
-      const chat = await Chat.findById({ _id: id });
-      if (chat.owner.toString() !== currentUserId) throw new GraphQLError('Only owner can change chat');
+      const chat = await Chat.findOne({ _id: id, owner: currentUserId });
+      if (!chat) throw new GraphQLError('Only owner can change chat');
       chat.name = name;
       await chat.save();
       sendToChatParticipants(req, chat, () => ({ type: 'chat_renamed', chatId: chat._id, name }));

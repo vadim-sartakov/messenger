@@ -26,7 +26,6 @@ type Chat {
 type Query {
   me: User!
   getChats: [Chat!]!
-  getChat(id: ID!): Chat!
 }
 
 type Mutation {

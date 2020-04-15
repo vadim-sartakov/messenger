@@ -27,29 +27,6 @@ export const HOME = `query {
   }
 }`;
 
-export const CHAT_DETAILS = `query GetChat($id: ID!){
-  chat: getChat(id: $id) {
-    _id
-    name
-    owner
-    inviteLink
-    participants {
-      _id
-      name
-    }
-    color
-    messages {
-      author {
-        _id
-        name
-        color
-      }
-      content
-      createdAt
-    }
-  }
-}`;
-
 export const CREATE_CHAT = `mutation CreateChat($name: String!) {
   createChat(name: $name) {
     _id
