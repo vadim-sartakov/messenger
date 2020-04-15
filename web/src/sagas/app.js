@@ -102,8 +102,8 @@ export function* initializeSocket() {
   }
 }
 
-function* createChat({ name, history }) {
-  const token = yield select(state => state.auth.token);
+export function* createChat({ name, history }) {
+  const token = yield select(tokenSelector);
   try {
     const response = yield call(graphqlFetchUtil, queries.CREATE_CHAT, { url: GRAPHQL_URL, variables: { name }, token });
     yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat: response.data.createChat });
@@ -113,8 +113,8 @@ function* createChat({ name, history }) {
   }
 }
 
-function* renameChat({ chatId, name }) {
-  const token = yield select(state => state.auth.token);
+export function* renameChat({ chatId, name }) {
+  const token = yield select(tokenSelector);
   try {
     yield call(graphqlFetchUtil, queries.RENAME_CHAT, { url: GRAPHQL_URL, variables: { id: chatId, name }, token });
     yield put({ type: actions.RENAME_CHAT_SUCCEEDED, chatId, name });
@@ -123,8 +123,8 @@ function* renameChat({ chatId, name }) {
   }
 }
 
-function* joinChat({ inviteLink, history }) {
-  const token = yield select(state => state.auth.token);
+export function* joinChat({ inviteLink, history }) {
+  const token = yield select(tokenSelector);
   try {
     const response = yield call(graphqlFetchUtil, queries.JOIN_CHAT, { url: GRAPHQL_URL, token, variables: { inviteLink } });
     const chat = response.data.joinChat;
@@ -135,8 +135,8 @@ function* joinChat({ inviteLink, history }) {
   }
 }
 
-function* postMessage({ chatId, text }) {
-  const token = yield select(state => state.auth.token);
+export function* postMessage({ chatId, text }) {
+  const token = yield select(tokenSelector);
   const me = yield select(state => state.app.me);
   const newMessage = { content: text, author: me, createdAt: new Date() };
   yield put({ type: actions.POST_MESSAGE_SUCCEEDED, chatId, message: newMessage });

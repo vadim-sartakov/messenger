@@ -2,7 +2,16 @@ import { select } from 'redux-saga/effects';
 import { expectSaga } from 'redux-saga-test-plan';
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { throwError } from 'redux-saga-test-plan/providers';
-import { messageTypes, loadApp, initializeSocket, watchSocket, sleep, createSocketChannel } from './app';
+import {
+  messageTypes,
+  loadApp,
+  initializeSocket,
+  watchSocket,
+  sleep,
+  createSocketChannel,
+  createChat,
+  joinChat
+} from './app';
 import { tokenSelector } from './auth';
 import graphqlFetch from '../utils/graphqlFetch';
 import {
@@ -13,7 +22,8 @@ import {
   DESTROY_REQUESTED,
   RENAME_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
-  POST_MESSAGE_SUCCEEDED
+  POST_MESSAGE_SUCCEEDED,
+  CREATE_CHAT_SUCCEEDED
 } from '../actions';
 
 describe('app saga', () => {
@@ -150,6 +160,40 @@ describe('app saga', () => {
         ])
         .put({ type: POST_MESSAGE_SUCCEEDED, chatId: 0, message: 'Test' })
         .silentRun();
+    });
+  });
+
+  describe('createChat', () => {
+    it('should send request and redirect on success', async () => {
+      const history = {
+        replace: jest.fn()
+      };
+      const response =  { data: { createChat: { _id: 0 } } };
+      await expectSaga(createChat, { name: 'Test', history })
+        .provide([
+          [select(tokenSelector), 'token'],
+          [matchers.call.fn(graphqlFetch), response]
+        ])
+        .put({ type: CREATE_CHAT_SUCCEEDED, chat: response.data.createChat })
+        .run();
+      expect(history.replace.mock.calls[0][0]).toEqual({ pathname: '/chats/0' });
+    });
+  });
+
+  describe('joinChat', () => {
+    it('should dispatch join chat and redirect on success', async () => {
+      const history = {
+        replace: jest.fn()
+      };
+      const response =  { data: { joinChat: { _id: 0 } } };
+      await expectSaga(joinChat, { name: 'Test', history })
+        .provide([
+          [select(tokenSelector), 'token'],
+          [matchers.call.fn(graphqlFetch), response]
+        ])
+        .put({ type: CREATE_CHAT_SUCCEEDED, chat: response.data.joinChat })
+        .run();
+      expect(history.replace.mock.calls[0][0]).toEqual({ pathname: '/chats/0' });
     });
   });
 });
