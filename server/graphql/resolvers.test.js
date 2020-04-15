@@ -90,7 +90,7 @@ describe('graphql resolvers', () => {
       const instance = new Chat({ owner: 0 });
       Chat.findOne.mockReturnValueOnce(instance);
       await Mutation.renameChat(undefined, { id: 0, name: 'Renamed chat' }, req);
-      expect(instance).toEqual({ owner: 0, name: 'Renamed chat' });
+      expect(instance).toEqual({ _id: 0, owner: 0, name: 'Renamed chat' });
       expect(Chat.findOne).toHaveBeenCalledWith({ _id: 0, owner: '0' });
       expect(instance.save).toHaveBeenCalledTimes(1);
     });
@@ -100,7 +100,7 @@ describe('graphql resolvers', () => {
       Chat.findOne.mockReturnValueOnce(instance);
       await Mutation.renameChat(undefined, { id: 0, name: 'Renamed chat' }, req);
       expect(req.app.wss.clients[0].send).not.toHaveBeenCalled();
-      expect(req.app.wss.clients[1].send).toHaveBeenCalledWith(JSON.stringify({ type: 'chat_renamed', name: 'Renamed chat' }));
+      expect(req.app.wss.clients[1].send).toHaveBeenCalledWith(JSON.stringify({ type: 'chat_renamed', chatId: 0, name: 'Renamed chat' }));
     });
   });
 
@@ -115,6 +115,7 @@ describe('graphql resolvers', () => {
       Chat.findOne.mockReturnValue({ name: 'Chat' });
       const result = await Mutation.postMessage(undefined, { chatId: '0', text: 'Test' }, req);
       expect(result).toEqual({
+        _id: 0,
         author: '0',
         chat: '0',
         content: 'Test'
@@ -131,8 +132,36 @@ describe('graphql resolvers', () => {
         message: {
           author: '0',
           content: 'Test',
-          chat: '0'
+          chat: '0',
+          _id: 0
         }
+      }));
+    });
+  });
+
+  describe('joinChat', () => {
+    it('should throw error with invalid link', async () => {
+      await expect(Mutation.joinChat(undefined, { inviteLink: 'link' }, req))
+        .rejects
+        .toThrow('Invalid link');
+    });
+
+    it('should update chat on join', async () => {
+      Chat.findOne.mockReturnValue(new Chat({ name: 'Chat', participants: ['1'] }));
+      const result = await Mutation.joinChat(undefined, { inviteLink: 'link' }, req);
+      expect(result).toEqual({ _id: 0, name: 'Chat', participants: ['1', '0'] });
+      expect(Chat.prototype.save).toHaveBeenCalled();
+    });
+
+    it('should send notification to chat\'s participants', async () => {
+      User.findById.mockReturnValueOnce({ _id: '0' });
+      Chat.findOne.mockReturnValueOnce(new Chat({ _id: 0, participants: ['0', '1'] }));
+      await Mutation.joinChat(undefined, { inviteLink: 'link' }, req);
+      expect(req.app.wss.clients[0].send).not.toHaveBeenCalled();
+      expect(req.app.wss.clients[1].send).toHaveBeenCalledWith(JSON.stringify({
+        type: 'joined_chat',
+        chatId: 0,
+        participant: { _id: '0' }
       }));
     });
   });

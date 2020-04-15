@@ -1,12 +1,12 @@
-class Model {
-  static idCounter = 0;
-  constructor(value) {
-    Object.assign(this, value);
-  }
-}
+const Model = jest.fn(function Model(value) {
+  Object.assign(this, value);
+});
+
+Model.idCounter = 0;
 
 Model.prototype.save = jest.fn(function() {
-  return { ...this, _id: Model.idCounter++ };
+  this._id = Model.idCounter++;
+  return this;
 });
 Model.prototype.populate = jest.fn(function() {
   return this;

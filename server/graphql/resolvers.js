@@ -82,9 +82,8 @@ const root = {
       // TODO: protect from bruteforce
       const currentUserId = req.user.subject;
       const currentUser = await User.findById(currentUserId, 'name color');
-
       const chat = await Chat.findOne({ inviteLink });
-      if (!chat) throw new GraphQLError('Invalid id');
+      if (!chat) throw new GraphQLError('Invalid link');
       chat.participants = [...(chat.participants || []), currentUserId];
       await chat.save()
       sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));

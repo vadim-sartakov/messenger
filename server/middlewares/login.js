@@ -8,8 +8,8 @@ const jwtSignAsync = promisify(jwt.sign);
 
 const login = asyncMiddleware(async (req, res) => {
   const { name } = req.body;
-  let user = new User({ name });
-  user = await user.save();
+  const user = new User({ name });
+  await user.save();
   const token = await jwtSignAsync(
     {
       subject: user._id
