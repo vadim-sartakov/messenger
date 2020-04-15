@@ -6,7 +6,7 @@ import * as queries from '../queries';
 import { GRAPHQL_URL, WS_URL } from '../constants';
 import { tokenSelector } from './auth';
 
-const messageTypes = {
+export const messageTypes = {
   OPEN: 'open',
   CLOSE: 'close',
   CHAT_RENAMED: 'chat_renamed',
@@ -19,7 +19,7 @@ function createSocket(token) {
   return socket;
 }
 
-function createSocketChannel(socket) {
+export function createSocketChannel(socket) {
   return eventChannel(emit => {
     socket.onmessage = event => {
       emit(JSON.parse(event.data));
