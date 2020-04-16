@@ -2,7 +2,7 @@ const url = require('url');
 const querystring = require('querystring');
 const { createServer } = require('http');
 const { Server } = require('ws');
-const { jwtPublicKey } = require('../constants/config');
+const { jwtPublicKey } = require('../config');
 const jwt = require('jsonwebtoken');
 
 function createWsServer(app) {

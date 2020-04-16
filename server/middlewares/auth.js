@@ -1,5 +1,5 @@
 const jwt = require('express-jwt');
-const { jwtPublicKey } = require('../constants/config');
+const { jwtPublicKey } = require('../config');
 
 const auth = jwt({ secret: jwtPublicKey });
 

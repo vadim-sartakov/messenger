@@ -2,7 +2,7 @@ const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const asyncMiddleware = require('../utils/asyncMiddleware');
-const { jwtPrivateKey, jwtPublicKey, jwtExpiresIn } = require('../constants/config');
+const { jwtPrivateKey, jwtPublicKey, jwtExpiresIn } = require('../config');
 
 const jwtSignAsync = promisify(jwt.sign);
 
