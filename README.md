@@ -1,6 +1,6 @@
-# Messenger Demo Application
+# Messenger Application
 
-Messenger application
+Simple text messenger application built with React and Node.js
 
 ### Features
 - Authentication (No password required, username is enough)
@@ -15,12 +15,13 @@ Messenger application
 - Redux
 - Redux Saga
 - Material UI
+- Jest
 - Node.js
 - Express
 - MongoDB
 - JWT
 - GraphQL
+- Websockets
 
 ### TODO
 - Skeleton loading
-- Data cleanup
