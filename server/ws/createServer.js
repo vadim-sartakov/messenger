@@ -2,7 +2,7 @@ const url = require('url');
 const querystring = require('querystring');
 const { createServer } = require('http');
 const { Server } = require('ws');
-const { publicKey } = require('../constants/jwt');
+const { jwtPublicKey } = require('../constants/config');
 const jwt = require('jsonwebtoken');
 
 function createWsServer(app) {
@@ -23,7 +23,7 @@ function createWsServer(app) {
     }
     let decodedToken;
     try {
-      decodedToken = jwt.verify(token, publicKey);
+      decodedToken = jwt.verify(token, jwtPublicKey);
     } catch(err) {
       socket.destroy();
       return;

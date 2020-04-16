@@ -1,6 +1,6 @@
 const jwt = require('express-jwt');
-const { publicKey } = require('../constants/jwt');
+const { jwtPublicKey } = require('../constants/config');
 
-const auth = jwt({ secret: publicKey });
+const auth = jwt({ secret: jwtPublicKey });
 
 module.exports = auth;

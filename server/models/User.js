@@ -8,7 +8,7 @@ const userSchema = new Schema({
     index: true
   },
   color
-});
+}, { timestamps: true });
 
 const User = model('User', userSchema);
 

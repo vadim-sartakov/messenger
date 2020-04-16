@@ -4,7 +4,7 @@ const login = require('./login');
 
 jest.mock('jsonwebtoken');
 jest.mock('../models/User');
-jest.mock('../constants/jwt', () => ({ publicKey: '123456', expiresIn: '8h' }));
+jest.mock('../constants/config', () => ({ jwtPublicKey: '123456', jwtExpiresIn: '8h' }));
 
 describe('login middleware', () => {
   it('should return token on success login', async () => {
