@@ -131,7 +131,6 @@ export function* joinChat({ inviteLink, history }) {
     yield put({ type: actions.CREATE_CHAT_SUCCEEDED, chat });
     yield call([history, 'replace'], { pathname: `/chats/${chat._id}` });
   } catch(err) {
-    console.log(err)
     yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Failed to join chat' });
   }
 }

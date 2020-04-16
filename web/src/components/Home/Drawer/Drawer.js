@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
+import Skeleton from '@material-ui/lab/Skeleton';
 import ChatList from './ChatList';
 import ColoredAvatar from '../../ui/ColoredAvatar';
 import getShortName from '../../../utils/getShortName';
@@ -79,12 +80,31 @@ function Drawer({
         wrap="nowrap"
         className={classes.user}
       >
-        <ColoredAvatar className={classes.avatar} color={!isLoading && me.color}>
-          {!isLoading && getShortName(me.name)}
-        </ColoredAvatar>
-        <Typography variant="h6" noWrap>
-          {!isLoading && me.name}
-        </Typography>
+        {isLoading ? (
+          <Skeleton
+            className={classes.avatar}
+            variant="circle"
+            animation="wave"
+            width={40}
+            height={40}
+          />
+        ) : (
+          <ColoredAvatar className={classes.avatar} color={me.color}>
+            {getShortName(me.name)}
+          </ColoredAvatar>
+        )}
+        {isLoading ? (
+          <Skeleton
+            variant="text"
+            animation="wave"
+            width={120}
+            height={32}
+          />
+        ) : (
+          <Typography variant="h6" noWrap>
+            {me.name}
+          </Typography>
+        )}
       </Grid>
       <Divider />
       <ChatList

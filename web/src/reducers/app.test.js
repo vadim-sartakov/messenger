@@ -18,9 +18,9 @@ describe('app reducer', () => {
     expect(reducer({ prev: true }, action)).toEqual({ prev: true, isLoading: true });
   });
 
-  it('should preserve prev state, reset isLoading and set \'me\' and \'chats\' data on initialize succeed', () => {
+  it('should preserve prev state, reset isLoading, initialized and set \'me\' and \'chats\' data on initialize succeed', () => {
     const action = { type: INITIALIZE_SUCCEEDED, data: { me: 'me', chats: 'chats' } };
-    expect(reducer({ prev: true }, action)).toEqual({ prev: true, isLoading: false, me: 'me', chats: 'chats' });
+    expect(reducer({ prev: true }, action)).toEqual({ prev: true, isLoading: false, initialized: true, me: 'me', chats: 'chats' });
   });
 
   it('should preserve prev state, reset isLoading, set error on initialize fail', () => {

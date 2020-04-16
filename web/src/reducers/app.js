@@ -20,7 +20,7 @@ function app(state = initialState, { type, ...action }) {
     case INITIALIZE_REQUESTED:
       return { ...state, isLoading: true };
     case INITIALIZE_SUCCEEDED:
-      return { ...state, isLoading: false, me: action.data.me, chats: action.data.chats };
+      return { ...state, isLoading: false, initialized: true, me: action.data.me, chats: action.data.chats };
     case INITIALIZE_FAILED:
       return { ...state, isLoading: false, error: true };
     case SHOW_MESSAGE:

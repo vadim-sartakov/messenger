@@ -15,6 +15,7 @@ function HomeContainer({
   destroy,
   logOut,
   isLoading,
+  initialized,
   me,
   chats,
   joinChat,
@@ -37,7 +38,7 @@ function HomeContainer({
   return (
     <Home
       {...props}
-      isLoading={isLoading}
+      isLoading={!initialized && isLoading}
       logout={handleLogout}
       me={me}
       chats={chats}
@@ -45,9 +46,10 @@ function HomeContainer({
   );
 }
 
-const mapStateToProps = ({ auth: { token }, app: { isLoading, me, chats } }) => ({
+const mapStateToProps = ({ auth: { token }, app: { isLoading, initialized, me, chats } }) => ({
   token,
   isLoading,
+  initialized,
   me,
   chats
 });

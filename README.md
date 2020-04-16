@@ -32,6 +32,3 @@ Note that after logout it is not possible to login back to previous session, so 
 - JWT
 - GraphQL
 - Websockets
-
-### TODO
-- Skeleton loading

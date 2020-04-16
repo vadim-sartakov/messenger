@@ -31,7 +31,7 @@ function ChatDialog({ open, onClose, chat, onSubmit }) {
         onSubmit={onSubmit}
       >
         <Form noValidate>
-          <DialogTitle>{chat._id ? 'Update Chat' : 'Create New Chat'}</DialogTitle>
+          <DialogTitle>{chat._id ? 'Rename Chat' : 'Create New Chat'}</DialogTitle>
           <DialogContent>
             <InputTextField
               id="name"
@@ -50,7 +50,7 @@ function ChatDialog({ open, onClose, chat, onSubmit }) {
               variant="contained"
               color="primary"
             >
-              {chat._id ? 'Update' : 'Create'}
+              {chat._id ? 'Rename' : 'Create'}
             </Button>
           </DialogActions>
         </Form>
