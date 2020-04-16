@@ -18,11 +18,11 @@ try {
 if (!process.env.JWT_EXPIRES_IN) throw new Error('No JWT_EXPIRES_IN variable set');
 if (!process.env.USER_EXPIRES_IN) throw new Error('No USER_EXPIRES_IN variable set');
 if (!process.env.CLEANUP_PERIOD) throw new Error('No CLEANUP_PERIOD variable set');
-if (!process.env.DB_URL) throw new Error('No DB_URL variable set');
+if (!process.env.MONGODB_URI) throw new Error('No MONGODB_URI variable set');
 
 module.exports = {
   port: process.env.PORT || 8080,
-  dbUrl: process.env.DB_URL,
+  dbUrl: process.env.MONGODB_URI,
   corsOrigin: process.env.CORS_ORIGIN,
   jwtPrivateKey,
   jwtPublicKey,
