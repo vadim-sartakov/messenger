@@ -23,7 +23,7 @@ if (!process.env.DB_URL) throw new Error('No DB_URL variable set');
 module.exports = {
   port: process.env.PORT || 8080,
   dbUrl: process.env.DB_URL,
-  webAppUrl: process.env.WEB_APP_URL,
+  corsOrigin: process.env.CORS_ORIGIN,
   jwtPrivateKey,
   jwtPublicKey,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN,

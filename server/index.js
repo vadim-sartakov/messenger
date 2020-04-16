@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -10,7 +11,7 @@ const login = require('./middlewares/login');
 const graphqlServer = require('./graphql/server');
 const createWsServer = require('./ws/createServer');
 const cleanup = require('./tasks/cleanup');
-const { port, dbUrl, webAppUrl, cleanupPeriod } = require('./config');
+const { port, dbUrl, corsOrigin, cleanupPeriod } = require('./config');
 const apiPrefix = '/api';
 
 const appInfo = createDebug('app:info');
@@ -29,7 +30,15 @@ async function run() {
 
     const app = express();
 
-    if (webAppUrl) app.use(cors({ origin: webAppUrl }));
+    if (corsOrigin) app.use(cors({ origin: corsOrigin }));
+
+    // Serving web app
+    if (process.env.NODE_ENV === 'production') {
+      app.use(express.static(path.resolve(__dirname, 'web')));
+      app.get('*', function (request, response) {
+        response.sendFile(path.resolve(__dirname, 'web', 'index.html'));
+      });
+    }
 
     app.use(bodyParser.json());
     app.post(`${apiPrefix}/login`, login);

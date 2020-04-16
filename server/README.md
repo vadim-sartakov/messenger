@@ -8,7 +8,7 @@ To run the server there are following environment variables should be set:
 - USER_EXPIRES_IN - Period after which user is considered as expired so user and all related data allowed to be removed. Compatible with [zeit/ms](https://github.com/zeit/ms) format
 - CLEANUP_PERIOD - Cleanup task will run with this period. Compatible with [zeit/ms](https://github.com/zeit/ms) format
 - DB_URL - connection to database
-- WEB_APP_URL - to enable CORS
+- CORS_ORIGIN - to enable CORS
 - DEBUG - logging namespaces. Utilizing [debug](https://www.npmjs.com/package/debug) package.
 
 ## JWT Encoding
