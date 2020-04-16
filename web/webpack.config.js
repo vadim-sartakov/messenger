@@ -2,9 +2,12 @@ const path = require('path');
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const OptimizeCss = require('optimize-css-assets-webpack-plugin');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
+  mode: process.env.NODE_ENV,
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -59,6 +62,10 @@ module.exports = {
           chunks: 'all'
         }
       }
+    },
+    ...process.env.NODE_ENV === 'production' && {
+      minimize: true,
+      minimizer: [new TerserPlugin(), new OptimizeCss()]
     }
   },
   // Allows to omit extensions in import statements
@@ -74,5 +81,14 @@ module.exports = {
     }),
     // Inline generated bundles into html
     new HtmlWebpackPlugin({ template: './public/index.html' })
-  ]
+  ],
+  ...process.env.NODE_ENV === 'development' && {
+    devtool: 'inline-source-map',
+    devServer: {
+      contentBase: './build',
+      port: 3000,
+      historyApiFallback: true,
+      hot: true
+    }
+  }
 }

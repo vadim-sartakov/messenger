@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --open --config webpack.dev.js",
-    "build": "cross-env NODE_ENV=production rimraf build && webpack --config webpack.prod.js",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --open",
+    "build": "rimraf build && cross-env NODE_ENV=production webpack",
     "test": "jest"
   },
   "author": "Vadim Sartakov",
