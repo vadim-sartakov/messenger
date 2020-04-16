@@ -34,9 +34,9 @@ async function run() {
 
     // Serving web app
     if (process.env.NODE_ENV !== 'development') {
-      app.use(express.static(path.resolve(__dirname, 'web')));
+      app.use(express.static(path.resolve(__dirname, 'app', 'web')));
       app.get('*', function (request, response) {
-        response.sendFile(path.resolve(__dirname, 'web', 'index.html'));
+        response.sendFile(path.resolve(__dirname, 'app', 'web', 'index.html'));
       });
     }
 
