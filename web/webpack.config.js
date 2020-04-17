@@ -78,7 +78,10 @@ module.exports = {
       filename: `css/[name]${process.env.NODE_ENV === 'development' ? '' : '.[contenthash]'}.css`
     }),
     // Inline generated bundles into html
-    new HtmlWebpackPlugin({ template: './public/index.html' })
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+      favicon: './public/favicon.ico'
+    })
   ],
   ...process.env.NODE_ENV === 'development' && {
     devtool: 'inline-source-map',
