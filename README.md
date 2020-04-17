@@ -9,6 +9,7 @@ Users can login with their name only, no password or registration required. Afte
 Note that after logout it is not possible to login back to previous session, so all conversations will be lost.
 
 ## Live demo
+Live demo available [here](https://vs-messenger.herokuapp.com/)
 
 ### Features
 - Responsive layout
@@ -32,3 +33,4 @@ Note that after logout it is not possible to login back to previous session, so 
 - JWT
 - GraphQL
 - Websockets
+- Docker

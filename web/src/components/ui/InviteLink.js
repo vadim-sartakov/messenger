@@ -7,7 +7,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 function InviteLink({ chat }) {
   const { protocol, hostname, port } = window.location;
-  const location = `${protocol}//${hostname}${port.length && ':' + port}`;
+  const location = `${protocol}//${hostname}${port.length ? ':' + port : ''}`;
   const inputRef = useRef();
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {

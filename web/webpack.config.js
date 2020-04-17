@@ -1,5 +1,4 @@
 const path = require('path');
-const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -73,7 +72,6 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   plugins: [
-    new Dotenv({ path: process.env.NODE_ENV === 'development' ? './.dev.env' : './.prod.env' }),
     // Extract CSS
     new MiniCssExtractPlugin({
       // In development mode and hot reload we can't use contenthash
@@ -88,7 +86,12 @@ module.exports = {
       contentBase: './build',
       port: 3000,
       historyApiFallback: true,
-      hot: true
+      hot: true,
+      proxy: {
+        '/api': 'http://localhost:8080/',
+        '/graphql': 'http://localhost:8080/',
+        'ws://localhost:3000/ws': 'ws://localhost:8080/'
+      }
     }
   }
 }

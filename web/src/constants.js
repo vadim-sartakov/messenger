@@ -1,7 +1,6 @@
-const { hostname, port } = window.location;
+const { hostname, port, protocol } = window.location;
 
-export const API_URL = process.env.API_URL || '';
-export const GRAPHQL_URL = process.env.GRAPHQL_URL || '';
+export const API_URL = '/api';
+export const GRAPHQL_URL = '/graphql';
 
-export const WS_URL = process.env.WS_URL ||
-  `${process.env.NODE_ENV === 'development' ? 'ws' : 'wss'}://${hostname}${port.length ? ':' + port : ''}/ws`;
+export const WS_URL = `${protocol === 'http:' ? 'ws' : 'wss'}://${hostname}${port.length ? ':' + port : ''}/ws`;

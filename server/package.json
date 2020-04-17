@@ -4,7 +4,7 @@
   "main": "lib/index.js",
   "scripts": {
     "start": "node ./lib/index.js",
-    "debug": "cross-env NODE_ENV=development nodemon --inspect --ext js,gql ./lib/index.js",
+    "debug": "cross-env NODE_ENV=development nodemon -r dotenv/config --inspect --ext js,gql ./lib/index.js",
     "test": "jest"
   },
   "author": "Vadim Sartakov",

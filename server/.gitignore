@@ -2,3 +2,4 @@ node_modules
 private.key
 public.key
 .env
+.docker.env

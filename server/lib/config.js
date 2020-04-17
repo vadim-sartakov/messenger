@@ -15,9 +15,6 @@ try {
   }
 }
 
-if (!process.env.JWT_EXPIRES_IN) throw new Error('No JWT_EXPIRES_IN variable set');
-if (!process.env.USER_EXPIRES_IN) throw new Error('No USER_EXPIRES_IN variable set');
-if (!process.env.CLEANUP_PERIOD) throw new Error('No CLEANUP_PERIOD variable set');
 if (!process.env.MONGODB_URI) throw new Error('No MONGODB_URI variable set');
 
 module.exports = {
@@ -26,7 +23,7 @@ module.exports = {
   corsOrigin: process.env.CORS_ORIGIN,
   jwtPrivateKey,
   jwtPublicKey,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN,
-  userExpiresIn: process.env.USER_EXPIRES_IN,
-  cleanupPeriod: process.env.CLEANUP_PERIOD
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  userExpiresIn: process.env.USER_EXPIRES_IN || '24h',
+  cleanupPeriod: process.env.CLEANUP_PERIOD || '1h'
 }

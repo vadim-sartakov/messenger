@@ -50,7 +50,7 @@ describe('auth saga', () => {
         .put({ type: LOGIN_SUCCEEDED, token: true })
         .run();
 
-      expect(fetch.mock.calls[0][0]).toBe('/login');
+      expect(fetch.mock.calls[0][0]).toBe('/api/login');
       expect(fetch.mock.calls[0][1].body).toBe(JSON.stringify(credentials));
 
       expect(history.replace.mock.calls[0][0]).toEqual('/prev');

@@ -1,4 +1,3 @@
-require('dotenv').config();
 const path = require('path');
 const mongoose = require('mongoose');
 const express = require('express');
@@ -33,12 +32,10 @@ async function run() {
     if (corsOrigin) app.use(cors({ origin: corsOrigin }));
 
     // Serving web app
-    if (process.env.NODE_ENV !== 'development') {
-      app.use(express.static(path.resolve(__dirname, '..', 'web')));
-      app.get('*', function (request, response) {
-        response.sendFile(path.resolve(__dirname, '..', 'web', 'index.html'));
-      });
-    }
+    app.use(express.static(path.resolve(__dirname, '..', 'web')));
+    app.get('*', function (request, response) {
+      response.sendFile(path.resolve(__dirname, '..', 'web', 'index.html'));
+    });
 
     app.use(bodyParser.json());
     app.post(`${apiPrefix}/login`, login);
