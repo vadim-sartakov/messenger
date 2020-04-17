@@ -99,6 +99,6 @@ describe('app reducer', () => {
   it('should destroy app', () => {
     const prevState = { prev: true };
     const action = { type: DESTROY_SUCCEEDED };
-    expect(reducer(prevState, action)).toEqual({ isLoading: true });
+    expect(reducer(prevState, action)).toEqual({ isLoading: true, darkMode: false });
   });
 });

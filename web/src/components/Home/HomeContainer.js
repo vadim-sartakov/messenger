@@ -5,7 +5,8 @@ import {
   initialize,
   joinChat,
   destroy,
-  logOut
+  logOut,
+  switchThemeType
 } from '../../actions';
 import Home from './Home';
 
@@ -19,6 +20,7 @@ function HomeContainer({
   me,
   chats,
   joinChat,
+  switchThemeType,
   ...props
 }) {
   const history = useHistory();
@@ -38,6 +40,7 @@ function HomeContainer({
   return (
     <Home
       {...props}
+      onSwitchTheme={switchThemeType}
       isLoading={!initialized && isLoading}
       logout={handleLogout}
       me={me}
@@ -54,6 +57,7 @@ const mapStateToProps = ({ auth: { token }, app: { isLoading, initialized, me, c
   chats
 });
 const mapDispatchToProps = dispatch => ({
+  switchThemeType: () => dispatch(switchThemeType()),
   initialize: () => dispatch(initialize()),
   destroy: () => dispatch(destroy()),
   logOut: history => dispatch(logOut(history)),

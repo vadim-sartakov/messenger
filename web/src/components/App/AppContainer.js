@@ -10,6 +10,7 @@ function AppContainer(props) {
 
 function mapStateToProps(state) {
   return {
+    darkMode: state.app.darkMode,
     message: state.app.message
   }
 }

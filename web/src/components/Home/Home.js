@@ -70,7 +70,7 @@ function LogoutDialog({ open, onClose, onSubmit }) {
   )
 }
 
-function Home({ isLoading, logout, me, chats = [] }) {
+function Home({ isLoading, logout, me, chats = [], onSwitchTheme }) {
   const classes = useStyles();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
@@ -90,6 +90,7 @@ function Home({ isLoading, logout, me, chats = [] }) {
     <Grid container wrap="nowrap">
       <Drawer
         isLoading={isLoading}
+        onSwitchTheme={onSwitchTheme}
         me={me}
         chats={chats}
         open={openDrawer}

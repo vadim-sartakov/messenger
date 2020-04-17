@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => {
       bottom: 0,
       zIndex: 1,
       width: '100%',
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: theme.palette.background.default,
       padding: `${theme.spacing(1)}px ${theme.spacing(3)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
       '& form': {
         width: '100%',

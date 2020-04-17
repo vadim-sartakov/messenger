@@ -10,10 +10,11 @@ import {
   RENAME_CHAT_SUCCEEDED,
   ADD_CHAT_PARTICIPANT,
   DESTROY_SUCCEEDED,
-  POST_MESSAGE_SUCCEEDED
+  POST_MESSAGE_SUCCEEDED,
+  SWITCH_THEME_TYPE
 } from '../actions';
 
-const initialState = { isLoading: true };
+const initialState = { isLoading: true, darkMode: false };
 
 function app(state = initialState, { type, ...action }) {
   switch (type) {
@@ -51,6 +52,8 @@ function app(state = initialState, { type, ...action }) {
           return chat._id === action.chatId ? { ...chat, messages: [...chat.messages, action.message] } : chat
         })
       };
+    case SWITCH_THEME_TYPE:
+      return { ...state, darkMode: !state.darkMode };
     case DESTROY_SUCCEEDED:
       return initialState;
     default:

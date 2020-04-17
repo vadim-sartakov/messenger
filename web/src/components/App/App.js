@@ -11,12 +11,12 @@ function App({ darkMode, message = {}, hideError }) {
     return createMuiTheme({
       palette: {
         primary: {
-          main: lightBlue[700]
+          main: lightBlue[800]
         },
         secondary: {
           main: amber[500]
         },
-        type: darkMode && 'dark'
+        type: darkMode ? 'dark' : undefined
       }
     })
   }, [darkMode]);

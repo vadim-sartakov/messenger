@@ -2,6 +2,9 @@ import React from 'react';
 import Hidden from '@material-ui/core/Hidden';
 import MuiDrawer from '@material-ui/core/Drawer';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import DarkModeIcon from '@material-ui/icons/NightsStay';
+import Tooltip from '@material-ui/core/Tooltip';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,6 +26,9 @@ const useStyles = makeStyles(theme => {
     user: {
       padding: `0 ${theme.spacing(2)}px`,
       ...theme.mixins.toolbar
+    },
+    name: {
+      flexGrow: 1
     },
     drawerPaper: {
       width: DRAWER_WIDTH,
@@ -60,52 +66,68 @@ function ResponsiveDrawer({ open, onClose, children }) {
   )
 }
 
+function User({ isLoading, me, onSwitchTheme }) {
+  const classes = useStyles();
+  return (
+    <Grid
+      container
+      alignItems="center"
+      wrap="nowrap"
+      className={classes.user}
+    >
+      {isLoading ? (
+        <Skeleton
+          className={classes.avatar}
+          variant="circle"
+          animation="wave"
+          width={40}
+          height={40}
+        />
+      ) : (
+        <ColoredAvatar className={classes.avatar} color={me.color}>
+          {getShortName(me.name)}
+        </ColoredAvatar>
+      )}
+      {isLoading ? (
+        <Skeleton
+          variant="text"
+          animation="wave"
+          width={120}
+          height={32}
+        />
+      ) : (
+        <Typography variant="h6" noWrap className={classes.name}>
+          {me.name}
+        </Typography>
+      )}
+      <Tooltip title="Dark mode" arrow>
+        <IconButton size="small" onClick={onSwitchTheme}>
+          <DarkModeIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </Grid>
+  );
+}
+
 function Drawer({
   isLoading,
+  onSwitchTheme,
   me,
   chats,
   open,
   onClose,
   onCreateChat
 }) {
-  const classes = useStyles();
   return (
     <ResponsiveDrawer
       open={open}
       onClose={onClose}
     >
-      <Grid
-        container
-        alignItems="center"
-        wrap="nowrap"
-        className={classes.user}
-      >
-        {isLoading ? (
-          <Skeleton
-            className={classes.avatar}
-            variant="circle"
-            animation="wave"
-            width={40}
-            height={40}
-          />
-        ) : (
-          <ColoredAvatar className={classes.avatar} color={me.color}>
-            {getShortName(me.name)}
-          </ColoredAvatar>
-        )}
-        {isLoading ? (
-          <Skeleton
-            variant="text"
-            animation="wave"
-            width={120}
-            height={32}
-          />
-        ) : (
-          <Typography variant="h6" noWrap>
-            {me.name}
-          </Typography>
-        )}
-      </Grid>
+      <User
+        isLoading={isLoading}
+        me={me}
+        onSwitchTheme={onSwitchTheme}
+      />
       <Divider />
       <ChatList
         isLoading={isLoading}

@@ -19,6 +19,8 @@ export const POST_MESSAGE_REQUESTED = 'POST_MESSAGE_REQUESTED';
 export const POST_MESSAGE_SUCCEEDED = 'POST_MESSAGE_SUCCEEDED';
 export const POST_MESSAGE_FAILED = 'POST_MESSAGE_FAILED';
 
+export const SWITCH_THEME_TYPE = 'SWITCH_THEME_TYPE';
+
 export function initialize() {
   return { type: INITIALIZE_REQUESTED };
 }
@@ -49,4 +51,8 @@ export function postMessage(chatId, text) {
 
 export function destroy() {
   return { type: DESTROY_REQUESTED };
+}
+
+export function switchThemeType() {
+  return { type: SWITCH_THEME_TYPE };
 }
