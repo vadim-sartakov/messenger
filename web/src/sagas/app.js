@@ -96,7 +96,16 @@ export function* initializeSocket() {
       return;
     } else if (disconnected) {
       yield put({ type: actions.SHOW_MESSAGE, severity: 'error', text: 'Disconnected. Trying to reconnect...' });
-      yield call(sleep, 5000);
+      const { destroy } = yield race({
+        sleep: call(sleep, 5000),
+        destroy: take(actions.DESTROY_REQUESTED)
+      });
+      // Breaking the loop when destroy called while
+      // waiting for reconnect
+      if (destroy) {
+        yield call([socket, 'close']);
+        return;
+      }
       reconnect = true;
     }
   }

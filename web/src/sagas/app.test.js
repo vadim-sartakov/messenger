@@ -105,6 +105,21 @@ describe('app saga', () => {
         expect(closeMock).not.toHaveBeenCalled();
     });
 
+    it('should not reconnect when on reconnect timeout and destroy was called', async () => {
+      let counter = 0;
+      await expectSaga(initializeSocket)
+        .provide([
+          [select(tokenSelector), 'token'],
+          {
+            call: (event, next) => event.fn === watchSocket ? true : next(),
+            take: (event, next) => counter++ === 1 ? true : next()
+          }
+        ])
+          .silentRun();
+        expect(WebSocket).toBeCalledTimes(1);
+        expect(closeMock).toHaveBeenCalled();
+    });
+
     it('should close socket on destroy', async () => {
       await expectSaga(initializeSocket)
         .provide([
