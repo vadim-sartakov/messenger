@@ -11,7 +11,7 @@ function App({ darkMode, message = {}, hideError }) {
     return createMuiTheme({
       palette: {
         primary: {
-          main: lightBlue[800]
+          main: darkMode ? lightBlue[800] : lightBlue[700]
         },
         secondary: {
           main: amber[500]

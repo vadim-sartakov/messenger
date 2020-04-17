@@ -96,9 +96,9 @@ describe('app reducer', () => {
     });
   });
 
-  it('should destroy app', () => {
-    const prevState = { prev: true };
+  it('should destroy app and preserve darkMode', () => {
+    const prevState = { prev: true, darkMode: true };
     const action = { type: DESTROY_SUCCEEDED };
-    expect(reducer(prevState, action)).toEqual({ isLoading: true, darkMode: false });
+    expect(reducer(prevState, action)).toEqual({ isLoading: true, darkMode: true });
   });
 });

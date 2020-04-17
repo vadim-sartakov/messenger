@@ -55,7 +55,7 @@ function app(state = initialState, { type, ...action }) {
     case SWITCH_THEME_TYPE:
       return { ...state, darkMode: !state.darkMode };
     case DESTROY_SUCCEEDED:
-      return initialState;
+      return { isLoading: true, darkMode: state.darkMode };
     default:
       return state;
   }
