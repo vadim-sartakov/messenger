@@ -21,10 +21,10 @@ function EmptyChat({ chat }) {
   const classes = useStyles();
   
   return (
-    <Container maxWidth="xs" disableGutters className={classes.container}>
+    <Container maxWidth="sm" disableGutters className={classes.container}>
       <Grid container direction="column">
         <Typography variant="h5" className={classes.title}>
-          {`No one has invited to ${chat.name} yet...`}
+          No one has invited yet...
         </Typography>
         <Typography variant="subtitle1" className={classes.subtitle}>
           Share this link with others for invite:
