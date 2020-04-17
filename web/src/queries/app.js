@@ -16,6 +16,7 @@ export const HOME = `query {
     }
     color
     messages(limit: 30) {
+      _id
       author {
         _id
         name
@@ -61,6 +62,13 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
     color
     messages(limit: 30) {
       _id
+      author {
+        _id
+        name
+        color
+      }
+      content
+      createdAt
     }
   }
 }`;

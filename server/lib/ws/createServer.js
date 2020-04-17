@@ -1,8 +1,9 @@
 const url = require('url');
 const querystring = require('querystring');
+const ms = require('ms');
 const { createServer } = require('http');
 const { Server } = require('ws');
-const { jwtPublicKey } = require('../config');
+const { jwtPublicKey, clientPingInterval, clientConnectionTimeout } = require('../config');
 const jwt = require('jsonwebtoken');
 
 function createWsServer(app) {
@@ -12,6 +13,29 @@ function createWsServer(app) {
 
   wss.on('connection', function(socket, req, user) {
     socket.id = user;
+    let interval, timeout;
+    interval = setInterval(function() {
+      socket.send(JSON.stringify({ type: 'ping' }));
+      socket.pingSent = true;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        if (socket.pingSent) socket.close();
+      }, ms(clientConnectionTimeout));
+    }, ms(clientPingInterval));
+
+    socket.on('close', () => {
+      clearInterval(interval);
+    })
+
+    socket.on('message', event => {
+      const message = JSON.parse(event);
+      switch (message.type) {
+        case 'pong':
+          delete socket.pingSent;
+          break;
+        default:
+      }
+    });
   });
 
   server.on('upgrade', function upgrade(req, socket, head) {

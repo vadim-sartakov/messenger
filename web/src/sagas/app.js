@@ -9,6 +9,8 @@ import { tokenSelector } from './auth';
 export const messageTypes = {
   OPEN: 'open',
   CLOSE: 'close',
+  PING: 'ping',
+  PONG: 'pong',
   CHAT_RENAMED: 'chat_renamed',
   JOINED_CHAT: 'joined_chat',
   MESSAGE_POSTED: 'message_posted'
@@ -49,6 +51,9 @@ export function* watchSocket(socket, reconnect) {
         break;
       case messageTypes.CLOSE:
         return true;
+      case messageTypes.PING:
+        socket.send(JSON.stringify({ type: messageTypes.PONG }));
+        break;
       case messageTypes.CHAT_RENAMED:
         yield put({ type: actions.RENAME_CHAT_SUCCEEDED, chatId: action.chatId, name: action.name });
         break;

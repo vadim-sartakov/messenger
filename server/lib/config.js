@@ -25,5 +25,7 @@ module.exports = {
   jwtPublicKey,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
   userExpiresIn: process.env.USER_EXPIRES_IN || '24h',
-  cleanupPeriod: process.env.CLEANUP_PERIOD || '1h'
+  cleanupPeriod: process.env.CLEANUP_PERIOD || '1h',
+  clientPingInterval: process.env.CLIENT_PING_INTERVAL || '15s',
+  clientConnectionTimeout: process.env.CLIENT_CONNECTION_TIMEOUT || '10s'
 }
