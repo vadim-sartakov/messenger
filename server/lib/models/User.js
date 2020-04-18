@@ -18,7 +18,8 @@ const userSchema = new Schema({
       const endMs = new Date().getTime() + ms(userExpiresIn);
       return new Date(endMs);
     }
-  }
+  },
+  cleaned: Boolean
 }, { timestamps: true });
 
 const User = model('User', userSchema);
