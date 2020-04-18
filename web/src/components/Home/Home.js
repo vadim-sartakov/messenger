@@ -14,7 +14,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import Drawer from './Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
@@ -110,11 +109,9 @@ function Home({ isLoading, logout, me, chats = [], onSwitchTheme }) {
             <Typography variant="h6" noWrap className={classes.title}>
               {curChat ? curChat.name : 'Messenger App'}
             </Typography>
-            <Tooltip arrow title="Logout">
-              <IconButton color="inherit" onClick={() => setOpenLogout(true)}>
-                <ExitToApp />
-              </IconButton>
-            </Tooltip>
+            <IconButton title="Logout" color="inherit" onClick={() => setOpenLogout(true)}>
+              <ExitToApp />
+            </IconButton>
           </Toolbar>
         </AppBar>
         

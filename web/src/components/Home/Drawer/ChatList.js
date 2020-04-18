@@ -90,7 +90,7 @@ const LinkOption = forwardRef(function LinkOption({ chat }, ref) {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>{name}</DialogTitle>
+        <DialogTitle>{chat.name}</DialogTitle>
         <DialogContent>
           <DialogContentText>Share this link with others for invite:</DialogContentText>
           <InviteLink chat={chat} />

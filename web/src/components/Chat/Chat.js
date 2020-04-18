@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { makeStyles } from '@material-ui/core/styles';
@@ -92,11 +91,9 @@ function InputMessage({ onSubmit }) {
                 inputRef,
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Tooltip title="Send" placement="top" arrow>
-                      <IconButton color="primary" type="submit">
-                        <SendIcon />
-                      </IconButton>
-                    </Tooltip>
+                    <IconButton color="primary" type="submit">
+                      <SendIcon />
+                    </IconButton>
                   </InputAdornment>
                 )
               }}
