@@ -3,6 +3,7 @@ import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import auth from './auth';
 import app from './app';
+import call from './call';
 
 const persistConfig = {
   key: 'root',
@@ -12,7 +13,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth,
-  app
+  app,
+  call
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
