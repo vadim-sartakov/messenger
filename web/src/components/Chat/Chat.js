@@ -1,12 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
+import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { makeStyles } from '@material-ui/core/styles';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SendIcon from '@material-ui/icons/Send';
-import { Formik, Form } from 'formik';
+import VideoIcon from '@material-ui/icons/Videocam';
+import CallIcon from '@material-ui/icons/Call';
+import { Formik } from 'formik';
 import InputTextField from '../ui/InputTextField';
 import EmptyChat from './EmptyChat';
 import Message from './Message';
@@ -26,24 +34,28 @@ const useStyles = makeStyles(theme => {
     message: {
       marginBottom: theme.spacing(2)
     },
-    inputMessageContainer: {
+    bottomPanel: {
       position: 'sticky',
       bottom: 0,
       zIndex: 1,
       width: '100%',
       backgroundColor: theme.palette.type === 'dark' ? theme.palette.background.default : '#fff',
       padding: `${theme.spacing(1)}px ${theme.spacing(3)}px ${theme.spacing(3)}px ${theme.spacing(3)}px`,
-      '& form': {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-      }
+      display: 'flex',
+      justifyContent: 'center'
     },
-    inputMessage: {
+    inputContainer: {
+      display: 'flex',
+      alignItems: 'center',
       width: '100%',
       [theme.breakpoints.up('md')]: {
         width: theme.breakpoints.values.sm
       }
+    },
+    actions: {
+      flex: '1 0',
+      display: 'flex',
+      marginLeft: theme.spacing(1)
     }
   };
 });
@@ -55,7 +67,6 @@ function validate({ content }) {
 }
 
 function InputMessage({ onSubmit }) {
-  const classes = useStyles();
   const handleSubmit = (value, { resetForm }) => {
     onSubmit(value);
     resetForm();
@@ -77,40 +88,93 @@ function InputMessage({ onSubmit }) {
           }
         }
         return (
-          <Form>
-            <InputTextField
-              ignoreError
-              className={classes.inputMessage}
-              id="content"
-              name="content"
-              placeholder="Type a message"
-              variant="outlined"
-              multiline
-              fullWidth
-              onKeyDown={handleKeyDown}
-              InputProps={{
-                inputRef,
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Tooltip title="Send" placement="top" arrow PopperProps={{ disablePortal: true }}>
-                      <IconButton color="primary" type="submit">
-                        <SendIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </InputAdornment>
-                )
-              }}
-            />
-          </Form>
+          <InputTextField
+            ignoreError
+            id="content"
+            name="content"
+            placeholder="Type a message"
+            variant="outlined"
+            multiline
+            fullWidth
+            onKeyDown={handleKeyDown}
+            InputProps={{
+              inputRef,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Tooltip title="Send" placement="top" arrow PopperProps={{ disablePortal: true }}>
+                    <IconButton color="primary">
+                      <SendIcon />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              )
+            }}
+          />
         )
       }}
-      
     </Formik>
   )
 }
 
-// TODO:
-// Add messages pagination
+function CallButtonsMenu({ onAudioCallStart, onVideoCallStart }) {
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef();
+  return (
+    <>
+      <IconButton ref={buttonRef} size="small" onClick={() => setOpen(true)}>
+        <MoreVertIcon />
+      </IconButton>
+      <Menu open={open} onClose={() => setOpen(false)} anchorEl={buttonRef.current}>
+        <MenuItem onClick={onAudioCallStart}>
+          <ListItemIcon>
+            <CallIcon />
+          </ListItemIcon>
+          <ListItemText primary="Audio call" />
+        </MenuItem>
+        <MenuItem onClick={onVideoCallStart}>
+          <ListItemIcon>
+            <VideoIcon />
+          </ListItemIcon>
+          <ListItemText primary="Video call" />
+        </MenuItem>
+      </Menu>
+    </>
+  )
+}
+
+function Actions({ onAudioCallStart, onVideoCallStart }) {
+  const classes = useStyles();
+  return (
+    <div className={classes.actions}>
+      <Hidden smDown>
+        <Tooltip
+          title="Audio call"
+          placement="top"
+          arrow
+          PopperProps={{ disablePortal: true }}
+        >
+          <IconButton onClick={onAudioCallStart}>
+            <CallIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip
+          title="Video call"
+          placement="top"
+          arrow
+          PopperProps={{ disablePortal: true }}
+        >
+          <IconButton onClick={onVideoCallStart}>
+            <VideoIcon />
+          </IconButton>
+        </Tooltip>
+      </Hidden>
+      <Hidden mdUp>
+        <CallButtonsMenu />
+      </Hidden>
+    </div>
+  );
+}
+
 function Chat({ chat, postMessage }) {
   const classes = useStyles();
 
@@ -138,8 +202,11 @@ function Chat({ chat, postMessage }) {
           })}
         </TransitionGroup>
       </Grid>
-      <div className={classes.inputMessageContainer}>
-        <InputMessage onSubmit={postMessage} />
+      <div className={classes.bottomPanel}>
+        <div className={classes.inputContainer}>
+          <InputMessage onSubmit={postMessage} />
+          <Actions />
+        </div>
       </div>
     </Grid>
   );
