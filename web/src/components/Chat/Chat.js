@@ -102,7 +102,7 @@ function InputMessage({ onSubmit }) {
               endAdornment: (
                 <InputAdornment position="end">
                   <Tooltip title="Send" placement="top" arrow PopperProps={{ disablePortal: true }}>
-                    <IconButton color="primary">
+                    <IconButton color="primary" onClick={handleSubmit}>
                       <SendIcon />
                     </IconButton>
                   </Tooltip>
@@ -142,8 +142,10 @@ function CallButtonsMenu({ onAudioCallStart, onVideoCallStart }) {
   )
 }
 
-function Actions({ onAudioCallStart, onVideoCallStart }) {
+function Actions({ onStartCall }) {
   const classes = useStyles();
+  const handleStartAudioCall = () => onStartCall({ audio: true });
+  const handleStartVideoCall = () => onStartCall({ audio: true, video: true });
   return (
     <div className={classes.actions}>
       <Hidden smDown>
@@ -153,7 +155,7 @@ function Actions({ onAudioCallStart, onVideoCallStart }) {
           arrow
           PopperProps={{ disablePortal: true }}
         >
-          <IconButton onClick={onAudioCallStart}>
+          <IconButton onClick={handleStartAudioCall}>
             <CallIcon />
           </IconButton>
         </Tooltip>
@@ -163,19 +165,22 @@ function Actions({ onAudioCallStart, onVideoCallStart }) {
           arrow
           PopperProps={{ disablePortal: true }}
         >
-          <IconButton onClick={onVideoCallStart}>
+          <IconButton onClick={handleStartVideoCall}>
             <VideoIcon />
           </IconButton>
         </Tooltip>
       </Hidden>
       <Hidden mdUp>
-        <CallButtonsMenu />
+        <CallButtonsMenu
+          onAudioCallStart={handleStartAudioCall}
+          onVideoCallStart={handleStartVideoCall}
+        />
       </Hidden>
     </div>
   );
 }
 
-function Chat({ chat, postMessage }) {
+function Chat({ chat, onPostMessage, onStartCall }) {
   const classes = useStyles();
 
   useEffect(() => {
@@ -204,8 +209,8 @@ function Chat({ chat, postMessage }) {
       </Grid>
       <div className={classes.bottomPanel}>
         <div className={classes.inputContainer}>
-          <InputMessage onSubmit={postMessage} />
-          <Actions />
+          <InputMessage onSubmit={onPostMessage} />
+          <Actions onStartCall={onStartCall} />
         </div>
       </div>
     </Grid>

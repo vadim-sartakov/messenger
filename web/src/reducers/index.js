@@ -8,7 +8,7 @@ import call from './call';
 const persistConfig = {
   key: 'root',
   storage,
-  blacklist: ['app']
+  blacklist: ['app', 'call']
 };
 
 const rootReducer = combineReducers({

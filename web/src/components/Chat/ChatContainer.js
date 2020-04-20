@@ -1,26 +1,25 @@
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { postMessage } from '../../actions';
+import { postMessage, startCall } from '../../actions';
 import Chat from './Chat';
 
-function ChatContainer({ id, chat, postMessage, ...props }) {
+function ChatContainer({ postMessage, startCall, ...props }) {
   const handlePostMessage = useCallback(({ content }) => {
-    postMessage(id, content);
-  }, [id, postMessage]);
-
+    postMessage(content);
+  }, [postMessage]);
   return (
     <Chat
       {...props}
-      chat={chat}
-      location={location}
-      postMessage={handlePostMessage}
+      onPostMessage={handlePostMessage}
+      onStartCall={startCall}
     />
   );
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch, ownProps) {
   return {
-    postMessage: (chatId, text) => dispatch(postMessage(chatId, text))
+    postMessage: text => dispatch(postMessage(ownProps.id, text)),
+    startCall: options => dispatch(startCall(ownProps.id, options))
   }
 }
 

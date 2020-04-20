@@ -1,12 +1,17 @@
-export const CALL_REQUESTED = 'CALL_REQUESTED';
-export const CALL_FAILED = 'CALL_FAILED';
-export const INCOMING_CALL = 'INCOMING_CALL';
+export const OUTGOING_CALL_REQUESTED = 'OUTGOING_CALL_REQUESTED';
+export const OUTGOING_CALL_SUCCEEDED = 'OUTGOING_CALL_SUCCEEDED';
+export const OUTGOING_CALL_FAILED = 'OUTGOING_CALL_FAILED';
+export const INCOMING_CALL_REQUESTED = 'INCOMING_CALL_REQUESTED';
+export const INCOMING_CALL_SUCCEEDED = 'INCOMING_CALL_SUCCEEDED';
+export const INCOMING_CALL_FAILED = 'INCOMING_CALL_FAILED';
 export const SWITCH_CAMERA = 'SWITCH_CAMERA';
-export const START_CALL = 'START_CALL';
+export const ACCEPT_CALL = 'ACCEPT_CALL';
+export const CANCEL_CALL = 'CANCEL_CALL';
 export const END_CALL = 'END_CALL';
+export const SET_CALL_SETTINGS = 'SET_CALL_SETTINGS';
 
-export function call(chatId, { audio, video }) {
-  return { type: CALL_REQUESTED, chatId, audio, video };
+export function startCall(chatId, { audio, video }) {
+  return { type: OUTGOING_CALL_REQUESTED, chatId, audio, video };
 }
 
 export function switchCamera() {
@@ -15,4 +20,16 @@ export function switchCamera() {
 
 export function endCall() {
   return { type: END_CALL };
+}
+
+export function acceptCall() {
+  return { type: ACCEPT_CALL };
+}
+
+export function cancelCall() {
+  return { type: CANCEL_CALL };
+}
+
+export function setCallSettings() {
+  return { type: SET_CALL_SETTINGS };
 }

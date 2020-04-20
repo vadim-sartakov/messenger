@@ -20,6 +20,7 @@ import Drawer from './Drawer';
 import SessionExpiredDialog from './SessionExpiredDialog';
 import Chat from '../Chat';
 import NoChats from './NoChats';
+import Call from '../Call';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -120,6 +121,7 @@ function Home({ isLoading, logout, me, chats = [], onSwitchTheme }) {
         
         <main className={classes.main}>
           {chats.length === 0 ? <NoChats /> : !chatId || !curChat ? null : <Chat id={chatId} chat={curChat} />}
+          <Call chat={curChat} />
         </main>
       </Grid>
       <SessionExpiredDialog />
