@@ -30,15 +30,46 @@ const useStyles = makeStyles(theme => {
       top: theme.spacing(1),
       right: theme.spacing(1)
     },
-    input: {
+    inputControl: {
       minWidth: 300,
       marginBottom: theme.spacing(4)
+    },
+    input: {
+      maxWidth: 300
     }
   };
 });
 
-function Settings({ settings = {}, onSettingsChange, onSubmit }) {
+function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, showMessage }) {
   const classes = useStyles();
+
+  const [cams, setCams] = useState([]);
+  const [mics, setMics] = useState([]);
+  const [error, setError] = useState(false);
+
+  useEffect(function getMediaDevices() {
+    async function updateDevices() {
+      try {
+        const constraints = { audio, video };
+        await navigator.mediaDevices.getUserMedia(constraints);
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter(device => device.kind === 'videoinput');
+        const mics = devices.filter(device => device.kind === 'audioinput');
+        video && setCams(cams);
+        audio && setMics(mics)
+      } catch (err) {
+        console.log(err);
+        setError(true);
+        showMessage({ severity: 'error', text: 'Failed to get camera and microphone data', autoHide: true });
+      }
+    }
+    updateDevices();
+    navigator.mediaDevices.addEventListener('devicechange', updateDevices);
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', updateDevices);
+    }
+  }, [audio, video, showMessage]);
+
   const handleCameraChange = camera => {
     console.log('camera = %o', camera);
   };
@@ -47,11 +78,11 @@ function Settings({ settings = {}, onSettingsChange, onSubmit }) {
   };
   const formik = useFormik({
     initialValues: {
-      camera: '',
-      mic: ''
+      cam: settings.cam || '',
+      mic: settings.mic || ''
     },
     onSubmit
-  })
+  });
   return (
     <form onSubmit={formik.handleSubmit}>
       <Container maxWidth="sm" className={classes.container}>
@@ -59,23 +90,8 @@ function Settings({ settings = {}, onSettingsChange, onSubmit }) {
           <Typography variant="h5" className={classes.title} align="center">
             Check your microphone and camera settings
           </Typography>
-          
-          <FormControl variant="outlined" className={classes.input}>
-            <InputLabel id="cam-label">Camera</InputLabel>
-            <Select
-              id="camera"
-              labelId="cam-label"
-              label="Camera"
-              name="camera"
-              value={formik.values.camera}
-              onChange={formik.handleChange}
-            >
-              <MenuItem value="Camera 1">Camera 1</MenuItem>
-              <MenuItem value="Camera 2">Camera 2</MenuItem>
-            </Select>
-          </FormControl>
 
-          <FormControl variant="outlined" className={classes.input}>
+          <FormControl variant="outlined" className={classes.inputControl}>
             <InputLabel id="mic-label">Microphone</InputLabel>
             <Select
               id="mic"
@@ -84,13 +100,34 @@ function Settings({ settings = {}, onSettingsChange, onSubmit }) {
               name="mic"
               value={formik.values.mic}
               onChange={formik.handleChange}
+              className={classes.input}
             >
-              <MenuItem value="Microphone 1">Microphone 1</MenuItem>
-              <MenuItem value="Microphone 2">Microphone 2</MenuItem>
+              {mics.map((mic, index) => {
+                return <MenuItem key={index} value={mic}>{mic.label}</MenuItem>
+              })}
             </Select>
           </FormControl>
+          
+          {video && (
+            <FormControl variant="outlined" className={classes.inputControl}>
+              <InputLabel id="cam-label">Camera</InputLabel>
+              <Select
+                id="cam"
+                labelId="cam-label"
+                label="Camera"
+                name="cam"
+                value={formik.values.cam}
+                onChange={formik.handleChange}
+              >
+                {cams.map((cam, index) => {
+                  return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
+                })}
+              </Select>
+            </FormControl>
+          )}
 
           <Button
+            disabled={error}
             color="primary"
             variant="contained"
             type="submit"
@@ -106,7 +143,14 @@ function Settings({ settings = {}, onSettingsChange, onSubmit }) {
   )
 }
 
-function Outgoing({ chat, settings, onSettingsChange }) {
+function Outgoing({
+  chat,
+  audio,
+  video,
+  settings,
+  onSettingsChange,
+  showMessage
+}) {
   const classes = useStyles();
   const [openSettings, setOpenSettings] = useState(true);
 
@@ -115,7 +159,15 @@ function Outgoing({ chat, settings, onSettingsChange }) {
     setOpenSettings(false);
   }, [onSettingsChange]);
 
-  return openSettings ? <Settings settings={settings} onSubmit={handleSettingsSubmit} /> : (
+  return openSettings ? (
+    <Settings
+      settings={settings}
+      onSubmit={handleSettingsSubmit}
+      audio={audio}
+      video={video}
+      showMessage={showMessage}
+    />
+  ) : (
     <Container maxWidth="sm" className={classes.container}>
       <Typography variant="h5" className={classes.title}>
         {`Connecting to ${chat.name}...`}
@@ -128,7 +180,17 @@ function Ongoing() {
   return <div>Ongoing call</div>;
 }
 
-function Call({ chat, settings, onSettingsChange, outgoing, ongoing, onEndCall }) {
+function Call({
+  chat,
+  audio,
+  video,
+  settings,
+  onSettingsChange,
+  outgoing,
+  ongoing,
+  onEndCall,
+  showMessage
+}) {
   useEffect(function alertOnClose() {
     const unload = () => true;
     window.addEventListener('unload', unload);
@@ -147,6 +209,9 @@ function Call({ chat, settings, onSettingsChange, outgoing, ongoing, onEndCall }
           <Outgoing
             settings={settings}
             chat={chat}
+            audio={audio}
+            video={video}
+            showMessage={showMessage}
           />
         )}
         {ongoing && <Ongoing onSettingsChange={onSettingsChange} />}
