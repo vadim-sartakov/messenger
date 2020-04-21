@@ -17,7 +17,6 @@ function mapStateToProps(state) {
   return {
     settings: state.call.settings,
     outgoing: state.call.outgoing,
-    incoming: state.call.incoming,
     ongoing: state.call.ongoing
   };
 }
