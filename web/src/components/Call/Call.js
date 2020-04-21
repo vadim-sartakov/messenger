@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useFormik } from 'formik';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -6,7 +6,6 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -14,8 +13,6 @@ import Dialog from '@material-ui/core/Dialog';
 import Grow from '@material-ui/core/Grow';
 import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import PhoneIcon from '@material-ui/icons/Phone';
-import PhoneDisabledIcon from '@material-ui/icons/PhoneDisabled';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -36,6 +33,10 @@ const useStyles = makeStyles(theme => {
     },
     input: {
       maxWidth: 300
+    },
+    videoStream: {
+      width: '100%',
+      marginBottom: theme.spacing(4)
     }
   };
 });
@@ -70,12 +71,6 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
     }
   }, [audio, video, showMessage]);
 
-  const handleCameraChange = camera => {
-    console.log('camera = %o', camera);
-  };
-  const handleMicrophoneChange = mic => {
-    console.log('mic = %o', mic);
-  };
   const formik = useFormik({
     initialValues: {
       cam: settings.cam || '',
@@ -83,12 +78,29 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
     },
     onSubmit
   });
+
+  useEffect(function getCameraStream() {
+    if (!video || !formik.values.cam.deviceId) return;
+    async function getStream() {
+      const constraints = {
+        video: {
+          deviceId: formik.values.cam.deviceId
+        }
+      };
+      const videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+      videoRef.current.srcObject = videoStream;
+    }
+    getStream();
+  }, [video, formik.values.cam]);
+
+  const videoRef = useRef();
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Container maxWidth="sm" className={classes.container}>
         <Grid container direction="column" alignItems="center">
           <Typography variant="h5" className={classes.title} align="center">
-            Check your microphone and camera settings
+            {`Check your microphone ${video ? 'and camera ' : ''}settings`}
           </Typography>
 
           <FormControl variant="outlined" className={classes.inputControl}>
@@ -109,21 +121,25 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
           </FormControl>
           
           {video && (
-            <FormControl variant="outlined" className={classes.inputControl}>
-              <InputLabel id="cam-label">Camera</InputLabel>
-              <Select
-                id="cam"
-                labelId="cam-label"
-                label="Camera"
-                name="cam"
-                value={formik.values.cam}
-                onChange={formik.handleChange}
-              >
-                {cams.map((cam, index) => {
-                  return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
-                })}
-              </Select>
-            </FormControl>
+            <Grid container direction="column" alignItems="center">
+              <FormControl variant="outlined" className={classes.inputControl}>
+                <InputLabel id="cam-label">Camera</InputLabel>
+                <Select
+                  id="cam"
+                  labelId="cam-label"
+                  label="Camera"
+                  name="cam"
+                  value={formik.values.cam}
+                  onChange={formik.handleChange}
+                >
+                  {cams.map((cam, index) => {
+                    return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
+                  })}
+                </Select>
+              </FormControl>
+
+              <video ref={videoRef} className={classes.videoStream} autoPlay playsInline controls={false} />
+            </Grid>
           )}
 
           <Button
