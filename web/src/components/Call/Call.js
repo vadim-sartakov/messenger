@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import classNames from 'classnames';
 import { useFormik } from 'formik';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -13,6 +14,7 @@ import Dialog from '@material-ui/core/Dialog';
 import Grow from '@material-ui/core/Grow';
 import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
+import MicVolume from '../../utils/MicVolume';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -27,12 +29,25 @@ const useStyles = makeStyles(theme => {
       top: theme.spacing(1),
       right: theme.spacing(1)
     },
-    inputControl: {
-      minWidth: 300,
+    maxWidth: {
+      maxWidth: 300
+    },
+    minWidth: {
+      minWidth: 300
+    },
+    marginBottom: {
       marginBottom: theme.spacing(4)
     },
-    input: {
-      maxWidth: 300
+    smallMarginBottom: {
+      marginBottom: theme.spacing(1)
+    },
+    pid: {
+      width: 25,
+      height: 10,
+      border: `solid 1px ${theme.palette.action.disabledBackground}`
+    },
+    activePid: {
+      backgroundColor: theme.palette.primary.main
     },
     videoStream: {
       width: '100%',
@@ -41,9 +56,34 @@ const useStyles = makeStyles(theme => {
   };
 });
 
+function MicVolumeIndicator({ level }) {
+  const classes = useStyles();
+  return (
+    <Grid
+      container
+      justify="space-between"
+      className={classNames(classes.maxWidth, classes.marginBottom)}
+    >
+      {[...new Array(10).keys()].map(index => {
+        return (
+          <div
+            key={index}
+            className={classNames(
+              classes.pid, {
+                [classes.activePid]: index < level
+              }
+            )}
+          />
+        )
+      })}
+    </Grid>
+  );
+}
+
 function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, showMessage }) {
   const classes = useStyles();
 
+  const [micVolume, setMicVolume] = useState(0);
   const [cams, setCams] = useState([]);
   const [mics, setMics] = useState([]);
   const [error, setError] = useState(false);
@@ -89,19 +129,35 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
     }
   }, [audio, video, showMessage, setFieldValue]);
 
-  useEffect(function getCameraStream() {
-    if (!video || !formik.values.cam.deviceId) return;
+  useEffect(function getStream() {
+    let micVolume;
+    if (formik.values.mic === '' && formik.values.cam === '') return;
     async function getStream() {
       const constraints = {
-        video: {
-          deviceId: formik.values.cam.deviceId
+        ...audio && formik.values.mic.deviceId && {
+          audio: {
+            deviceId: formik.values.mic.deviceId
+          }
+        },
+        ...video && formik.values.cam.deviceId && {
+          video: {
+            deviceId: formik.values.cam.deviceId
+          }
         }
       };
-      const videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = videoStream;
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      micVolume = new MicVolume(stream, avarage => {
+        setMicVolume(Math.round(avarage / 10));
+      });
+      micVolume.listen();
+      
+      if (video && formik.values.cam.deviceId) videoRef.current.srcObject = stream;
     }
     getStream();
-  }, [video, formik.values.cam]);
+    return () => {
+      micVolume && micVolume.clear();
+    }
+  }, [audio, video, formik.values.mic, formik.values.cam]);
 
   const videoRef = useRef();
 
@@ -113,7 +169,7 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
             {`Check your microphone ${video ? 'and camera ' : ''}settings`}
           </Typography>
 
-          <FormControl variant="outlined" className={classes.inputControl}>
+          <FormControl variant="outlined" className={classNames(classes.minWidth, classes.smallMarginBottom)}>
             <InputLabel id="mic-label">Microphone</InputLabel>
             <Select
               id="mic"
@@ -122,17 +178,19 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
               name="mic"
               value={formik.values.mic}
               onChange={formik.handleChange}
-              className={classes.input}
+              className={classes.maxWidth}
             >
               {mics.map((mic, index) => {
                 return <MenuItem key={index} value={mic}>{mic.label}</MenuItem>
               })}
             </Select>
           </FormControl>
+
+          <MicVolumeIndicator level={micVolume} />
           
           {video && (
             <Grid container direction="column" alignItems="center">
-              <FormControl variant="outlined" className={classes.inputControl}>
+              <FormControl variant="outlined" className={classNames(classes.minWidth, classes.marginBottom)}>
                 <InputLabel id="cam-label">Camera</InputLabel>
                 <Select
                   id="cam"
