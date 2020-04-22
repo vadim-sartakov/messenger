@@ -48,16 +48,34 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
   const [mics, setMics] = useState([]);
   const [error, setError] = useState(false);
 
+  const formik = useFormik({
+    initialValues: {
+      cam: settings.cam || '',
+      mic: settings.mic || ''
+    },
+    onSubmit
+  });
+
+  const { setFieldValue } = formik;
+
   useEffect(function getMediaDevices() {
     async function updateDevices() {
       try {
         const constraints = { audio, video };
+        // To be able to list all availabel devices it is required to
+        // execute getUserMedia first
         await navigator.mediaDevices.getUserMedia(constraints);
         const devices = await navigator.mediaDevices.enumerateDevices();
         const cams = devices.filter(device => device.kind === 'videoinput');
         const mics = devices.filter(device => device.kind === 'audioinput');
-        video && setCams(cams);
-        audio && setMics(mics)
+        if (video) {
+          setCams(cams);
+          setFieldValue('cam', cams[0]);
+        }
+        if (audio) {
+          setMics(mics);
+          setFieldValue('mic', mics[0]);
+        }
       } catch (err) {
         console.log(err);
         setError(true);
@@ -69,15 +87,7 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', updateDevices);
     }
-  }, [audio, video, showMessage]);
-
-  const formik = useFormik({
-    initialValues: {
-      cam: settings.cam || '',
-      mic: settings.mic || ''
-    },
-    onSubmit
-  });
+  }, [audio, video, showMessage, setFieldValue]);
 
   useEffect(function getCameraStream() {
     if (!video || !formik.values.cam.deviceId) return;
