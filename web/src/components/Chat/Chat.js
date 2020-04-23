@@ -142,10 +142,10 @@ function CallButtonsMenu({ onAudioCallStart, onVideoCallStart }) {
   )
 }
 
-function Actions({ onStartCall }) {
+function Actions({ onInitiateCall }) {
   const classes = useStyles();
-  const handleStartAudioCall = () => onStartCall({ audio: true });
-  const handleStartVideoCall = () => onStartCall({ audio: true, video: true });
+  const handleStartAudioCall = () => onInitiateCall({ audio: true });
+  const handleStartVideoCall = () => onInitiateCall({ audio: true, video: true });
   return (
     <div className={classes.actions}>
       <Hidden smDown>
@@ -180,7 +180,7 @@ function Actions({ onStartCall }) {
   );
 }
 
-function Chat({ chat, onPostMessage, onStartCall }) {
+function Chat({ chat, onPostMessage, onInitiateCall }) {
   const classes = useStyles();
 
   useEffect(() => {
@@ -210,7 +210,7 @@ function Chat({ chat, onPostMessage, onStartCall }) {
       <div className={classes.bottomPanel}>
         <div className={classes.inputContainer}>
           <InputMessage onSubmit={onPostMessage} />
-          <Actions onStartCall={onStartCall} />
+          <Actions onInitiateCall={onInitiateCall} />
         </div>
       </div>
     </Grid>

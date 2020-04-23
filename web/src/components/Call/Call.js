@@ -241,35 +241,15 @@ function Settings({
   )
 }
 
-function Outgoing({
-  chat,
-  audio,
-  video,
-  showMessage
-}) {
+function Outgoing({ chat }) {
   const classes = useStyles();
-  const [micStream, setMicStream] = useState();
-  const [camStream, setCamStream] = useState();
-  const [openSettings, setOpenSettings] = useState(true);
-
-  return openSettings ? (
-    <Settings
-      micStream={micStream}
-      onMicStreamChange={setMicStream}
-      camStream={camStream}
-      onCamStreamChange={setCamStream}
-      onSubmit={() => setOpenSettings(false)}
-      audio={audio}
-      video={video}
-      showMessage={showMessage}
-    />
-  ) : (
+  return (
     <Container maxWidth="sm" className={classes.container}>
       <Typography variant="h5" className={classes.title}>
         {`Connecting to ${chat.name}...`}
       </Typography>
     </Container>
-  )
+  );
 }
 
 function Ongoing() {
@@ -277,13 +257,45 @@ function Ongoing() {
 }
 
 function Call({
+  settings,
+  outgoing,
+  ongoing,
+  onStartCall,
+  chat,
+  audio,
+  video,
+  showMessage
+}) {
+  const [micStream, setMicStream] = useState();
+  const [camStream, setCamStream] = useState();
+  return (
+    <>
+      {settings && (
+        <Settings
+          micStream={micStream}
+          onMicStreamChange={setMicStream}
+          camStream={camStream}
+          onCamStreamChange={setCamStream}
+          onSubmit={() => onStartCall(chat._id, { audio, video })}
+          audio={audio}
+          video={video}
+          showMessage={showMessage}
+        />
+      )}
+      {outgoing && <Outgoing chat={chat} />}
+      {ongoing && <Ongoing />}
+    </>
+  );
+}
+
+function CallDialog({
   chat,
   audio,
   video,
   settings,
-  onSettingsChange,
   outgoing,
   ongoing,
+  onStartCall,
   onEndCall,
   showMessage
 }) {
@@ -292,28 +304,28 @@ function Call({
     window.addEventListener('unload', unload);
     return () => window.removeEventListener('unload', unload);
   }, []);
-
+  const open = settings || outgoing || ongoing || false;
   return (
     <>
       <Dialog
-        open={outgoing || ongoing || false}
+        open={open}
         onClose={onEndCall}
         fullScreen
         TransitionComponent={Grow}
       >
-        {outgoing && (
-          <Outgoing
-            settings={settings}
-            chat={chat}
-            audio={audio}
-            video={video}
-            showMessage={showMessage}
-          />
-        )}
-        {ongoing && <Ongoing onSettingsChange={onSettingsChange} />}
+        <Call
+          settings={settings}
+          outgoing={outgoing}
+          ongoing={ongoing}
+          onStartCall={onStartCall}
+          chat={chat}
+          audio={audio}
+          video={video}
+          showMessage={showMessage}
+        />
       </Dialog>
     </>
   )
 }
 
-export default Call;
+export default CallDialog;

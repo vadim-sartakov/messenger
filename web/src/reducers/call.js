@@ -1,6 +1,5 @@
-import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 import {
+  INITIATE_CALL,
   OUTGOING_CALL_REQUESTED,
   OUTGOING_CALL_SUCCEEDED,
   SWITCH_CAMERA,
@@ -11,8 +10,10 @@ const initialState = {};
 
 function call(state = initialState, { type, ...action }) {
   switch (type) {
+    case INITIATE_CALL:
+      return { ...state, settings: true, video: action.video, audio: action.audio };
     case OUTGOING_CALL_REQUESTED:
-      return { ...state, outgoing: true, video: action.video, audio: action.audio };
+      return { ...state, settings: false, outgoing: true, video: action.video, audio: action.audio };
     case OUTGOING_CALL_SUCCEEDED:
       return { ...state, outgoing: false, ongoing: true };
     case SWITCH_CAMERA:
@@ -24,10 +25,4 @@ function call(state = initialState, { type, ...action }) {
   }
 }
 
-const persistConfig = {
-  key: 'call',
-  storage,
-  whitelist: ['settings']
-};
-
-export default persistReducer(persistConfig, call);
+export default call;
