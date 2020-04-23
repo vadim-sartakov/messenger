@@ -5,7 +5,6 @@ export const SWITCH_CAMERA = 'SWITCH_CAMERA';
 export const ACCEPT_CALL = 'ACCEPT_CALL';
 export const CANCEL_CALL = 'CANCEL_CALL';
 export const END_CALL = 'END_CALL';
-export const SET_CALL_SETTINGS = 'SET_CALL_SETTINGS';
 
 export function startCall(chatId, { audio, video }) {
   return { type: OUTGOING_CALL_REQUESTED, chatId, audio, video };
@@ -25,8 +24,4 @@ export function acceptCall() {
 
 export function cancelCall() {
   return { type: CANCEL_CALL };
-}
-
-export function setCallSettings() {
-  return { type: SET_CALL_SETTINGS };
 }

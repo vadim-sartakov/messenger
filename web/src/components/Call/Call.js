@@ -80,7 +80,16 @@ function MicVolumeIndicator({ level }) {
   );
 }
 
-function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, showMessage }) {
+function Settings({
+  micStream,
+  onMicStreamChange,
+  camStream,
+  onCamStreamChange,
+  audio,
+  video,
+  onSubmit,
+  showMessage
+}) {
   const classes = useStyles();
 
   const [micVolume, setMicVolume] = useState(0);
@@ -90,16 +99,51 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
 
   const formik = useFormik({
     initialValues: {
-      cam: settings.cam || '',
-      mic: settings.mic || ''
+      cam: '',
+      mic: ''
     },
     onSubmit
   });
-
   const { setFieldValue } = formik;
 
-  useEffect(function getMediaDevices() {
-    async function updateDevices() {
+  const handleMicChange = useCallback(async mic => {
+    setFieldValue('mic', mic);
+    const constraints = {
+      audio: {
+        deviceId: mic.deviceId
+      }
+    };
+    const micStream = await navigator.mediaDevices.getUserMedia(constraints);
+    onMicStreamChange(micStream);
+  }, [setFieldValue, onMicStreamChange]);
+
+  useEffect(function attachMicVolume() {
+    if (!micStream) return;
+    const micVolume = new MicVolume(micStream, avarage => {
+      setMicVolume(Math.round(avarage / 10));
+    });
+    micVolume.listen();
+    return () => micVolume.clear();
+  }, [micStream]);
+
+  const handleCamChange = useCallback(async cam => {
+    setFieldValue('cam', cam);
+    const constraints = {
+      video: {
+        deviceId: cam.deviceId
+      }
+    };
+    const camStream = await navigator.mediaDevices.getUserMedia(constraints);
+    onCamStreamChange(camStream);
+  }, [setFieldValue, onCamStreamChange]);
+
+  useEffect(function streamLocalVideo() {
+    if (!camStream) return;
+    videoRef.current.srcObject = camStream;
+  }, [camStream]);
+
+  useEffect(function updateDevices() {
+    async function updateMediaDevices() {
       try {
         const constraints = { audio, video };
         // To be able to list all availabel devices it is required to
@@ -110,11 +154,11 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
         const mics = devices.filter(device => device.kind === 'audioinput');
         if (video) {
           setCams(cams);
-          setFieldValue('cam', cams[0]);
+          handleCamChange(cams[0]);
         }
         if (audio) {
           setMics(mics);
-          setFieldValue('mic', mics[0]);
+          handleMicChange(mics[0]);
         }
       } catch (err) {
         console.log(err);
@@ -122,42 +166,12 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
         showMessage({ severity: 'error', text: 'Failed to get camera and microphone data', autoHide: true });
       }
     }
-    updateDevices();
-    navigator.mediaDevices.addEventListener('devicechange', updateDevices);
+    updateMediaDevices();
+    navigator.mediaDevices.addEventListener('devicechange', updateMediaDevices);
     return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', updateDevices);
+      navigator.mediaDevices.removeEventListener('devicechange', updateMediaDevices);
     }
-  }, [audio, video, showMessage, setFieldValue]);
-
-  useEffect(function getStream() {
-    let micVolume;
-    if (formik.values.mic === '' && formik.values.cam === '') return;
-    async function getStream() {
-      const constraints = {
-        ...audio && formik.values.mic.deviceId && {
-          audio: {
-            deviceId: formik.values.mic.deviceId
-          }
-        },
-        ...video && formik.values.cam.deviceId && {
-          video: {
-            deviceId: formik.values.cam.deviceId
-          }
-        }
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      micVolume = new MicVolume(stream, avarage => {
-        setMicVolume(Math.round(avarage / 10));
-      });
-      micVolume.listen();
-      
-      if (video && formik.values.cam.deviceId) videoRef.current.srcObject = stream;
-    }
-    getStream();
-    return () => {
-      micVolume && micVolume.clear();
-    }
-  }, [audio, video, formik.values.mic, formik.values.cam]);
+  }, [audio, video, showMessage, setFieldValue, handleMicChange, handleCamChange]);
 
   const videoRef = useRef();
 
@@ -177,7 +191,7 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
               label="Microphone"
               name="mic"
               value={formik.values.mic}
-              onChange={formik.handleChange}
+              onChange={e => handleMicChange(e.target.value)}
               className={classes.maxWidth}
             >
               {mics.map((mic, index) => {
@@ -198,7 +212,7 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
                   label="Camera"
                   name="cam"
                   value={formik.values.cam}
-                  onChange={formik.handleChange}
+                  onChange={e => handleCamChange(e.target.value)}
                 >
                   {cams.map((cam, index) => {
                     return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
@@ -216,7 +230,7 @@ function Settings({ settings = {}, audio, video, onSettingsChange, onSubmit, sho
             variant="contained"
             type="submit"
           >
-            Connect
+            Join
           </Button>
         </Grid>
         <IconButton className={classes.closeButton}>
@@ -231,22 +245,20 @@ function Outgoing({
   chat,
   audio,
   video,
-  settings,
-  onSettingsChange,
   showMessage
 }) {
   const classes = useStyles();
+  const [micStream, setMicStream] = useState();
+  const [camStream, setCamStream] = useState();
   const [openSettings, setOpenSettings] = useState(true);
-
-  const handleSettingsSubmit = useCallback(settings => {
-    onSettingsChange(settings);
-    setOpenSettings(false);
-  }, [onSettingsChange]);
 
   return openSettings ? (
     <Settings
-      settings={settings}
-      onSubmit={handleSettingsSubmit}
+      micStream={micStream}
+      onMicStreamChange={setMicStream}
+      camStream={camStream}
+      onCamStreamChange={setCamStream}
+      onSubmit={() => setOpenSettings(false)}
       audio={audio}
       video={video}
       showMessage={showMessage}
