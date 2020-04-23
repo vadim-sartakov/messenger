@@ -1,4 +1,5 @@
 import {
+  UPDATE_MEDIA_DEVICES_SUCCEEDED,
   INITIATE_CALL,
   OUTGOING_CALL_REQUESTED,
   OUTGOING_CALL_SUCCEEDED,
@@ -13,6 +14,8 @@ function call(state = initialState, { type, ...action }) {
   switch (type) {
     case INITIATE_CALL:
       return { ...state, settings: true, video: action.video, audio: action.audio };
+    case UPDATE_MEDIA_DEVICES_SUCCEEDED:
+      return { ...state, mics: action.mics, cams: action.cams };
     case GET_LOCAL_STREAM_SUCCEEDED:
       return { ...state, [`${action.kind}Stream`]: action.stream };
     case OUTGOING_CALL_REQUESTED:
