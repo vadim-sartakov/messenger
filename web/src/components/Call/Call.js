@@ -29,11 +29,11 @@ const useStyles = makeStyles(theme => {
       top: theme.spacing(1),
       right: theme.spacing(1)
     },
-    maxWidth: {
-      maxWidth: 300
-    },
-    minWidth: {
-      minWidth: 300
+    inputsContainer: {
+      width: '100%',
+      [theme.breakpoints.up('sm')]: {
+        width: 350
+      }
     },
     marginBottom: {
       marginBottom: theme.spacing(4)
@@ -81,10 +81,9 @@ function MicVolumeIndicator({ level }) {
 }
 
 function Settings({
-  micStream,
-  onMicStreamChange,
-  camStream,
-  onCamStreamChange,
+  audioStream,
+  videoStream,
+  onGetLocalStream,
   audio,
   video,
   onSubmit,
@@ -106,41 +105,29 @@ function Settings({
   });
   const { setFieldValue } = formik;
 
-  const handleMicChange = useCallback(async mic => {
+  const handleMicChange = useCallback(mic => {
     setFieldValue('mic', mic);
-    const constraints = {
-      audio: {
-        deviceId: mic.deviceId
-      }
-    };
-    const micStream = await navigator.mediaDevices.getUserMedia(constraints);
-    onMicStreamChange(micStream);
-  }, [setFieldValue, onMicStreamChange]);
+    onGetLocalStream('audio', mic.deviceId);
+  }, [setFieldValue, onGetLocalStream]);
 
   useEffect(function attachMicVolume() {
-    if (!micStream) return;
-    const micVolume = new MicVolume(micStream, avarage => {
+    if (!audioStream) return;
+    const micVolume = new MicVolume(audioStream, avarage => {
       setMicVolume(Math.round(avarage / 10));
     });
     micVolume.listen();
     return () => micVolume.clear();
-  }, [micStream]);
+  }, [audioStream]);
 
-  const handleCamChange = useCallback(async cam => {
+  const handleCamChange = useCallback(cam => {
     setFieldValue('cam', cam);
-    const constraints = {
-      video: {
-        deviceId: cam.deviceId
-      }
-    };
-    const camStream = await navigator.mediaDevices.getUserMedia(constraints);
-    onCamStreamChange(camStream);
-  }, [setFieldValue, onCamStreamChange]);
+    onGetLocalStream('video', cam.deviceId);
+  }, [setFieldValue, onGetLocalStream]);
 
   useEffect(function streamLocalVideo() {
-    if (!camStream) return;
-    videoRef.current.srcObject = camStream;
-  }, [camStream]);
+    if (!videoStream) return;
+    videoRef.current.srcObject = videoStream;
+  }, [videoStream]);
 
   useEffect(function updateDevices() {
     async function updateMediaDevices() {
@@ -148,7 +135,8 @@ function Settings({
         const constraints = { audio, video };
         // To be able to list all availabel devices it is required to
         // execute getUserMedia first
-        await navigator.mediaDevices.getUserMedia(constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        stream.getTracks().forEach(track => track.stop());
         const devices = await navigator.mediaDevices.enumerateDevices();
         const cams = devices.filter(device => device.kind === 'videoinput');
         const mics = devices.filter(device => device.kind === 'audioinput');
@@ -183,46 +171,47 @@ function Settings({
             {`Check your microphone ${video ? 'and camera ' : ''}settings`}
           </Typography>
 
-          <FormControl variant="outlined" className={classNames(classes.minWidth, classes.smallMarginBottom)}>
-            <InputLabel id="mic-label">Microphone</InputLabel>
-            <Select
-              id="mic"
-              labelId="mic-label"
-              label="Microphone"
-              name="mic"
-              value={formik.values.mic}
-              onChange={e => handleMicChange(e.target.value)}
-              className={classes.maxWidth}
-            >
-              {mics.map((mic, index) => {
-                return <MenuItem key={index} value={mic}>{mic.label}</MenuItem>
-              })}
-            </Select>
-          </FormControl>
+          <Grid container direction="column" className={classes.inputsContainer}>
+            <FormControl variant="outlined" className={classes.smallMarginBottom} fullWidth>
+              <InputLabel id="mic-label">Microphone</InputLabel>
+              <Select
+                id="mic"
+                labelId="mic-label"
+                label="Microphone"
+                name="mic"
+                value={formik.values.mic}
+                onChange={e => handleMicChange(e.target.value)}
+              >
+                {mics.map((mic, index) => {
+                  return <MenuItem key={index} value={mic}>{mic.label}</MenuItem>
+                })}
+              </Select>
+            </FormControl>
 
-          <MicVolumeIndicator level={micVolume} />
-          
-          {video && (
-            <Grid container direction="column" alignItems="center">
-              <FormControl variant="outlined" className={classNames(classes.minWidth, classes.marginBottom)}>
-                <InputLabel id="cam-label">Camera</InputLabel>
-                <Select
-                  id="cam"
-                  labelId="cam-label"
-                  label="Camera"
-                  name="cam"
-                  value={formik.values.cam}
-                  onChange={e => handleCamChange(e.target.value)}
-                >
-                  {cams.map((cam, index) => {
-                    return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
-                  })}
-                </Select>
-              </FormControl>
+            <MicVolumeIndicator level={micVolume} />
+            
+            {video && (
+              <>
+                <FormControl variant="outlined" className={classes.marginBottom} fullWidth>
+                  <InputLabel id="cam-label">Camera</InputLabel>
+                  <Select
+                    id="cam"
+                    labelId="cam-label"
+                    label="Camera"
+                    name="cam"
+                    value={formik.values.cam}
+                    onChange={e => handleCamChange(e.target.value)}
+                  >
+                    {cams.map((cam, index) => {
+                      return <MenuItem key={index} value={cam}>{cam.label}</MenuItem>
+                    })}
+                  </Select>
+                </FormControl>
+              </>
+            )}
+          </Grid>
 
-              <video ref={videoRef} className={classes.videoStream} autoPlay playsInline controls={false} />
-            </Grid>
-          )}
+          {video && <video ref={videoRef} className={classes.videoStream} autoPlay playsInline controls={false} />}
 
           <Button
             disabled={error}
@@ -233,9 +222,6 @@ function Settings({
             Join
           </Button>
         </Grid>
-        <IconButton className={classes.closeButton}>
-          <CloseIcon />
-        </IconButton>
       </Container>
     </form>
   )
@@ -257,6 +243,9 @@ function Ongoing() {
 }
 
 function Call({
+  audioStream,
+  videoStream,
+  onGetLocalStream,
   settings,
   outgoing,
   ongoing,
@@ -266,17 +255,14 @@ function Call({
   video,
   showMessage
 }) {
-  const [micStream, setMicStream] = useState();
-  const [camStream, setCamStream] = useState();
   return (
     <>
       {settings && (
         <Settings
-          micStream={micStream}
-          onMicStreamChange={setMicStream}
-          camStream={camStream}
-          onCamStreamChange={setCamStream}
-          onSubmit={() => onStartCall(chat._id, { audio, video })}
+          audioStream={audioStream}
+          videoStream={videoStream}
+          onGetLocalStream={onGetLocalStream}
+          onSubmit={onStartCall}
           audio={audio}
           video={video}
           showMessage={showMessage}
@@ -289,6 +275,9 @@ function Call({
 }
 
 function CallDialog({
+  audioStream,
+  videoStream,
+  onGetLocalStream,
   chat,
   audio,
   video,
@@ -299,6 +288,7 @@ function CallDialog({
   onEndCall,
   showMessage
 }) {
+  const classes = useStyles();
   useEffect(function alertOnClose() {
     const unload = () => true;
     window.addEventListener('unload', unload);
@@ -309,11 +299,13 @@ function CallDialog({
     <>
       <Dialog
         open={open}
-        onClose={onEndCall}
         fullScreen
         TransitionComponent={Grow}
       >
         <Call
+          audioStream={audioStream}
+          videoStream={videoStream}
+          onGetLocalStream={onGetLocalStream}
           settings={settings}
           outgoing={outgoing}
           ongoing={ongoing}
@@ -323,6 +315,12 @@ function CallDialog({
           video={video}
           showMessage={showMessage}
         />
+        <IconButton
+          className={classes.closeButton}
+          onClick={onEndCall}
+        >
+          <CloseIcon />
+        </IconButton>
       </Dialog>
     </>
   )

@@ -1,12 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { showMessage, startCall, endCall } from '../../actions';
+import { showMessage, getLocalStream, startCall, endCall } from '../../actions';
 import Call from './Call';
 
-function CallContainer({ startCall, endCall, setCallSettings, ...props }) {
+function CallContainer({ startCall, getLocalStream, endCall, setCallSettings, ...props }) {
   return (
     <Call
       {...props}
+      onGetLocalStream={getLocalStream}
       onStartCall={startCall}
       onEndCall={endCall}
       onSettingsChange={setCallSettings}
@@ -20,13 +21,16 @@ function mapStateToProps(state) {
     outgoing: state.call.outgoing,
     audio: state.call.audio,
     video: state.call.video,
-    ongoing: state.call.ongoing
+    ongoing: state.call.ongoing,
+    audioStream: state.call.audioStream,
+    videoStream: state.call.videoStream
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    startCall: (chatId, options) => dispatch(startCall(chatId, options)),
+    getLocalStream: (kind, deviceId) => dispatch(getLocalStream(kind, deviceId)),
+    startCall: () => dispatch(startCall()),
     endCall: () => dispatch(endCall()),
     showMessage: options => dispatch(showMessage(options))
   }

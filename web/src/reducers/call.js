@@ -3,7 +3,8 @@ import {
   OUTGOING_CALL_REQUESTED,
   OUTGOING_CALL_SUCCEEDED,
   SWITCH_CAMERA,
-  END_CALL
+  END_CALL_SUCCEEDED,
+  GET_LOCAL_STREAM_SUCCEEDED
 } from '../actions';
 
 const initialState = {};
@@ -12,13 +13,15 @@ function call(state = initialState, { type, ...action }) {
   switch (type) {
     case INITIATE_CALL:
       return { ...state, settings: true, video: action.video, audio: action.audio };
+    case GET_LOCAL_STREAM_SUCCEEDED:
+      return { ...state, [`${action.kind}Stream`]: action.stream };
     case OUTGOING_CALL_REQUESTED:
-      return { ...state, settings: false, outgoing: true, video: action.video, audio: action.audio };
+      return { ...state, settings: false, outgoing: true };
     case OUTGOING_CALL_SUCCEEDED:
       return { ...state, outgoing: false, ongoing: true };
     case SWITCH_CAMERA:
       return { ...state, video: !state.video };
-    case END_CALL:
+    case END_CALL_SUCCEEDED:
       return initialState;
     default:
       return state;
