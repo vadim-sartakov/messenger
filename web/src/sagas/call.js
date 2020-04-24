@@ -3,16 +3,22 @@ import {
   UPDATE_MEDIA_DEVICES_REQUESTED,
   UPDATE_MEDIA_DEVICES_SUCCEEDED,
   OUTGOING_CALL_REQUESTED,
-  OUTGOING_CALL_SUCCEEDED,
-  OUTGOING_CALL_FAILED,
   GET_LOCAL_STREAM_REQUESTED,
   GET_LOCAL_STREAM_SUCCEEDED,
-  GET_LOCAL_STREAM_FAILED,
+  ADD_PEER_CONNECTION,
+  CALL_OFFER_RECEIVED,
+  CALL_ANSWER_RECEIVED,
   END_CALL_REQUESTED,
   END_CALL_SUCCEEDED,
   SHOW_MESSAGE,
 } from '../actions';
 import * as messageTypes from './messageTypes';
+
+const RTC_CONFIGURATION = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' }
+  ]
+};
 
 export const streamsSelector = state => ({
   audioStream: state.call.audioStream,
@@ -27,6 +33,7 @@ export const audioVideoPropsSelector = state => ({
 export const socketSelector = state => state.app.socket;
 export const meSelector = state => state.app.me;
 export const chatsSelector = state => state.app.chats;
+export const peerConnectionsSelector = state => state.call.peerConnections;
 
 export function* updateMediaDevices() {
   const { audio, video } = yield select(audioVideoPropsSelector);
@@ -68,30 +75,53 @@ export function* getLocalStream({ kind, deviceId }) {
   }
 }
 
-export function* startCall({ chatId }) {
-  const configuration = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' }
-    ]
-  };
-  const peerConnection = new RTCPeerConnection(configuration);
+export function* callOffer({ socket, chatId, calleeId }) {
+  const peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
+  peerConnection.calleeId = calleeId;
   const offer = yield call([peerConnection, 'createOffer']);
   yield call([peerConnection, 'setLocalDescription'], offer);
-  
+  yield call([socket, 'send'], JSON.stringify({
+    type: messageTypes.CALL_OFFER,
+    chatId,
+    calleeId,
+    offer
+  }));
+  yield put({ type: ADD_PEER_CONNECTION, peerConnection });
+}
+
+export function* answerCallOffer({ chatId, callerId, calleeId, offer }) {
+  const socket = yield select(socketSelector);
+  const peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
+  yield call([peerConnection, 'setRemoteDescription'], offer);
+  const answer = yield call([peerConnection, 'createAnswer']);
+  yield put({ type: ADD_PEER_CONNECTION, peerConnection });
+  yield call([socket, 'send'], JSON.stringify({
+    type: messageTypes.CALL_ANSWER,
+    chatId,
+    callerId,
+    calleeId,
+    answer
+  }));
+}
+
+export function* receiveCallAnswer({ calleeId, answer }) {
+  const peerConnections = yield select(peerConnectionsSelector);
+  const curPeerConnection = peerConnections.find(con => con.calleeId === calleeId);
+  const remoteDesc = new RTCSessionDescription(answer);
+  // Mutating object inside redux state. This is not ideal solution, but
+  // taking in count that we are doing almost everything with sagas, doing it this way for now
+  yield call([curPeerConnection, 'setRemoteDescription'], remoteDesc);
+}
+
+export function* startCall({ chatId }) {
   const socket = yield select(socketSelector);
   const me = yield select(meSelector);
   const chats = yield select(chatsSelector);
   const curChat = chats.find(chat => chat._id === chatId);
-
   for (let i = 0; i < curChat.participants.length; i++) {
     const participant = curChat.participants[i];
     if (me._id === participant.user._id) continue;
-    yield call([socket, 'send'], JSON.stringify({
-      type: messageTypes.CALL_OFFER,
-      chatId,
-      calleeId: participant.user._id,
-      offer
-    }));
+    yield call(callOffer, { socket, chatId, calleeId: participant.user._id });
   }
 }
 
@@ -106,6 +136,8 @@ export default function* callSaga() {
     takeEvery(UPDATE_MEDIA_DEVICES_REQUESTED, updateMediaDevices),
     takeEvery(GET_LOCAL_STREAM_REQUESTED, getLocalStream),
     takeLatest(OUTGOING_CALL_REQUESTED, startCall),
-    takeLatest(END_CALL_REQUESTED, stopStreams)
+    takeLatest(END_CALL_REQUESTED, stopStreams),
+    takeLatest(CALL_OFFER_RECEIVED, answerCallOffer),
+    takeLatest(CALL_ANSWER_RECEIVED, receiveCallAnswer)
   ])
 }

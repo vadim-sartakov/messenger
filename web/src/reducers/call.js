@@ -3,6 +3,7 @@ import {
   INITIATE_CALL,
   OUTGOING_CALL_REQUESTED,
   OUTGOING_CALL_SUCCEEDED,
+  ADD_PEER_CONNECTION,
   SWITCH_CAMERA,
   END_CALL_SUCCEEDED,
   GET_LOCAL_STREAM_SUCCEEDED
@@ -24,6 +25,8 @@ function call(state = initialState, { type, ...action }) {
       return { ...state, outgoing: false, ongoing: true };
     case SWITCH_CAMERA:
       return { ...state, video: !state.video };
+    case ADD_PEER_CONNECTION:
+      return { ...state, peerConnections: [...(state.peerConnections || []), action.peerConnection] };
     case END_CALL_SUCCEEDED:
       return initialState;
     default:

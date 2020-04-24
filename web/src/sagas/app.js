@@ -54,6 +54,12 @@ export function* watchSocket(socket, reconnect) {
       case messageTypes.MESSAGE_POSTED:
         yield put({ type: actions.POST_MESSAGE_SUCCEEDED, chatId: action.chatId, message: action.message });
         break;
+      case messageTypes.CALL_OFFER:
+        yield put({ type: actions.CALL_OFFER_RECEIVED, ...action });
+        break;
+      case messageTypes.CALL_ANSWER:
+        yield put({ type: actions.CALL_ANSWER_RECEIVED, ...action });
+        break;
       default:
     }
   }

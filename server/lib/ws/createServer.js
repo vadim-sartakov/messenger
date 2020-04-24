@@ -13,14 +13,14 @@ async function handleCallOffer({ wss, chatId, callerId, calleeId, offer }) {
   const calleeWsClient = findWsClient(wss.clients, calleeId);
   const curChat = await Chat.find({ _id: chatId, 'participants.user': callerId });
   if (!curChat) {
-    callerWsClient.send(JSON.stringify({ type: 'call-offer-error', message: 'Chat not found' }));
+    callerWsClient.send(JSON.stringify({ type: 'call_offer_error', message: 'Chat not found' }));
     return;
   }
   if (!calleeWsClient) {
-    callerWsClient.send(JSON.stringify({ type: 'call-offer-error', message: 'Callee is not available' }));
+    callerWsClient.send(JSON.stringify({ type: 'call_offer_error-offer-error', message: 'Callee is not available' }));
     return;
   }
-  calleeWsClient.send(JSON.stringify({ type: 'call-offer', chatId, callerId, offer }));
+  calleeWsClient.send(JSON.stringify({ type: 'call_offer', chatId, callerId, offer }));
 }
 
 async function handleCallAnswer({ wss, chatId, callerId, calleeId, answer }) {
@@ -28,10 +28,10 @@ async function handleCallAnswer({ wss, chatId, callerId, calleeId, answer }) {
   const calleeWsClient = findWsClient(wss.clients, calleeId);
   if (!calleeWsClient) return;
   if (!callerWsClient) {
-    calleeWsClient.send(JSON.stringify({ type: 'call-answer-error', message: 'Caller is not available' }));
+    calleeWsClient.send(JSON.stringify({ type: 'call_answer_error', message: 'Caller is not available' }));
     return;
   }
-  callerWsClient.send(JSON.stringify({ type: 'call-offer', chatId, callerId, answer }));
+  callerWsClient.send(JSON.stringify({ type: 'call_answer', chatId, callerId, calleeId, answer }));
 }
 
 function createWsServer(app) {
