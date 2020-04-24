@@ -36,6 +36,10 @@ export const socketSelector = state => state.app.socket;
 export const meSelector = state => state.app.me;
 export const chatsSelector = state => state.app.chats;
 export const peerConnectionsSelector = state => state.call.peerConnections;
+export const callMetaSelector = state => ({
+  chatId: state.call.chatId,
+  ongoing: state.call.ongoing
+})
 
 export function* updateMediaDevices() {
   const { audio, video } = yield select(audioVideoPropsSelector);
@@ -87,20 +91,23 @@ export function* callOffer({ socket, chatId, calleeId }) {
 
   const offer = yield call([peerConnection, 'createOffer']);
 
-  peerConnection.onicecandidate = event => {
-    event.candidate && socket.send(JSON.stringify({
-      type: messageTypes.ICE_CANDIDATE,
-      chatId,
-      calleeId,
-      candidate: event.candidate
-    }));
-  };
+  peerConnection.addEventListener('icecandidate', event => {
+    if (event.candidate) {
+      const message = JSON.stringify({
+        type: messageTypes.ICE_CANDIDATE,
+        chatId,
+        calleeId,
+        candidate: event.candidate
+      });
+      socket.send(message);
+    }
+  });
 
-  peerConnection.onconnectionstatechange = () => {
+  peerConnection.addEventListener('connectionstatechange', () => {
     if (peerConnection.connectionState === 'connected') {
       console.log('Connected!');
     }
-  };
+  });
 
   yield call([peerConnection, 'setLocalDescription'], offer);
   yield call([socket, 'send'], JSON.stringify({
@@ -125,6 +132,9 @@ function* getOrCreatePeerConnection(calleeId) {
 }
 
 export function* callOfferReceived({ chatId, callerId, calleeId, offer }) {
+  const { ongoing, chatId: curChatId } = yield select(callMetaSelector);
+  // Receiving offer only when in a calling state on the same chat
+  if (!ongoing && chatId !== curChatId) return;
   const socket = yield select(socketSelector);
   const peerConnection = yield call(getOrCreatePeerConnection, calleeId);
   const remoteDesc = new RTCSessionDescription(offer);
@@ -156,7 +166,9 @@ export function* receiveCallAnswer({ calleeId, answer }) {
   yield call([curPeerConnection, 'setRemoteDescription'], remoteDesc);
 }
 
-export function* receiveIceCandidate({ calleeId, candidate }) {
+export function* receiveIceCandidate({ chatId, calleeId, candidate }) {
+  const { ongoing, chatId: curChatId } = yield select(callMetaSelector);
+  if (!ongoing && chatId !== curChatId) return;
   const curPeerConnection = yield getOrCreatePeerConnection(calleeId);
   try {
     yield call([curPeerConnection, 'addIceCandidate'], candidate);

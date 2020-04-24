@@ -20,7 +20,7 @@ function call(state = initialState, { type, ...action }) {
     case GET_LOCAL_STREAM_SUCCEEDED:
       return { ...state, [`${action.kind}Stream`]: action.stream };
     case OUTGOING_CALL_REQUESTED:
-      return { ...state, settings: false, outgoing: true };
+      return { ...state, chatId: action.chatId, settings: false, outgoing: true };
     case OUTGOING_CALL_SUCCEEDED:
       return { ...state, outgoing: false, ongoing: true };
     case SWITCH_CAMERA:

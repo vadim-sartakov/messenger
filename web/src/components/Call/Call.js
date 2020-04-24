@@ -7,6 +7,7 @@ import Grow from '@material-ui/core/Grow';
 import { makeStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import Settings from './Settings';
+import Ongoing from './Ongoing';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -32,10 +33,6 @@ function Outgoing({ chat }) {
   );
 }
 
-function Ongoing() {
-  return <div>Ongoing call</div>;
-}
-
 function Call({
   settings,
   outgoing,
@@ -46,7 +43,7 @@ function Call({
     <>
       {settings && <Settings />}
       {outgoing && <Outgoing chat={chat} />}
-      {ongoing && <Ongoing />}
+      {ongoing && <Ongoing chat={chat} />}
     </>
   );
 }
