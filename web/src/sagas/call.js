@@ -3,12 +3,13 @@ import {
   UPDATE_MEDIA_DEVICES_REQUESTED,
   UPDATE_MEDIA_DEVICES_SUCCEEDED,
   OUTGOING_CALL_REQUESTED,
+  OUTGOING_CALL_SUCCEEDED,
   GET_LOCAL_STREAM_REQUESTED,
   GET_LOCAL_STREAM_SUCCEEDED,
   ADD_PEER_CONNECTION,
   CALL_OFFER_RECEIVED,
   CALL_ANSWER_RECEIVED,
-  ICE_CANDIDATE,
+  ICE_CANDIDATE_RECEIVED,
   END_CALL_REQUESTED,
   END_CALL_SUCCEEDED,
   SHOW_MESSAGE,
@@ -174,6 +175,7 @@ export function* startCall({ chatId }) {
     if (me._id === participant.user._id) continue;
     yield call(callOffer, { socket, chatId, calleeId: participant.user._id });
   }
+  yield put({ type: OUTGOING_CALL_SUCCEEDED });
 }
 
 export function* stopStreams() {
@@ -190,6 +192,6 @@ export default function* callSaga() {
     takeLatest(END_CALL_REQUESTED, stopStreams),
     takeEvery(CALL_OFFER_RECEIVED, callOfferReceived),
     takeEvery(CALL_ANSWER_RECEIVED, receiveCallAnswer),
-    takeEvery(ICE_CANDIDATE, receiveIceCandidate)
+    takeEvery(ICE_CANDIDATE_RECEIVED, receiveIceCandidate)
   ])
 }

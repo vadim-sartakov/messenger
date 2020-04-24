@@ -8,6 +8,7 @@ import MicVolume from '../../../utils/MicVolume';
 
 function SettingsContainer(props) {
   const {
+    devicesInitialized,
     mics = [],
     cams = [],
     video,
@@ -62,7 +63,7 @@ function SettingsContainer(props) {
     return () => micVolume.clear();
   }, [audioStream]);
 
-  return (
+  return devicesInitialized ? (
     <Settings
       {...props}
       micVolume={micVolume}
@@ -70,11 +71,12 @@ function SettingsContainer(props) {
       onMicChange={handleMicChange}
       onCamChange={handleCamChange}
       onSubmit={formik.handleSubmit} />
-  )
+  ) : null;
 }
 
 function mapStateToProps(state) {
   return {
+    devicesInitialized: state.call.devicesInitialized,
     mics: state.call.mics,
     cams: state.call.cams,
     audio: state.call.audio,

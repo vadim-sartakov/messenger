@@ -10,6 +10,9 @@ import Settings from './Settings';
 
 const useStyles = makeStyles(theme => {
   return {
+    container: {
+      marginTop: theme.spacing(8)
+    },
     closeButton: {
       position: 'fixed',
       top: theme.spacing(1),

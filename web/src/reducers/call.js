@@ -16,7 +16,7 @@ function call(state = initialState, { type, ...action }) {
     case INITIATE_CALL:
       return { ...state, settings: true, video: action.video, audio: action.audio };
     case UPDATE_MEDIA_DEVICES_SUCCEEDED:
-      return { ...state, mics: action.mics, cams: action.cams };
+      return { ...state, mics: action.mics, cams: action.cams, devicesInitialized: true };
     case GET_LOCAL_STREAM_SUCCEEDED:
       return { ...state, [`${action.kind}Stream`]: action.stream };
     case OUTGOING_CALL_REQUESTED:

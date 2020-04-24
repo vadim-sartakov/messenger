@@ -61,7 +61,7 @@ export function* watchSocket(socket, reconnect) {
         yield put({ type: actions.CALL_ANSWER_RECEIVED, ...action });
         break;
       case messageTypes.ICE_CANDIDATE:
-        yield put({ type: actions.ICE_CANDIDATE, ...action });
+        yield put({ type: actions.ICE_CANDIDATE_RECEIVED, ...action });
         break;
       default:
     }
