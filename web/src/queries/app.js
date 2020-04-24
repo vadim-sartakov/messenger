@@ -10,9 +10,12 @@ export const HOME = `query {
     owner
     inviteLink
     participants {
-      _id
-      name
-      color
+      user {
+        _id
+        name
+        color
+      }
+      call
     }
     color
     messages(limit: 30) {
@@ -35,8 +38,11 @@ export const CREATE_CHAT = `mutation CreateChat($name: String!) {
     owner
     inviteLink
     participants {
-      _id
-      name
+      user {
+        _id
+        name
+      }
+      call
     }
     color
     messages {
@@ -56,8 +62,11 @@ export const JOIN_CHAT = `mutation JoinChat($inviteLink: String!) {
     owner
     inviteLink
     participants {
-      _id
-      name
+      user {
+        _id
+        name
+      }
+      call
     }
     color
     messages(limit: 30) {

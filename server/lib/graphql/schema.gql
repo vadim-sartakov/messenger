@@ -13,12 +13,17 @@ type Message {
   createdAt: Date!
 }
 
+type Participant {
+  user: User!
+  call: Boolean
+}
+
 type Chat {
   _id: ID!
   name: String
   owner: ID!
   inviteLink: String!
-  participants: [User!]!
+  participants: [Participant!]!
   color: String!
   messages(limit: Int): [Message!]!
 }

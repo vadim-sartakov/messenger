@@ -104,9 +104,9 @@ const LinkOption = forwardRef(function LinkOption({ chat }, ref) {
 });
 
 function Chat({ me, chat, selected, onClick }) {
-  const { name, messages, participants, color } = chat;
+  const { name, messages, color } = chat;
   const classes = useStyles();
-  const title = name || participants[participants.length - 1].name;
+  const title = name;
   const lastMessage = messages && messages[messages.length - 1];
   const settingsButtonRef = useRef();
   const [openMenu, setOpenMenu] = useState(false);

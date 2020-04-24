@@ -1,6 +1,15 @@
 const { Schema, model } = require('mongoose');
 const color = require('./color');
 
+const participantSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
+  call: Boolean
+}, { _id: false });
+
 const chatSchema = new Schema({
   name: {
     type: String,
@@ -17,7 +26,7 @@ const chatSchema = new Schema({
     ref: 'User',
     required: true
   },
-  participants: [{ type: Schema.Types.ObjectId, ref: 'User', index: true }],
+  participants: [participantSchema],
   color,
   messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }]
 }, { timestamps: true });

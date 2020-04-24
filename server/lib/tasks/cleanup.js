@@ -15,18 +15,14 @@ async function cleanup() {
     info('No expired users found');
   } else {
     info('Found the following expired users: %o', expiredUsers);
-    const messageDeleteResult = await Message.deleteMany({ author: { $in: expiredUsers } });
-    info('Deleted %s messages', messageDeleteResult.deletedCount);
-
-    // Removing expired participants
-    const chatsUpdateResult = await Chat.updateMany({
-      participants: { $in: expiredUsers }
-    }, {
-      $pull: { participants: { $in: expiredUsers } }
-    });
-    info('Deleted expired participants in %s chats', chatsUpdateResult.nModified);
 
     // Removing chats of expired participants
+    const expiredChats = await Chat.find({ owner: { $in: expiredUsers } }).distinct('_id');
+    info('Found the following expired chats: %o', expiredChats);
+
+    const messageDeleteResult = await Message.deleteMany({ chat: { $in: expiredChats } });
+    info('Deleted %s messages', messageDeleteResult.deletedCount);
+
     const chatsDeleteResult = await Chat.deleteMany({ owner: { $in: expiredUsers } });
     info('Deleted %s chats with expired owners', chatsDeleteResult.deletedCount);
 

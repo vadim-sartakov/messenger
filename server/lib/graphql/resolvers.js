@@ -23,7 +23,7 @@ function sendToChatParticipants(req, chat, callback) {
   const currentUserId = req.user.subject;
   const { wss } = req.app;
   (chat.participants || []).forEach(participant => {
-    const client = findWsClient(wss.clients, participant.toString());
+    const client = findWsClient(wss.clients, participant.user.toString());
     if (!client || client.id === currentUserId) return;
     client.send(JSON.stringify(callback()));
   });
@@ -33,7 +33,13 @@ const root = {
   Date: GraphQLDateTime,
   Chat: {
     participants: async parent => {
-      return populateArray(parent.participants, id => User.findById(id));
+      return populateArray(parent.participants, async participant => {
+        const user = await User.findById(participant.user._id);
+        return {
+          ...participant,
+          user
+        }
+      });
     },
     messages: async (parent, { limit }) => {
       let query = Message.find({ chat: parent._id }).sort({ 'createdAt': 1 });
@@ -53,7 +59,7 @@ const root = {
     getChats: async (parent, args, req) => {
       const currentUserId = req.user.subject;
       const chats = await Chat.find({
-        $or: [{ owner: currentUserId }, { participants: currentUserId }]
+        $or: [{ owner: currentUserId }, { 'participants.user': currentUserId }]
       });
       return chats;
     }
@@ -66,7 +72,7 @@ const root = {
         inviteLink = getRandomString(7);
         if (!await Chat.findOne({ inviteLink })) break;
       }
-      const newChat = new Chat({ name, inviteLink, owner: currentUserId, participants: [currentUserId] });
+      const newChat = new Chat({ name, inviteLink, owner: currentUserId, participants: [{ user: currentUserId }] });
       return await newChat.save();
     },
     renameChat: async (parent, { id, name }, req) => {
@@ -84,14 +90,14 @@ const root = {
       const currentUser = await User.findById(currentUserId, 'name color');
       const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid link');
-      chat.participants = [...(chat.participants || []), currentUserId];
+      chat.participants = [...(chat.participants || []), { user: currentUserId }];
       await chat.save()
-      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: currentUser }));
+      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: { user: currentUser } }));
       return chat;
     },
     postMessage: async (parent, { chatId, text }, req) => {
       const currentUserId = req.user.subject;
-      const chat = await Chat.findOne({ _id: chatId, participants: { $in: currentUserId } });
+      const chat = await Chat.findOne({ _id: chatId, 'participants.user': { $in: currentUserId } });
       if (!chat) throw new GraphQLError('Invalid chat id');
       const message = new Message({ author: currentUserId, content: text, chat: chatId });
       await message.save();
