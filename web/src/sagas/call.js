@@ -89,11 +89,14 @@ export function* callOffer({ socket, chatId, calleeId }) {
   yield put({ type: ADD_PEER_CONNECTION, peerConnection });
 }
 
-export function* answerCallOffer({ chatId, callerId, calleeId, offer }) {
+export function* callOfferReceived({ chatId, callerId, calleeId, offer }) {
   const socket = yield select(socketSelector);
   const peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
-  yield call([peerConnection, 'setRemoteDescription'], offer);
+  const remoteDesc = new RTCSessionDescription(offer);
+  yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
   const answer = yield call([peerConnection, 'createAnswer']);
+  yield call([peerConnection, 'setLocalDescription'], answer);
+  
   yield put({ type: ADD_PEER_CONNECTION, peerConnection });
   yield call([socket, 'send'], JSON.stringify({
     type: messageTypes.CALL_ANSWER,
@@ -137,7 +140,7 @@ export default function* callSaga() {
     takeEvery(GET_LOCAL_STREAM_REQUESTED, getLocalStream),
     takeLatest(OUTGOING_CALL_REQUESTED, startCall),
     takeLatest(END_CALL_REQUESTED, stopStreams),
-    takeLatest(CALL_OFFER_RECEIVED, answerCallOffer),
+    takeLatest(CALL_OFFER_RECEIVED, callOfferReceived),
     takeLatest(CALL_ANSWER_RECEIVED, receiveCallAnswer)
   ])
 }
