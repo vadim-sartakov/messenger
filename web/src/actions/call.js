@@ -21,8 +21,8 @@ export function initiateCall(chatId, { audio, video }) {
   return { type: INITIATE_CALL, chatId, audio, video };
 }
 
-export function startCall() {
-  return { type: OUTGOING_CALL_REQUESTED };
+export function startCall(chatId) {
+  return { type: OUTGOING_CALL_REQUESTED, chatId };
 }
 
 export function getLocalStream(kind, deviceId) {

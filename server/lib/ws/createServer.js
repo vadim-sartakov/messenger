@@ -58,18 +58,18 @@ function createWsServer(app) {
     socket.on('message', event => {
       const message = JSON.parse(event);
       switch (message.type) {
-        case 'call-offer':
+        case 'call_offer':
           handleCallOffer({
-            wss: req.app.wss,
+            wss,
             chatId: message.chatId,
             callerId: socket.id,
             calleeId: message.calleeId,
             offer: message.offer
           });
           break;
-        case 'call-answer':
+        case 'call_answer':
           handleCallAnswer({
-            wss: req.app.wss,
+            wss,
             chatId: message.chatId,
             callerId: message.callerId,
             calleeId: socket.id,

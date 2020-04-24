@@ -4,7 +4,7 @@ import * as matchers from 'redux-saga-test-plan/matchers';
 import { throwError } from 'redux-saga-test-plan/providers';
 import {
   messageTypes,
-  loadApp,
+  initialize,
   initializeSocket,
   watchSocket,
   sleep,
@@ -33,11 +33,11 @@ jest.mock('../utils/graphqlFetch');
 describe('app saga', () => {
   afterEach(() => graphqlFetch.mockReset());
 
-  describe('loadApp', () => {
+  describe('initialize', () => {
     it('should load app', async () => {
       const response = { data: { me: 'me', chats: 'chats' } };
       graphqlFetch.mockImplementation(() => response);
-      await expectSaga(loadApp)
+      await expectSaga(initialize)
         .provide([
           [select(tokenSelector), 'token']
         ])
@@ -48,7 +48,7 @@ describe('app saga', () => {
     });
 
     it('should fail to load app on error', async () => {
-      await expectSaga(loadApp)
+      await expectSaga(initialize)
         .provide([
           [select(tokenSelector), 'token'],
           [matchers.call.fn(graphqlFetch), throwError(new Error('test'))]

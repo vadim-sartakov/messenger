@@ -4,6 +4,7 @@ import {
   INITIALIZE_REQUESTED,
   INITIALIZE_SUCCEEDED,
   INITIALIZE_FAILED,
+  SOCKET_INITIALIZED,
   SHOW_MESSAGE,
   HIDE_MESSAGE,
   CREATE_CHAT_SUCCEEDED,
@@ -21,9 +22,17 @@ function app(state = initialState, { type, ...action }) {
     case INITIALIZE_REQUESTED:
       return { ...state, isLoading: true };
     case INITIALIZE_SUCCEEDED:
-      return { ...state, isLoading: false, initialized: true, me: action.data.me, chats: action.data.chats };
+      return {
+        ...state,
+        isLoading: false,
+        initialized: true,
+        me: action.data.me,
+        chats: action.data.chats
+      };
     case INITIALIZE_FAILED:
       return { ...state, isLoading: false, error: true };
+    case SOCKET_INITIALIZED:
+      return { ...state, socket: action.socket };
     case SHOW_MESSAGE:
       return { ...state, message: { ...action, open: true } };
     case HIDE_MESSAGE:
@@ -64,7 +73,7 @@ function app(state = initialState, { type, ...action }) {
 const persistConfig = {
   key: 'app',
   storage,
-  blacklist: ['message']
+  blacklist: ['message', 'socket']
 };
 
 export default persistReducer(persistConfig, app);

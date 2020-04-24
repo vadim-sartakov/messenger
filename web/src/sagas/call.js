@@ -12,6 +12,7 @@ import {
   END_CALL_SUCCEEDED,
   SHOW_MESSAGE,
 } from '../actions';
+import * as messageTypes from './messageTypes';
 
 export const streamsSelector = state => ({
   audioStream: state.call.audioStream,
@@ -22,6 +23,10 @@ export const audioVideoPropsSelector = state => ({
   audio: state.call.audio,
   video: state.call.video
 });
+
+export const socketSelector = state => state.app.socket;
+export const meSelector = state => state.app.me;
+export const chatsSelector = state => state.app.chats;
 
 export function* updateMediaDevices() {
   const { audio, video } = yield select(audioVideoPropsSelector);
@@ -63,8 +68,31 @@ export function* getLocalStream({ kind, deviceId }) {
   }
 }
 
-export function* startCall() {
+export function* startCall({ chatId }) {
+  const configuration = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' }
+    ]
+  };
+  const peerConnection = new RTCPeerConnection(configuration);
+  const offer = yield call([peerConnection, 'createOffer']);
+  yield call([peerConnection, 'setLocalDescription'], offer);
+  
+  const socket = yield select(socketSelector);
+  const me = yield select(meSelector);
+  const chats = yield select(chatsSelector);
+  const curChat = chats.find(chat => chat._id === chatId);
 
+  for (let i = 0; i < curChat.participants.length; i++) {
+    const participant = curChat.participants[i];
+    if (me._id === participant.user._id) continue;
+    yield call([socket, 'send'], JSON.stringify({
+      type: messageTypes.CALL_OFFER,
+      chatId,
+      calleeId: participant.user._id,
+      offer
+    }));
+  }
 }
 
 export function* stopStreams() {

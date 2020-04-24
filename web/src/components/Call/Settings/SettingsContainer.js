@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useFormik } from 'formik';
 import { connect } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import Settings from './Settings';
 import { startCall, endCall, getLocalStream, updateMediaDevices } from '../../../actions';
 import MicVolume from '../../../utils/MicVolume';
@@ -15,6 +16,7 @@ function SettingsContainer(props) {
     onGetLocalStream,
     onStartCall
   } = props;
+  const { chatId } = useParams();
   const [micVolume, setMicVolume] = useState(0);
 
   useEffect(function updateMediaDevices() {
@@ -30,7 +32,7 @@ function SettingsContainer(props) {
       cam: '',
       mic: ''
     },
-    onSubmit: onStartCall
+    onSubmit: () => onStartCall(chatId)
   });
   const { setFieldValue } = formik;
 
@@ -85,7 +87,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onUpdateMediaDevices: () => dispatch(updateMediaDevices()),
-    onStartCall: () => dispatch(startCall()),
+    onStartCall: chatId => dispatch(startCall(chatId)),
     onEndCall: () => dispatch(endCall()),
     onGetLocalStream: (kind, deviceId) => dispatch(getLocalStream(kind, deviceId))
   }

@@ -5,16 +5,7 @@ import graphqlFetchUtil from '../utils/graphqlFetch';
 import * as queries from '../queries';
 import { GRAPHQL_URL, WS_URL } from '../constants';
 import { tokenSelector } from './auth';
-
-export const messageTypes = {
-  OPEN: 'open',
-  CLOSE: 'close',
-  PING: 'ping',
-  PONG: 'pong',
-  CHAT_RENAMED: 'chat_renamed',
-  JOINED_CHAT: 'joined_chat',
-  MESSAGE_POSTED: 'message_posted'
-};
+import * as messageTypes from './messageTypes';
 
 function createSocket(token) {
   const socket = new WebSocket(`${WS_URL}?token=${token}`);
@@ -68,7 +59,7 @@ export function* watchSocket(socket, reconnect) {
   }
 }
 
-export function* loadApp() {
+export function* initialize() {
   const token = yield select(tokenSelector);
   try {
     const content = yield call(graphqlFetchUtil, queries.HOME, { url: GRAPHQL_URL, token });
@@ -92,6 +83,7 @@ export function* initializeSocket() {
   while (true) {
     const token = yield select(tokenSelector);
     const socket = createSocket(token);
+    yield put({ type: actions.SOCKET_INITIALIZED, socket });
     const { disconnected, destroy } = yield race({
       disconnected: call(watchSocket, socket, reconnect),
       destroy: take(actions.DESTROY_REQUESTED)
@@ -159,7 +151,7 @@ export function* postMessage({ chatId, text }) {
 
 export default function* appSaga() {
   yield all([
-    takeLatest(actions.INITIALIZE_REQUESTED, loadApp),
+    takeLatest(actions.INITIALIZE_REQUESTED, initialize),
     takeLatest(actions.INITIALIZE_REQUESTED, initializeSocket),
     takeLatest(actions.DESTROY_REQUESTED, destroyApp),
     takeLatest(actions.CREATE_CHAT_REQUESTED, createChat),
