@@ -1,4 +1,5 @@
-import { all, takeLatest, select, put, call, takeEvery } from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga';
+import { all, takeLatest, select, put, call, takeEvery, take, race, delay, fork } from 'redux-saga/effects';
 import {
   UPDATE_MEDIA_DEVICES_REQUESTED,
   UPDATE_MEDIA_DEVICES_SUCCEEDED,
@@ -81,6 +82,49 @@ export function* getLocalStream({ kind, deviceId }) {
   }
 }
 
+function createPeerConnectionChannel(peerConnection) {
+  return eventChannel(emit => {
+    peerConnection.addEventListener('icecandidate', event => {
+      emit({ type: messageTypes.ICE_CANDIDATE, iceCandidate: event.candidate });
+    });
+
+    peerConnection.addEventListener('connectionstatechange', () => {
+      if (peerConnection.connectionState === 'connected') {
+        emit({ type: messageTypes.CALL_ESTABLISHED });
+      }
+    });
+  });
+}
+
+function* watchConnection({ peerConnection, socket, chatId, calleeId }) {
+  const channel = createPeerConnectionChannel(peerConnection);
+  while (true) {
+    const { connection, timeout } = yield race({
+      connection: take(channel),
+      timeout: delay(20000)
+    });
+    if (timeout) {
+      peerConnection.close();
+      return;
+    }
+    const { type, ...message } = connection;
+    switch (type) {
+      case messageTypes.ICE_CANDIDATE:
+        yield call([socket, 'send'], JSON.stringify({
+          type: messageTypes.ICE_CANDIDATE,
+          chatId,
+          calleeId,
+          candidate: message.candidate
+        }));
+        break;
+      case messageTypes.CALL_ESTABLISHED:
+        yield put({ type: ADD_PEER_CONNECTION, peerConnection });
+        return;
+      default:
+    }
+  }
+}
+
 export function* callOffer({ socket, chatId, calleeId }) {
   const { audioStream, videoStream } = yield select(streamsSelector);
 
@@ -88,27 +132,8 @@ export function* callOffer({ socket, chatId, calleeId }) {
   peerConnection.calleeId = calleeId;
   audioStream.getTracks().forEach(track => peerConnection.addTrack(track));
   videoStream && videoStream.getTracks().forEach(track => peerConnection.addTrack(track));
-
+  
   const offer = yield call([peerConnection, 'createOffer']);
-
-  peerConnection.addEventListener('icecandidate', event => {
-    if (event.candidate) {
-      const message = JSON.stringify({
-        type: messageTypes.ICE_CANDIDATE,
-        chatId,
-        calleeId,
-        candidate: event.candidate
-      });
-      socket.send(message);
-    }
-  });
-
-  peerConnection.addEventListener('connectionstatechange', () => {
-    if (peerConnection.connectionState === 'connected') {
-      console.log('Connected!');
-    }
-  });
-
   yield call([peerConnection, 'setLocalDescription'], offer);
   yield call([socket, 'send'], JSON.stringify({
     type: messageTypes.CALL_OFFER,
@@ -116,64 +141,67 @@ export function* callOffer({ socket, chatId, calleeId }) {
     calleeId,
     offer
   }));
-  yield put({ type: ADD_PEER_CONNECTION, peerConnection });
-}
-
-function* getOrCreatePeerConnection(calleeId) {
-  const peerConnections = yield select(peerConnectionsSelector);
-  let peerConnection;
-  peerConnection = peerConnections && peerConnections.find(con => con.calleeId === calleeId);
-  if (!peerConnection) {
-    peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
-    peerConnection.calleeId = calleeId;
-    yield put({ type: ADD_PEER_CONNECTION, peerConnection });
+  yield fork(watchConnection, { peerConnection, socket, chatId, calleeId });
+  while (true) {
+    const { calleeId: answerCalleeId, answer } = yield take(CALL_ANSWER_RECEIVED);
+    if (calleeId !== answerCalleeId) continue;
+    const remoteDesc = new RTCSessionDescription(answer);
+    yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
   }
-  return peerConnection;
 }
 
-export function* callOfferReceived({ chatId, callerId, calleeId, offer }) {
-  const { ongoing, chatId: curChatId } = yield select(callMetaSelector);
-  // Receiving offer only when in a calling state on the same chat
-  if (!ongoing && chatId !== curChatId) return;
+export function* callOfferOrIceCandidateReceived() {
   const socket = yield select(socketSelector);
-  const peerConnection = yield call(getOrCreatePeerConnection, calleeId);
-  const remoteDesc = new RTCSessionDescription(offer);
-  yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
-  const answer = yield call([peerConnection, 'createAnswer']);
-  yield call([peerConnection, 'setLocalDescription'], answer);
+  let peerConnection, channel;
+  while (true) {
+    const winner = yield race({
+      iceCandidate: take(ICE_CANDIDATE_RECEIVED),
+      callOffer: take(CALL_OFFER_RECEIVED)
+    });
 
-  peerConnection.addEventListener('connectionstatechange', () => {
-    if (peerConnection.connectionState === 'connected') {
-      console.log('Connected!');
+    const { chatId, callerId, calleeId } = winner.iceCandidate || winner.callOffer;
+    const candidate = winner.iceCandidate && winner.iceCandidate.candidate;
+    const offer = winner.callOffer && winner.callOffer.offer;
+
+    if (!peerConnection) {
+      peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
+      peerConnection.calleeId = calleeId;
+      channel = createPeerConnectionChannel(peerConnection);
     }
-  });
 
-  yield call([socket, 'send'], JSON.stringify({
-    type: messageTypes.CALL_ANSWER,
-    chatId,
-    callerId,
-    calleeId,
-    answer
-  }));
-}
+    if (candidate) {
+      yield call([peerConnection, 'addIceCandidate'], candidate);
+    }
 
-export function* receiveCallAnswer({ calleeId, answer }) {
-  const peerConnections = yield select(peerConnectionsSelector);
-  const curPeerConnection = peerConnections.find(con => con.calleeId === calleeId);
-  const remoteDesc = new RTCSessionDescription(answer);
-  // Mutating object inside redux state. This is not ideal solution, but
-  // taking in count that we are doing almost everything with sagas, doing it this way for now
-  yield call([curPeerConnection, 'setRemoteDescription'], remoteDesc);
-}
+    if (offer) {
+      const remoteDesc = new RTCSessionDescription(offer);
+      yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
+      const answer = yield call([peerConnection, 'createAnswer']);
+      yield call([peerConnection, 'setLocalDescription'], answer);
+      yield call([socket, 'send'], JSON.stringify({
+        type: messageTypes.CALL_ANSWER,
+        chatId,
+        callerId,
+        calleeId,
+        answer
+      }));
+    }
 
-export function* receiveIceCandidate({ chatId, calleeId, candidate }) {
-  const { ongoing, chatId: curChatId } = yield select(callMetaSelector);
-  if (!ongoing && chatId !== curChatId) return;
-  const curPeerConnection = yield getOrCreatePeerConnection(calleeId);
-  try {
-    yield call([curPeerConnection, 'addIceCandidate'], candidate);
-  } catch (err) {
-    console.log(err);
+    const { connection, timeout } = yield race({
+      connection: take(channel),
+      timeout: delay(20000)
+    });
+    if (timeout) {
+      peerConnection.close();
+      return;
+    }
+    const { type } = connection;
+    switch (type) {
+      case messageTypes.CALL_ESTABLISHED:
+        yield put({ type: ADD_PEER_CONNECTION, peerConnection });
+        break;
+      default:
+    }
   }
 }
 
@@ -182,11 +210,15 @@ export function* startCall({ chatId }) {
   const me = yield select(meSelector);
   const chats = yield select(chatsSelector);
   const curChat = chats.find(chat => chat._id === chatId);
+  const calls = [];
   for (let i = 0; i < curChat.participants.length; i++) {
     const participant = curChat.participants[i];
     if (me._id === participant.user._id) continue;
-    yield call(callOffer, { socket, chatId, calleeId: participant.user._id });
+    calls.push(
+      call(callOffer, { socket, chatId, calleeId: participant.user._id })
+    );
   }
+  yield all(calls);
   yield put({ type: OUTGOING_CALL_SUCCEEDED });
 }
 
@@ -202,8 +234,6 @@ export default function* callSaga() {
     takeEvery(GET_LOCAL_STREAM_REQUESTED, getLocalStream),
     takeLatest(OUTGOING_CALL_REQUESTED, startCall),
     takeLatest(END_CALL_REQUESTED, stopStreams),
-    takeEvery(CALL_OFFER_RECEIVED, callOfferReceived),
-    takeEvery(CALL_ANSWER_RECEIVED, receiveCallAnswer),
-    takeEvery(ICE_CANDIDATE_RECEIVED, receiveIceCandidate)
+    call(callOfferOrIceCandidateReceived)
   ])
 }
