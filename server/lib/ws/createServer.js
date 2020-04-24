@@ -3,8 +3,36 @@ const querystring = require('querystring');
 const ms = require('ms');
 const { createServer } = require('http');
 const { Server } = require('ws');
-const { jwtPublicKey, clientPingInterval, clientConnectionTimeout } = require('../config');
 const jwt = require('jsonwebtoken');
+const { jwtPublicKey, clientPingInterval, clientConnectionTimeout } = require('../config');
+const Chat = require('../models/Chat');
+const findWsClient = require('../utils/findWsClient');
+
+async function handleCallOffer({ wss, chatId, callerId, calleeId, offer }) {
+  const callerWsClient = findWsClient(wss.clients, callerId);
+  const calleeWsClient = findWsClient(wss.clients, calleeId);
+  const curChat = await Chat.find({ _id: chatId, 'participants.user': callerId });
+  if (!curChat) {
+    callerWsClient.send(JSON.stringify({ type: 'call-offer-error', message: 'Chat not found' }));
+    return;
+  }
+  if (!calleeWsClient) {
+    callerWsClient.send(JSON.stringify({ type: 'call-offer-error', message: 'Callee is not available' }));
+    return;
+  }
+  calleeWsClient.send(JSON.stringify({ type: 'call-offer', chatId, callerId, offer }));
+}
+
+async function handleCallAnswer({ wss, chatId, callerId, calleeId, answer }) {
+  const callerWsClient = findWsClient(wss.clients, callerId);
+  const calleeWsClient = findWsClient(wss.clients, calleeId);
+  if (!calleeWsClient) return;
+  if (!callerWsClient) {
+    calleeWsClient.send(JSON.stringify({ type: 'call-answer-error', message: 'Caller is not available' }));
+    return;
+  }
+  callerWsClient.send(JSON.stringify({ type: 'call-offer', chatId, callerId, answer }));
+}
 
 function createWsServer(app) {
   const server = createServer(app);
@@ -25,11 +53,29 @@ function createWsServer(app) {
 
     socket.on('close', () => {
       clearInterval(interval);
-    })
+    });
 
     socket.on('message', event => {
       const message = JSON.parse(event);
       switch (message.type) {
+        case 'call-offer':
+          handleCallOffer({
+            wss: req.app.wss,
+            chatId: message.chatId,
+            callerId: socket.id,
+            calleeId: message.calleeId,
+            offer: message.offer
+          });
+          break;
+        case 'call-answer':
+          handleCallAnswer({
+            wss: req.app.wss,
+            chatId: message.chatId,
+            callerId: message.callerId,
+            calleeId: socket.id,
+            answer: message.answer
+          });
+          break;
         case 'pong':
           delete socket.pingSent;
           break;

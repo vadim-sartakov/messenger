@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Chat = require('../models/Chat');
 const Message = require('../models/Message');
 const getRandomString = require('../utils/getRandomString');
+const sendToChatParticipants = require('../utils/sendToChatParticipants');
 
 async function populateArray(array, populate) {
   return array.reduce(async (prev, cur) => {
@@ -11,22 +12,6 @@ async function populateArray(array, populate) {
     const entry = await populate(cur);
     return [...acc, entry];
   }, Promise.resolve([]));
-}
-
-function findWsClient(wssClients, id) {
-  return Array.from(wssClients).find(client => {
-    return client.id === id;
-  });
-}
-
-function sendToChatParticipants(req, chat, callback) {
-  const currentUserId = req.user.subject;
-  const { wss } = req.app;
-  (chat.participants || []).forEach(participant => {
-    const client = findWsClient(wss.clients, participant.user.toString());
-    if (!client || client.id === currentUserId) return;
-    client.send(JSON.stringify(callback()));
-  });
 }
 
 const root = {
@@ -81,7 +66,7 @@ const root = {
       if (!chat) throw new GraphQLError('Only owner can change chat');
       chat.name = name;
       await chat.save();
-      sendToChatParticipants(req, chat, () => ({ type: 'chat_renamed', chatId: chat._id, name }));
+      sendToChatParticipants(req.app.wss, currentUserId, chat, () => ({ type: 'chat_renamed', chatId: chat._id, name }));
       return;
     },
     joinChat: async (parent, { inviteLink }, req) => {
@@ -92,7 +77,7 @@ const root = {
       if (!chat) throw new GraphQLError('Invalid link');
       chat.participants = [...(chat.participants || []), { user: currentUserId }];
       await chat.save()
-      sendToChatParticipants(req, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: { user: currentUser } }));
+      sendToChatParticipants(req.app.wss, currentUserId, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: { user: currentUser } }));
       return chat;
     },
     postMessage: async (parent, { chatId, text }, req) => {
@@ -102,7 +87,7 @@ const root = {
       const message = new Message({ author: currentUserId, content: text, chat: chatId });
       await message.save();
       await message.populate('author').execPopulate();
-      sendToChatParticipants(req, chat, () => ({ type: 'message_posted', chatId: chat._id, message }));
+      sendToChatParticipants(req.app.wss, currentUserId, chat, () => ({ type: 'message_posted', chatId: chat._id, message }));
       return message;
     }
   }
