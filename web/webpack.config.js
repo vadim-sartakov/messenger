@@ -90,10 +90,12 @@ module.exports = {
       port: 3000,
       historyApiFallback: true,
       hot: true,
+      host: '192.168.1.8',
+      https: true,
       proxy: {
-        '/api': 'http://localhost:8080/',
-        '/graphql': 'http://localhost:8080/',
-        'ws://localhost:3000/ws': 'ws://localhost:8080/'
+        '/api': 'http://192.168.1.8:8080/',
+        '/graphql': 'http://192.168.1.8:8080/',
+        'ws://192.168.1.8:3000/ws': 'ws://192.168.1.8:8080/'
       }
     }
   }

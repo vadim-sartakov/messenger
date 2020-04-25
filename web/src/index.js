@@ -1,4 +1,5 @@
 import 'react-hot-loader';
+import 'webrtc-adapter';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
