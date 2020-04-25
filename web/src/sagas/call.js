@@ -1,5 +1,5 @@
 import { eventChannel } from 'redux-saga';
-import { all, takeLatest, select, put, call, takeEvery, take, race, delay, fork } from 'redux-saga/effects';
+import { all, takeLatest, select, put, call, takeEvery, take, race, delay, fork, actionChannel } from 'redux-saga/effects';
 import {
   UPDATE_MEDIA_DEVICES_REQUESTED,
   UPDATE_MEDIA_DEVICES_SUCCEEDED,
@@ -28,22 +28,19 @@ export const streamsSelector = state => ({
   videoStream: state.call.videoStream,
 });
 
-export const audioVideoPropsSelector = state => ({
-  audio: state.call.audio,
-  video: state.call.video
-});
-
 export const socketSelector = state => state.app.socket;
 export const meSelector = state => state.app.me;
 export const chatsSelector = state => state.app.chats;
 export const peerConnectionsSelector = state => state.call.peerConnections;
 export const callMetaSelector = state => ({
+  audio: state.call.audio,
+  video: state.call.video,
   chatId: state.call.chatId,
   ongoing: state.call.ongoing
 })
 
 export function* updateMediaDevices() {
-  const { audio, video } = yield select(audioVideoPropsSelector);
+  const { audio, video } = yield select(callMetaSelector);
   try {
     const constraints = { audio, video };
     // To be able to list all available devices it is required to
@@ -60,12 +57,6 @@ export function* updateMediaDevices() {
     yield put({ type: SHOW_MESSAGE, severity: 'error', text: 'Failed to get camera and microphone data', autoHide: true });
     yield put({ type: END_CALL_REQUESTED });
   }
-}
-
-function* stopStream(kind) {
-  const streams = yield select(streamsSelector); 
-  const curStream = streams[`${kind}Stream`];
-  curStream && curStream.getTracks().forEach(track => track.stop());
 }
 
 export function* getLocalStream({ kind, deviceId }) {
@@ -85,7 +76,7 @@ export function* getLocalStream({ kind, deviceId }) {
 function createPeerConnectionChannel(peerConnection) {
   return eventChannel(emit => {
     peerConnection.addEventListener('icecandidate', event => {
-      emit({ type: messageTypes.ICE_CANDIDATE, iceCandidate: event.candidate });
+      emit({ type: messageTypes.ICE_CANDIDATE, candidate: event.candidate });
     });
 
     peerConnection.addEventListener('connectionstatechange', () => {
@@ -93,10 +84,12 @@ function createPeerConnectionChannel(peerConnection) {
         emit({ type: messageTypes.CALL_ESTABLISHED });
       }
     });
+
+    return () => peerConnection.close();
   });
 }
 
-function* watchConnection({ peerConnection, socket, chatId, calleeId }) {
+function* watchPeerConnection({ peerConnection, socket, chatId, calleeId, ignoreIceCandidates }) {
   const channel = createPeerConnectionChannel(peerConnection);
   while (true) {
     const { connection, timeout } = yield race({
@@ -110,12 +103,14 @@ function* watchConnection({ peerConnection, socket, chatId, calleeId }) {
     const { type, ...message } = connection;
     switch (type) {
       case messageTypes.ICE_CANDIDATE:
-        yield call([socket, 'send'], JSON.stringify({
-          type: messageTypes.ICE_CANDIDATE,
-          chatId,
-          calleeId,
-          candidate: message.candidate
-        }));
+        if (!ignoreIceCandidates) {
+          yield call([socket, 'send'], JSON.stringify({
+            type: messageTypes.ICE_CANDIDATE,
+            chatId,
+            calleeId,
+            candidate: message.candidate
+          }));
+        }
         break;
       case messageTypes.CALL_ESTABLISHED:
         yield put({ type: ADD_PEER_CONNECTION, peerConnection });
@@ -133,6 +128,8 @@ export function* callOffer({ socket, chatId, calleeId }) {
   audioStream.getTracks().forEach(track => peerConnection.addTrack(track));
   videoStream && videoStream.getTracks().forEach(track => peerConnection.addTrack(track));
   
+  yield fork(watchPeerConnection, { peerConnection, socket, chatId, calleeId });
+
   const offer = yield call([peerConnection, 'createOffer']);
   yield call([peerConnection, 'setLocalDescription'], offer);
   yield call([socket, 'send'], JSON.stringify({
@@ -141,67 +138,49 @@ export function* callOffer({ socket, chatId, calleeId }) {
     calleeId,
     offer
   }));
-  yield fork(watchConnection, { peerConnection, socket, chatId, calleeId });
   while (true) {
-    const { calleeId: answerCalleeId, answer } = yield take(CALL_ANSWER_RECEIVED);
-    if (calleeId !== answerCalleeId) continue;
+    const { chatId: answerChatId, calleeId: answerCalleeId, answer } = yield take(CALL_ANSWER_RECEIVED);
+    if (chatId !== answerChatId && calleeId !== answerCalleeId) continue;
     const remoteDesc = new RTCSessionDescription(answer);
     yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
   }
 }
 
-export function* callOfferOrIceCandidateReceived() {
-  const socket = yield select(socketSelector);
-  let peerConnection, channel;
+function* watchIceCandidates({ channel, peerConnection }) {
   while (true) {
-    const winner = yield race({
-      iceCandidate: take(ICE_CANDIDATE_RECEIVED),
-      callOffer: take(CALL_OFFER_RECEIVED)
-    });
+    const { candidate } = yield take(channel);
+    if (candidate) yield call([peerConnection, 'addIceCandidate'], candidate);
+  }
+}
 
-    const { chatId, callerId, calleeId } = winner.iceCandidate || winner.callOffer;
-    const candidate = winner.iceCandidate && winner.iceCandidate.candidate;
-    const offer = winner.callOffer && winner.callOffer.offer;
+export function* listenForCall({ socket, calleeId, chatId }) {
+  const iceCandidatesChannel = yield actionChannel(action =>
+    action.type === ICE_CANDIDATE_RECEIVED &&
+    action.callerId === calleeId
+  );
+  while (true) {
+    const offerAction = yield take(CALL_OFFER_RECEIVED);
+    if (!offerAction.ongoing && offerAction.chatId !== chatId) continue;
 
-    if (!peerConnection) {
-      peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
-      peerConnection.calleeId = calleeId;
-      channel = createPeerConnectionChannel(peerConnection);
-    }
+    const peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
+    peerConnection.calleeId = offerAction.callerId;
 
-    if (candidate) {
-      yield call([peerConnection, 'addIceCandidate'], candidate);
-    }
+    yield fork(watchPeerConnection, { peerConnection, socket, chatId, ignoreIceCandidates: true });
 
-    if (offer) {
-      const remoteDesc = new RTCSessionDescription(offer);
-      yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
-      const answer = yield call([peerConnection, 'createAnswer']);
-      yield call([peerConnection, 'setLocalDescription'], answer);
-      yield call([socket, 'send'], JSON.stringify({
-        type: messageTypes.CALL_ANSWER,
-        chatId,
-        callerId,
-        calleeId,
-        answer
-      }));
-    }
+    const remoteDesc = new RTCSessionDescription(offerAction.offer);
+    yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
 
-    const { connection, timeout } = yield race({
-      connection: take(channel),
-      timeout: delay(20000)
-    });
-    if (timeout) {
-      peerConnection.close();
-      return;
-    }
-    const { type } = connection;
-    switch (type) {
-      case messageTypes.CALL_ESTABLISHED:
-        yield put({ type: ADD_PEER_CONNECTION, peerConnection });
-        break;
-      default:
-    }
+    yield fork(watchIceCandidates, { peerConnection, channel: iceCandidatesChannel });
+
+    const answer = yield call([peerConnection, 'createAnswer']);
+    yield call([peerConnection, 'setLocalDescription'], answer);
+    yield call([socket, 'send'], JSON.stringify({
+      type: messageTypes.CALL_ANSWER,
+      chatId,
+      callerId: offerAction.callerId,
+      calleeId: offerAction.calleeId,
+      answer
+    }));
   }
 }
 
@@ -210,16 +189,25 @@ export function* startCall({ chatId }) {
   const me = yield select(meSelector);
   const chats = yield select(chatsSelector);
   const curChat = chats.find(chat => chat._id === chatId);
-  const calls = [];
   for (let i = 0; i < curChat.participants.length; i++) {
     const participant = curChat.participants[i];
     if (me._id === participant.user._id) continue;
-    calls.push(
-      call(callOffer, { socket, chatId, calleeId: participant.user._id })
-    );
+    yield fork(callOffer, { socket, chatId, calleeId: participant.user._id })
   }
-  yield all(calls);
+
   yield put({ type: OUTGOING_CALL_SUCCEEDED });
+
+  for (let i = 0; i < curChat.participants.length; i++) {
+    const participant = curChat.participants[i];
+    if (me._id === participant.user._id) continue;
+    yield fork(listenForCall, { socket, chatId, calleeId: participant.user._id })
+  }
+}
+
+function* stopStream(kind) {
+  const streams = yield select(streamsSelector); 
+  const curStream = streams[`${kind}Stream`];
+  curStream && curStream.getTracks().forEach(track => track.stop());
 }
 
 export function* stopStreams() {
@@ -233,7 +221,6 @@ export default function* callSaga() {
     takeEvery(UPDATE_MEDIA_DEVICES_REQUESTED, updateMediaDevices),
     takeEvery(GET_LOCAL_STREAM_REQUESTED, getLocalStream),
     takeLatest(OUTGOING_CALL_REQUESTED, startCall),
-    takeLatest(END_CALL_REQUESTED, stopStreams),
-    call(callOfferOrIceCandidateReceived)
+    takeLatest(END_CALL_REQUESTED, stopStreams)
   ])
 }
