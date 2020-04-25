@@ -8,4 +8,6 @@ export const MESSAGE_POSTED = 'message_posted';
 export const CALL_OFFER = 'call_offer';
 export const CALL_ANSWER = 'call_answer';
 export const ICE_CANDIDATE = 'ice_candidate';
+
 export const CALL_ESTABLISHED = 'call_established';
+export const REMOTE_STREAM_TRACK_ADDED = 'REMOTE_STREAM_TRACK_ADDED';

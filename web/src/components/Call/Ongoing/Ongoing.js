@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
 
-function Ongoing({
-  streams
-}) {
+function Ongoing({ peerConnections = [] }) {
+  useEffect(function setStreams() {
+    peerConnections.forEach(peerConnection => {
+      const videoEl = document.getElementById(peerConnection.calleeId);
+      videoEl.srcObject = peerConnection.remoteStream;
+    });
+  }, [peerConnections]);
+
   return (
     <Grid container>
-      Ongoing call
+      {peerConnections.map(connection => {
+        return (
+          <video
+            key={connection.calleeId}
+            id={connection.calleeId}
+            autoPlay
+            playsInline
+            controls={false}
+          />
+        )
+      })}
     </Grid>
   );
 }

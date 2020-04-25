@@ -85,8 +85,22 @@ function createPeerConnectionChannel(peerConnection) {
       }
     });
 
+    peerConnection.addEventListener('track', event => {
+      emit({ type: messageTypes.REMOTE_STREAM_TRACK_ADDED, track: event.track });
+    });
+
     return () => peerConnection.close();
   });
+}
+
+function handleRemoteStreamTrackAdded(peerConnection, track) {
+  let remoteStream;
+  if (peerConnection.remoteStream) remoteStream = peerConnection.remoteStream;
+  else {
+    peerConnection.remoteStream = new MediaStream();
+    remoteStream = peerConnection.remoteStream;
+  }
+  remoteStream.addTrack(track);
 }
 
 function* watchPeerConnection({ peerConnection, socket, chatId, calleeId, ignoreIceCandidates }) {
@@ -97,8 +111,11 @@ function* watchPeerConnection({ peerConnection, socket, chatId, calleeId, ignore
       timeout: delay(20000)
     });
     if (timeout) {
-      peerConnection.close();
-      return;
+      if (peerConnection.connectionState !== 'connected') {
+        peerConnection.close();
+        return;
+      }
+      continue;
     }
     const { type, ...message } = connection;
     switch (type) {
@@ -114,7 +131,10 @@ function* watchPeerConnection({ peerConnection, socket, chatId, calleeId, ignore
         break;
       case messageTypes.CALL_ESTABLISHED:
         yield put({ type: ADD_PEER_CONNECTION, peerConnection });
-        return;
+        break;
+      case messageTypes.REMOTE_STREAM_TRACK_ADDED:
+        handleRemoteStreamTrackAdded(peerConnection, message.track);
+        break;
       default:
     }
   }
@@ -171,6 +191,10 @@ export function* listenForCall({ socket, calleeId, chatId }) {
     yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
 
     yield fork(watchIceCandidates, { peerConnection, channel: iceCandidatesChannel });
+
+    const { audioStream, videoStream } = yield select(streamsSelector);
+    audioStream.getTracks().forEach(track => peerConnection.addTrack(track));
+    videoStream && videoStream.getTracks().forEach(track => peerConnection.addTrack(track));
 
     const answer = yield call([peerConnection, 'createAnswer']);
     yield call([peerConnection, 'setLocalDescription'], answer);
