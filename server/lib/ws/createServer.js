@@ -16,35 +16,32 @@ const messageTypes = {
   ICE_CANDIDATE: 'ice_candidate'
 };
 
-async function handleCallOffer({ wss, chatId, callerId, calleeId, offer }) {
-  const callerWsClient = findWsClient(wss.clients, callerId);
-  const calleeWsClient = findWsClient(wss.clients, calleeId);
-  const curChat = await Chat.find({ _id: chatId, 'participants.user': callerId });
+async function handleCallOffer({ wss, socket, chat, recipient, offer }) {
+  const recipientWsClient = findWsClient(wss.clients, recipient);
+  const curChat = await Chat.find({ _id: chat, 'participants.user': recipient });
   if (!curChat) {
-    callerWsClient.send(JSON.stringify({ type: messageTypes.CALL_OFFER_ERROR, message: 'Chat not found' }));
+    socket.send(JSON.stringify({ type: messageTypes.CALL_OFFER_ERROR, message: 'Chat not found' }));
     return;
   }
-  if (!calleeWsClient) {
-    callerWsClient.send(JSON.stringify({ type: messageTypes.CALL_OFFER_ERROR, message: 'Callee is not available' }));
+  if (!recipientWsClient) {
+    socket.send(JSON.stringify({ type: messageTypes.CALL_OFFER_ERROR, message: 'Recipient is not available' }));
     return;
   }
-  calleeWsClient.send(JSON.stringify({ type: messageTypes.CALL_OFFER, chatId, callerId, calleeId, offer }));
+  recipientWsClient.send(JSON.stringify({ type: messageTypes.CALL_OFFER, chat, sender: socket.id, offer }));
 }
 
-async function handleCallAnswer({ wss, chatId, callerId, calleeId, answer }) {
-  const callerWsClient = findWsClient(wss.clients, callerId);
-  const calleeWsClient = findWsClient(wss.clients, calleeId);
-  if (!calleeWsClient) return;
-  if (!callerWsClient) {
-    calleeWsClient.send(JSON.stringify({ type: messageTypes.CALL_ANSWER_ERROR, message: 'Caller is not available' }));
+async function handleCallAnswer({ wss, socket, chat, recipient, answer }) {
+  const recipientWsClient = findWsClient(wss.clients, recipient);
+  if (!recipientWsClient) {
+    socket.send(JSON.stringify({ type: messageTypes.CALL_ANSWER_ERROR, message: 'Recipient is not available' }));
     return;
   }
-  callerWsClient.send(JSON.stringify({ type: messageTypes.CALL_ANSWER, chatId, callerId, calleeId, answer }));
+  recipientWsClient.send(JSON.stringify({ type: messageTypes.CALL_ANSWER, chat, sender: socket.id, answer }));
 }
 
-async function handleIceCandidate({ wss, chatId, callerId, calleeId, candidate }) {
-  const calleeWsClient = findWsClient(wss.clients, calleeId);
-  calleeWsClient.send(JSON.stringify({ type: messageTypes.ICE_CANDIDATE, chatId, calleeId, callerId, candidate }));
+async function handleIceCandidate({ wss, socket, chat, recipient, candidate }) {
+  const recipientWsClient = findWsClient(wss.clients, recipient);
+  recipientWsClient.send(JSON.stringify({ type: messageTypes.ICE_CANDIDATE, chat, sender: socket.id, candidate }));
 }
 
 function createWsServer(app) {
@@ -73,28 +70,28 @@ function createWsServer(app) {
       switch (message.type) {
         case messageTypes.CALL_OFFER:
           handleCallOffer({
+            socket,
             wss,
-            chatId: message.chatId,
-            callerId: socket.id,
-            calleeId: message.calleeId,
+            chat: message.chat,
+            recipient: message.recipient,
             offer: message.offer
           });
           break;
         case messageTypes.CALL_ANSWER:
           handleCallAnswer({
+            socket,
             wss,
-            chatId: message.chatId,
-            callerId: message.callerId,
-            calleeId: socket.id,
+            chat: message.chat,
+            recipient: message.recipient,
             answer: message.answer
           });
           break;
         case messageTypes.ICE_CANDIDATE:
           handleIceCandidate({
+            socket,
             wss,
-            chatId: message.chatId,
-            callerId: socket.id,
-            calleeId: message.calleeId,
+            chat: message.chat,
+            recipient: message.recipient,
             candidate: message.candidate
           });
           break;
