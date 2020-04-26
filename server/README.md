@@ -30,3 +30,7 @@ Otherwise HS256 encoding will be used. Secret string should be provided with `JW
 Server utilizes [debug](https://www.npmjs.com/package/debug) package for logging. To enable logs it is required to set `DEBUG` env variable. The following namaspaces are supported:
 - app:info, app:error - general app logs
 - cleanup:info - cleanup periodic task
+
+## Self signed certificates
+For development purposes self signed certificates can be generated:
+`openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./private-server.key -out public-server.key`

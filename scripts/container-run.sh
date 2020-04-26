@@ -2,8 +2,8 @@
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 cd "${DIR}/.."
-docker container stop messenger &&\
-  docker container rm messenger &&\
+docker container stop messenger &\
+  docker container rm messenger &\
   docker build -t messenger . &&\
   
   docker run --name messenger -d -p 8080:8080\

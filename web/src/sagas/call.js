@@ -91,7 +91,7 @@ function createPeerConnectionChannel(peerConnection) {
 
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'connected') {
-        console.log('Connected %s', peerConnection.recipient);
+        //console.log('Connected %s', peerConnection.recipient);
         emit({ type: messageTypes.CALL_ESTABLISHED });
       }
     });
@@ -113,7 +113,7 @@ function* watchPeerConnection({ peerConnection, socket, chat, recipient }) {
     });
     if (timeout) {
       if (peerConnection.connectionState !== 'connected') {
-        console.log('Timeout connection %s, closing', peerConnection.recipient)
+        //console.log('Timeout connection %s, closing', peerConnection.recipient)
         peerConnection.close();
         return;
       }
@@ -122,7 +122,7 @@ function* watchPeerConnection({ peerConnection, socket, chat, recipient }) {
     const { type, ...message } = connection;
     switch (type) {
       case messageTypes.ICE_CANDIDATE:
-        console.log('Sending ice candidate to %s', recipient);
+        //console.log('Sending ice candidate to %s', recipient);
         yield call([socket, 'send'], JSON.stringify({
           type: messageTypes.ICE_CANDIDATE,
           chat,
@@ -156,7 +156,7 @@ export function* callOffer({ socket, chat, recipient }) {
   // After setLocalDescription ice candidates should start flowing
   yield call([peerConnection, 'setLocalDescription'], offer);
   
-  console.log('Sending call offer to %s', peerConnection.recipient);
+  //console.log('Sending call offer to %s', peerConnection.recipient);
   yield call([socket, 'send'], JSON.stringify({
     type: messageTypes.CALL_OFFER,
     chat,
@@ -174,7 +174,7 @@ export function* callOffer({ socket, chat, recipient }) {
       action.chat === chat &&
       action.sender === recipient
     );
-    console.log('Answer received from %s', peerConnection.recipient);
+    //console.log('Answer received from %s', peerConnection.recipient);
     const remoteDesc = new RTCSessionDescription(answer);
     yield call([peerConnection, 'setRemoteDescription'], remoteDesc);
     yield fork(watchIncomingIceCandidates, { peerConnection, channel: receivedIceCandidatesChannel });
@@ -184,7 +184,7 @@ export function* callOffer({ socket, chat, recipient }) {
 function* watchIncomingIceCandidates({ channel, peerConnection }) {
   while (true) {
     const { candidate } = yield take(channel);
-    console.log('Received ice candidate from %s', peerConnection.recipient);
+    //console.log('Received ice candidate from %s', peerConnection.recipient);
     if (candidate) yield call([peerConnection, 'addIceCandidate'], candidate);
   }
 }
@@ -201,7 +201,7 @@ export function* listenForCall({ socket, chat, recipient }) {
       action.chat === chat &&
       action.sender === recipient
     );
-    console.log('Received call offer from %s', recipient);
+    //console.log('Received call offer from %s', recipient);
 
     const peerConnection = new RTCPeerConnection(RTC_CONFIGURATION);
     peerConnection.recipient = recipient;
@@ -220,7 +220,7 @@ export function* listenForCall({ socket, chat, recipient }) {
     const answer = yield call([peerConnection, 'createAnswer']);
 
     yield call([peerConnection, 'setLocalDescription'], answer);
-    console.log('Sending answer to %s', recipient);
+    //console.log('Sending answer to %s', recipient);
     yield call([socket, 'send'], JSON.stringify({
       type: messageTypes.CALL_ANSWER,
       chat,
@@ -238,7 +238,7 @@ export function* startCall({ chatId }) {
   for (let i = 0; i < curChat.participants.length; i++) {
     const participant = curChat.participants[i];
     if (me._id === participant.user._id) continue;
-    console.log('Making call to %s', participant.user._id);
+    //console.log('Making call to %s', participant.user._id);
     yield fork(callOffer, { socket, chat: chatId, recipient: participant.user._id })
   }
 
@@ -247,7 +247,7 @@ export function* startCall({ chatId }) {
   for (let i = 0; i < curChat.participants.length; i++) {
     const participant = curChat.participants[i];
     if (me._id === participant.user._id) continue;
-    console.log('Listening for a call from %s', participant.user._id);
+    //console.log('Listening for a call from %s', participant.user._id);
     yield fork(listenForCall, { socket, chat: chatId, recipient: participant.user._id })
   }
 }
