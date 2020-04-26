@@ -76,7 +76,8 @@ const root = {
       const chat = await Chat.findOne({ inviteLink });
       if (!chat) throw new GraphQLError('Invalid link');
       chat.participants = [...(chat.participants || []), { user: currentUserId }];
-      await chat.save()
+      await chat.save();
+      await chat.populate('participants.user').execPopulate();
       sendToChatParticipants(req.app.wss, currentUserId, chat, () => ({ type: 'joined_chat', chatId: chat._id, participant: { user: currentUser } }));
       return chat;
     },
